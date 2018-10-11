@@ -1,0 +1,966 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Rufflewind's Scratchpad</title>
+    <description>Rufflewind's personal blog</description>
+    <link>https://rufflewind.com/</link>
+    <atom:link href="https://rufflewind.com/feed.xml" rel="self" type="application/rss+xml"/>
+    <pubDate>Wed, 10 Oct 2018 23:32:04 -0700</pubDate>
+    <lastBuildDate>Wed, 10 Oct 2018 23:32:04 -0700</lastBuildDate>
+    <generator>Jekyll v3.8.4</generator>
+    
+      <item>
+        <title>Linking Rust crates to native libraries</title>
+        <description>&lt;p&gt;As far as I know, there’s two ways to link native libraries in a Rust package:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&quot;https://doc.rust-lang.org/reference/attributes.html#ffi-attributes&quot;&gt;Attributes&lt;/a&gt;: &lt;code&gt;#[link(name = &amp;quot;…&amp;quot;)]&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;http://doc.crates.io/build-script.html&quot;&gt;Build scripts&lt;/a&gt;: &lt;code&gt;cargo:rustc-link-lib=dylib=…&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;You can also pass the linker flags directly to &lt;code&gt;rustc&lt;/code&gt;, but that’s a bit too low level for packages.&lt;/p&gt;
+&lt;p&gt;The attribute approach is the easiest, but it’s also fairly inflexible. Once the attribute is set in the upstream FFI library, dependents downstream have no control over it. This is usually OK for most libraries because the name is fixed and known ahead of time.&lt;/p&gt;
+&lt;p&gt;However, in cases where the name is not known ahead of time (e.g. platform-dependent libraries), or cases where you want to offer the choice of library to the final application, build scripts offer far more flexibility.&lt;/p&gt;
+&lt;p&gt;One might be tempted to omit the &lt;code&gt;#[link(…)]&lt;/code&gt; attribute in the upstream FFI library, and let the downstream application set the attribute, but this doesn’t work as one might expect. This is due to &lt;a href=&quot;https://github.com/rust-lang/rust/pull/28605&quot;&gt;rust-lang/rust#28605&lt;/a&gt;, which causes the linker flags to be ordered like this:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;cc downstreamapp -l somenativelib upstreamrustlib&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Because the native library appears &lt;em&gt;before&lt;/em&gt; the upstream library, symbols in the native library are not available for the upstream library.&lt;/p&gt;
+&lt;p&gt;Fortunately, in build scripts the custom linking flags are always placed at the end. For convenience, one would often place this in a separate crate that contains nothing but a build script like this:&lt;/p&gt;
+&lt;div class=&quot;sourceCode&quot; id=&quot;cb2&quot;&gt;&lt;pre class=&quot;sourceCode rust&quot;&gt;&lt;code class=&quot;sourceCode rust&quot;&gt;&lt;a class=&quot;sourceLine&quot; id=&quot;cb2-1&quot; data-line-number=&quot;1&quot;&gt;&lt;span class=&quot;kw&quot;&gt;fn&lt;/span&gt; main() &lt;span class=&quot;op&quot;&gt;{&lt;/span&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb2-2&quot; data-line-number=&quot;2&quot;&gt;    &lt;span class=&quot;pp&quot;&gt;println!&lt;/span&gt;(&lt;span class=&quot;st&quot;&gt;&amp;quot;cargo:rustc-link-lib=dylib=somenativelib&amp;quot;&lt;/span&gt;);&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb2-3&quot; data-line-number=&quot;3&quot;&gt;&lt;span class=&quot;op&quot;&gt;}&lt;/span&gt;&lt;/a&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+</description>
+        <pubDate>Sun, 19 Nov 2017 00:00:00 -0800</pubDate>
+        <link>https://rufflewind.com/2017-11-19/linking-in-rust</link>
+        <guid isPermaLink="true">https://rufflewind.com/2017-11-19/linking-in-rust</guid>
+        
+        <category>rust</category>
+        
+        
+      </item>
+    
+      <item>
+        <title>Cheatsheet for Futures</title>
+        <description>&lt;p&gt;A simplified listing of the various &lt;code&gt;Future&lt;/code&gt; combinators in &lt;code&gt;futures-rs&lt;/code&gt; (&lt;a href=&quot;/img/rust-futures-cheatsheet.html&quot;&gt;expanded version&lt;/a&gt;):&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;&lt;span style=&quot;color: #8e908c&quot;&gt;// Constructing leaf futures&lt;/span&gt;
+&lt;span style=&quot;color: #8959a8&quot;&gt;fn&lt;/span&gt; &lt;a href=&quot;https://docs.rs/futures/0.1.13/futures/future/fn.empty.html&quot;&gt;empty&lt;/a&gt; ()             -&amp;gt; &lt;span style=&quot;color: #c82829&quot;&gt;Future&lt;/span&gt;&amp;lt;&lt;var&gt;T&lt;/var&gt;, &lt;var&gt;E&lt;/var&gt;&amp;gt;
+&lt;span style=&quot;color: #8959a8&quot;&gt;fn&lt;/span&gt; &lt;a href=&quot;https://docs.rs/futures/0.1.13/futures/future/fn.ok.html&quot;&gt;ok&lt;/a&gt;    (&lt;var&gt;T&lt;/var&gt;)            -&amp;gt; &lt;span style=&quot;color: #c82829&quot;&gt;Future&lt;/span&gt;&amp;lt;&lt;var&gt;T&lt;/var&gt;, &lt;var&gt;E&lt;/var&gt;&amp;gt;
+&lt;span style=&quot;color: #8959a8&quot;&gt;fn&lt;/span&gt; &lt;a href=&quot;https://docs.rs/futures/0.1.13/futures/future/fn.err.html&quot;&gt;err&lt;/a&gt;   (&lt;var&gt;E&lt;/var&gt;)            -&amp;gt; &lt;span style=&quot;color: #c82829&quot;&gt;Future&lt;/span&gt;&amp;lt;&lt;var&gt;T&lt;/var&gt;, &lt;var&gt;E&lt;/var&gt;&amp;gt;
+&lt;span style=&quot;color: #8959a8&quot;&gt;fn&lt;/span&gt; &lt;a href=&quot;https://docs.rs/futures/0.1.13/futures/future/fn.result.html&quot;&gt;result&lt;/a&gt;(&lt;span style=&quot;color: #4271ae&quot;&gt;Result&lt;/span&gt;&amp;lt;&lt;var&gt;T&lt;/var&gt;, &lt;var&gt;E&lt;/var&gt;&amp;gt;) -&amp;gt; &lt;span style=&quot;color: #c82829&quot;&gt;Future&lt;/span&gt;&amp;lt;&lt;var&gt;T&lt;/var&gt;, &lt;var&gt;E&lt;/var&gt;&amp;gt;
+
+&lt;span style=&quot;color: #8e908c&quot;&gt;// General future constructor&lt;/span&gt;
+&lt;span style=&quot;color: #8959a8&quot;&gt;fn&lt;/span&gt; &lt;a href=&quot;https://docs.rs/futures/0.1.13/futures/future/fn.poll_fn.html&quot;&gt;poll_fn&lt;/a&gt;(&lt;span style=&quot;color: #8959a8&quot;&gt;FnMut&lt;/span&gt;(&lt;span style=&quot;color: #3e999f&quot;&gt;thread_local!&lt;/span&gt;(&lt;span style=&quot;color: #4271ae&quot;&gt;Task&lt;/span&gt;)) -&amp;gt; &lt;span style=&quot;color: #4271ae&quot;&gt;Poll&lt;/span&gt;&amp;lt;&lt;var&gt;T&lt;/var&gt;, &lt;var&gt;E&lt;/var&gt;&amp;gt;) -&amp;gt; &lt;span style=&quot;color: #c82829&quot;&gt;Future&lt;/span&gt;&amp;lt;&lt;var&gt;T&lt;/var&gt;, &lt;var&gt;E&lt;/var&gt;&amp;gt;
+
+&lt;span style=&quot;color: #8e908c&quot;&gt;// Mapping futures&lt;/span&gt;
+&lt;span style=&quot;color: #8959a8&quot;&gt;fn&lt;/span&gt; &lt;a href=&quot;https://docs.rs/futures/0.1.13/futures/future/trait.Future.html#method.map&quot;&gt;Future::map&lt;/a&gt;     (&lt;span style=&quot;color: #c82829&quot;&gt;Future&lt;/span&gt;&amp;lt;&lt;var&gt;T&lt;/var&gt;, &lt;var&gt;E&lt;/var&gt;&amp;gt;, &lt;span style=&quot;color: #8959a8&quot;&gt;FnOnce&lt;/span&gt;(&lt;var&gt;T&lt;/var&gt;) -&amp;gt; &lt;var&gt;U&lt;/var&gt;) -&amp;gt; &lt;span style=&quot;color: #c82829&quot;&gt;Future&lt;/span&gt;&amp;lt;&lt;var&gt;U&lt;/var&gt;, &lt;var&gt;E&lt;/var&gt;&amp;gt;
+&lt;span style=&quot;color: #8959a8&quot;&gt;fn&lt;/span&gt; &lt;a href=&quot;https://docs.rs/futures/0.1.13/futures/future/trait.Future.html#method.map_err&quot;&gt;Future::map_err&lt;/a&gt; (&lt;span style=&quot;color: #c82829&quot;&gt;Future&lt;/span&gt;&amp;lt;&lt;var&gt;T&lt;/var&gt;, &lt;var&gt;E&lt;/var&gt;&amp;gt;, &lt;span style=&quot;color: #8959a8&quot;&gt;FnOnce&lt;/span&gt;(&lt;var&gt;E&lt;/var&gt;) -&amp;gt; &lt;var&gt;F&lt;/var&gt;) -&amp;gt; &lt;span style=&quot;color: #c82829&quot;&gt;Future&lt;/span&gt;&amp;lt;&lt;var&gt;T&lt;/var&gt;, &lt;var&gt;F&lt;/var&gt;&amp;gt;
+&lt;span style=&quot;color: #8959a8&quot;&gt;fn&lt;/span&gt; &lt;a href=&quot;https://docs.rs/futures/0.1.13/futures/future/trait.Future.html#method.from_err&quot;&gt;Future::from_err&lt;/a&gt;(&lt;span style=&quot;color: #c82829&quot;&gt;Future&lt;/span&gt;&amp;lt;&lt;var&gt;T&lt;/var&gt;, &lt;span style=&quot;color: #4271ae&quot;&gt;Into&lt;/span&gt;&amp;lt;&lt;var&gt;E&lt;/var&gt;&amp;gt;&amp;gt;)           -&amp;gt; &lt;span style=&quot;color: #c82829&quot;&gt;Future&lt;/span&gt;&amp;lt;&lt;var&gt;T&lt;/var&gt;, &lt;var&gt;E&lt;/var&gt;&amp;gt;
+
+&lt;span style=&quot;color: #8e908c&quot;&gt;// Chaining (sequencing) futures&lt;/span&gt;
+&lt;span style=&quot;color: #8959a8&quot;&gt;fn&lt;/span&gt; &lt;a href=&quot;https://docs.rs/futures/0.1.13/futures/future/trait.Future.html#method.then&quot;&gt;Future::then&lt;/a&gt;    (&lt;span style=&quot;color: #c82829&quot;&gt;Future&lt;/span&gt;&amp;lt;&lt;var&gt;T&lt;/var&gt;, &lt;var&gt;E&lt;/var&gt;&amp;gt;, &lt;span style=&quot;color: #8959a8&quot;&gt;FnOnce&lt;/span&gt;(&lt;span style=&quot;color: #4271ae&quot;&gt;Result&lt;/span&gt;&amp;lt;&lt;var&gt;T&lt;/var&gt;, &lt;var&gt;E&lt;/var&gt;&amp;gt;) -&amp;gt; &lt;span style=&quot;color: #c82829&quot;&gt;IntoFuture&lt;/span&gt;&amp;lt;&lt;var&gt;U&lt;/var&gt;, &lt;var&gt;F&lt;/var&gt;&amp;gt;) -&amp;gt; &lt;span style=&quot;color: #c82829&quot;&gt;Future&lt;/span&gt;&amp;lt;&lt;var&gt;U&lt;/var&gt;, &lt;var&gt;F&lt;/var&gt;&amp;gt;
+&lt;span style=&quot;color: #8959a8&quot;&gt;fn&lt;/span&gt; &lt;a href=&quot;https://docs.rs/futures/0.1.13/futures/future/trait.Future.html#method.and_then&quot;&gt;Future::and_then&lt;/a&gt;(&lt;span style=&quot;color: #c82829&quot;&gt;Future&lt;/span&gt;&amp;lt;&lt;var&gt;T&lt;/var&gt;, &lt;var&gt;E&lt;/var&gt;&amp;gt;, &lt;span style=&quot;color: #8959a8&quot;&gt;FnOnce&lt;/span&gt;(&lt;var&gt;T&lt;/var&gt;)            -&amp;gt; &lt;span style=&quot;color: #c82829&quot;&gt;IntoFuture&lt;/span&gt;&amp;lt;&lt;var&gt;U&lt;/var&gt;, &lt;var&gt;E&lt;/var&gt;&amp;gt;) -&amp;gt; &lt;span style=&quot;color: #c82829&quot;&gt;Future&lt;/span&gt;&amp;lt;&lt;var&gt;U&lt;/var&gt;, &lt;var&gt;E&lt;/var&gt;&amp;gt;
+&lt;span style=&quot;color: #8959a8&quot;&gt;fn&lt;/span&gt; &lt;a href=&quot;https://docs.rs/futures/0.1.13/futures/future/trait.Future.html#method.or_else&quot;&gt;Future::or_else&lt;/a&gt; (&lt;span style=&quot;color: #c82829&quot;&gt;Future&lt;/span&gt;&amp;lt;&lt;var&gt;T&lt;/var&gt;, &lt;var&gt;E&lt;/var&gt;&amp;gt;, &lt;span style=&quot;color: #8959a8&quot;&gt;FnOnce&lt;/span&gt;(&lt;var&gt;E&lt;/var&gt;)            -&amp;gt; &lt;span style=&quot;color: #c82829&quot;&gt;IntoFuture&lt;/span&gt;&amp;lt;&lt;var&gt;T&lt;/var&gt;, &lt;var&gt;F&lt;/var&gt;&amp;gt;) -&amp;gt; &lt;span style=&quot;color: #c82829&quot;&gt;Future&lt;/span&gt;&amp;lt;&lt;var&gt;T&lt;/var&gt;, &lt;var&gt;F&lt;/var&gt;&amp;gt;
+&lt;span style=&quot;color: #8959a8&quot;&gt;fn&lt;/span&gt; &lt;a href=&quot;https://docs.rs/futures/0.1.13/futures/future/trait.Future.html#method.flatten&quot;&gt;Future::flatten&lt;/a&gt; (&lt;span style=&quot;color: #c82829&quot;&gt;Future&lt;/span&gt;&amp;lt;&lt;span style=&quot;color: #c82829&quot;&gt;Future&lt;/span&gt;&amp;lt;&lt;var&gt;T&lt;/var&gt;, &lt;var&gt;E&lt;/var&gt;&amp;gt;, &lt;span style=&quot;color: #4271ae&quot;&gt;Into&lt;/span&gt;&amp;lt;&lt;var&gt;E&lt;/var&gt;&amp;gt;&amp;gt;)                          -&amp;gt; &lt;span style=&quot;color: #c82829&quot;&gt;Future&lt;/span&gt;&amp;lt;&lt;var&gt;T&lt;/var&gt;, &lt;var&gt;E&lt;/var&gt;&amp;gt;
+
+&lt;span style=&quot;color: #8e908c&quot;&gt;// Joining (waiting) futures&lt;/span&gt;
+&lt;span style=&quot;color: #8959a8&quot;&gt;fn&lt;/span&gt; &lt;a href=&quot;https://docs.rs/futures/0.1.13/futures/future/trait.Future.html#method.join&quot;&gt;Future::join&lt;/a&gt; (&lt;span style=&quot;color: #c82829&quot;&gt;Future&lt;/span&gt;&amp;lt;&lt;var&gt;T&lt;/var&gt;, &lt;var&gt;E&lt;/var&gt;&amp;gt;, &lt;span style=&quot;color: #c82829&quot;&gt;IntoFuture&lt;/span&gt;&amp;lt;&lt;var&gt;U&lt;/var&gt;, &lt;var&gt;E&lt;/var&gt;&amp;gt;)                                                       -&amp;gt; &lt;span style=&quot;color: #c82829&quot;&gt;Future&lt;/span&gt;&amp;lt;(&lt;var&gt;T&lt;/var&gt;, &lt;var&gt;U&lt;/var&gt;),          &lt;var&gt;E&lt;/var&gt;&amp;gt;
+&lt;span style=&quot;color: #8959a8&quot;&gt;fn&lt;/span&gt; &lt;a href=&quot;https://docs.rs/futures/0.1.13/futures/future/trait.Future.html#method.join3&quot;&gt;Future::join3&lt;/a&gt;(&lt;span style=&quot;color: #c82829&quot;&gt;Future&lt;/span&gt;&amp;lt;&lt;var&gt;T&lt;/var&gt;, &lt;var&gt;E&lt;/var&gt;&amp;gt;, &lt;span style=&quot;color: #c82829&quot;&gt;IntoFuture&lt;/span&gt;&amp;lt;&lt;var&gt;U&lt;/var&gt;, &lt;var&gt;E&lt;/var&gt;&amp;gt;, &lt;span style=&quot;color: #c82829&quot;&gt;IntoFuture&lt;/span&gt;&amp;lt;&lt;var&gt;V&lt;/var&gt;, &lt;var&gt;E&lt;/var&gt;&amp;gt;)                                     -&amp;gt; &lt;span style=&quot;color: #c82829&quot;&gt;Future&lt;/span&gt;&amp;lt;(&lt;var&gt;T&lt;/var&gt;, &lt;var&gt;U&lt;/var&gt;, &lt;var&gt;V&lt;/var&gt;),       &lt;var&gt;E&lt;/var&gt;&amp;gt;
+&lt;span style=&quot;color: #8959a8&quot;&gt;fn&lt;/span&gt; &lt;a href=&quot;https://docs.rs/futures/0.1.13/futures/future/trait.Future.html#method.join4&quot;&gt;Future::join4&lt;/a&gt;(&lt;span style=&quot;color: #c82829&quot;&gt;Future&lt;/span&gt;&amp;lt;&lt;var&gt;T&lt;/var&gt;, &lt;var&gt;E&lt;/var&gt;&amp;gt;, &lt;span style=&quot;color: #c82829&quot;&gt;IntoFuture&lt;/span&gt;&amp;lt;&lt;var&gt;U&lt;/var&gt;, &lt;var&gt;E&lt;/var&gt;&amp;gt;, &lt;span style=&quot;color: #c82829&quot;&gt;IntoFuture&lt;/span&gt;&amp;lt;&lt;var&gt;V&lt;/var&gt;, &lt;var&gt;E&lt;/var&gt;&amp;gt;, &lt;span style=&quot;color: #c82829&quot;&gt;IntoFuture&lt;/span&gt;&amp;lt;&lt;var&gt;W&lt;/var&gt;, &lt;var&gt;E&lt;/var&gt;&amp;gt;)                   -&amp;gt; &lt;span style=&quot;color: #c82829&quot;&gt;Future&lt;/span&gt;&amp;lt;(&lt;var&gt;T&lt;/var&gt;, &lt;var&gt;U&lt;/var&gt;, &lt;var&gt;V&lt;/var&gt;, &lt;var&gt;W&lt;/var&gt;),    &lt;var&gt;E&lt;/var&gt;&amp;gt;
+&lt;span style=&quot;color: #8959a8&quot;&gt;fn&lt;/span&gt; &lt;a href=&quot;https://docs.rs/futures/0.1.13/futures/future/trait.Future.html#method.join5&quot;&gt;Future::join5&lt;/a&gt;(&lt;span style=&quot;color: #c82829&quot;&gt;Future&lt;/span&gt;&amp;lt;&lt;var&gt;T&lt;/var&gt;, &lt;var&gt;E&lt;/var&gt;&amp;gt;, &lt;span style=&quot;color: #c82829&quot;&gt;IntoFuture&lt;/span&gt;&amp;lt;&lt;var&gt;U&lt;/var&gt;, &lt;var&gt;E&lt;/var&gt;&amp;gt;, &lt;span style=&quot;color: #c82829&quot;&gt;IntoFuture&lt;/span&gt;&amp;lt;&lt;var&gt;V&lt;/var&gt;, &lt;var&gt;E&lt;/var&gt;&amp;gt;, &lt;span style=&quot;color: #c82829&quot;&gt;IntoFuture&lt;/span&gt;&amp;lt;&lt;var&gt;W&lt;/var&gt;, &lt;var&gt;E&lt;/var&gt;&amp;gt;, &lt;span style=&quot;color: #c82829&quot;&gt;IntoFuture&lt;/span&gt;&amp;lt;&lt;var&gt;X&lt;/var&gt;, &lt;var&gt;E&lt;/var&gt;&amp;gt;) -&amp;gt; &lt;span style=&quot;color: #c82829&quot;&gt;Future&lt;/span&gt;&amp;lt;(&lt;var&gt;T&lt;/var&gt;, &lt;var&gt;U&lt;/var&gt;, &lt;var&gt;V&lt;/var&gt;, &lt;var&gt;W&lt;/var&gt;, &lt;var&gt;X&lt;/var&gt;), &lt;var&gt;E&lt;/var&gt;&amp;gt;
+&lt;span style=&quot;color: #8959a8&quot;&gt;fn&lt;/span&gt; &lt;a href=&quot;https://docs.rs/futures/0.1.13/futures/future/fn.join_all.html&quot;&gt;join_all&lt;/a&gt;     (&lt;span style=&quot;color: #4271ae&quot;&gt;IntoIterator&lt;/span&gt;&amp;lt;&lt;span style=&quot;color: #c82829&quot;&gt;IntoFuture&lt;/span&gt;&amp;lt;&lt;var&gt;T&lt;/var&gt;, &lt;var&gt;E&lt;/var&gt;&amp;gt;&amp;gt;)                                                       -&amp;gt; &lt;span style=&quot;color: #c82829&quot;&gt;Future&lt;/span&gt;&amp;lt;&lt;span style=&quot;color: #4271ae&quot;&gt;Vec&lt;/span&gt;&amp;lt;&lt;var&gt;T&lt;/var&gt;&amp;gt;,          &lt;var&gt;E&lt;/var&gt;&amp;gt;
+
+&lt;span style=&quot;color: #8e908c&quot;&gt;// Selecting (racing) futures&lt;/span&gt;
+&lt;span style=&quot;color: #8959a8&quot;&gt;fn&lt;/span&gt; &lt;a href=&quot;https://docs.rs/futures/0.1.13/futures/future/trait.Future.html#method.select&quot;&gt;Future::select&lt;/a&gt; (&lt;span style=&quot;color: #c82829&quot;&gt;Future&lt;/span&gt;&amp;lt;&lt;var&gt;T&lt;/var&gt;, &lt;var&gt;E&lt;/var&gt;&amp;gt;, &lt;span style=&quot;color: #c82829&quot;&gt;IntoFuture&lt;/span&gt;&amp;lt;&lt;var&gt;T&lt;/var&gt;, &lt;var&gt;E&lt;/var&gt;&amp;gt;) -&amp;gt; &lt;span style=&quot;color: #c82829&quot;&gt;Future&lt;/span&gt;&amp;lt;(&lt;var&gt;T&lt;/var&gt;, &lt;span style=&quot;color: #c82829&quot;&gt;Future&lt;/span&gt;&amp;lt;&lt;var&gt;T&lt;/var&gt;, &lt;var&gt;E&lt;/var&gt;&amp;gt;), (&lt;var&gt;E&lt;/var&gt;, &lt;span style=&quot;color: #c82829&quot;&gt;Future&lt;/span&gt;&amp;lt;&lt;var&gt;T&lt;/var&gt;, &lt;var&gt;E&lt;/var&gt;&amp;gt;)&amp;gt;
+&lt;span style=&quot;color: #8959a8&quot;&gt;fn&lt;/span&gt; &lt;a href=&quot;https://docs.rs/futures/0.1.13/futures/future/trait.Future.html#method.select2&quot;&gt;Future::select2&lt;/a&gt;(&lt;span style=&quot;color: #c82829&quot;&gt;Future&lt;/span&gt;&amp;lt;&lt;var&gt;T&lt;/var&gt;, &lt;var&gt;E&lt;/var&gt;&amp;gt;, &lt;span style=&quot;color: #c82829&quot;&gt;IntoFuture&lt;/span&gt;&amp;lt;&lt;var&gt;U&lt;/var&gt;, &lt;var&gt;F&lt;/var&gt;&amp;gt;) -&amp;gt; &lt;span style=&quot;color: #c82829&quot;&gt;Future&lt;/span&gt;&amp;lt;&lt;span style=&quot;color: #4271ae&quot;&gt;Either&lt;/span&gt;&amp;lt;(&lt;var&gt;T&lt;/var&gt;, &lt;span style=&quot;color: #c82829&quot;&gt;Future&lt;/span&gt;&amp;lt;&lt;var&gt;U&lt;/var&gt;, &lt;var&gt;F&lt;/var&gt;&amp;gt;), (&lt;var&gt;U&lt;/var&gt;, &lt;span style=&quot;color: #c82829&quot;&gt;Future&lt;/span&gt;&amp;lt;&lt;var&gt;T&lt;/var&gt;, &lt;var&gt;E&lt;/var&gt;&amp;gt;)&amp;gt;, &lt;span style=&quot;color: #4271ae&quot;&gt;Either&lt;/span&gt;&amp;lt;(&lt;var&gt;E&lt;/var&gt;, &lt;span style=&quot;color: #c82829&quot;&gt;Future&lt;/span&gt;&amp;lt;&lt;var&gt;U&lt;/var&gt;, &lt;var&gt;F&lt;/var&gt;&amp;gt;), (&lt;var&gt;F&lt;/var&gt;, &lt;span style=&quot;color: #c82829&quot;&gt;Future&lt;/span&gt;&amp;lt;&lt;var&gt;T&lt;/var&gt;, &lt;var&gt;E&lt;/var&gt;&amp;gt;)&amp;gt;&amp;gt;
+&lt;span style=&quot;color: #8959a8&quot;&gt;fn&lt;/span&gt; &lt;a href=&quot;https://docs.rs/futures/0.1.13/futures/future/fn.select_all.html&quot;&gt;select_all&lt;/a&gt;     (&lt;span style=&quot;color: #4271ae&quot;&gt;IntoIterator&lt;/span&gt;&amp;lt;&lt;span style=&quot;color: #c82829&quot;&gt;IntoFuture&lt;/span&gt;&amp;lt;&lt;var&gt;T&lt;/var&gt;, &lt;var&gt;E&lt;/var&gt;&amp;gt;&amp;gt;) -&amp;gt; &lt;span style=&quot;color: #c82829&quot;&gt;Future&lt;/span&gt;&amp;lt;(&lt;var&gt;T&lt;/var&gt;, &lt;span style=&quot;color: #4271ae&quot;&gt;usize&lt;/span&gt;, &lt;span style=&quot;color: #4271ae&quot;&gt;Vec&lt;/span&gt;&amp;lt;&lt;span style=&quot;color: #c82829&quot;&gt;Future&lt;/span&gt;&amp;lt;&lt;var&gt;T&lt;/var&gt;, &lt;var&gt;E&lt;/var&gt;&amp;gt;&amp;gt;), (&lt;var&gt;E&lt;/var&gt;, &lt;span style=&quot;color: #4271ae&quot;&gt;usize&lt;/span&gt;, &lt;span style=&quot;color: #4271ae&quot;&gt;Vec&lt;/span&gt;&amp;lt;&lt;span style=&quot;color: #c82829&quot;&gt;Future&lt;/span&gt;&amp;lt;&lt;var&gt;T&lt;/var&gt;, &lt;var&gt;E&lt;/var&gt;&amp;gt;&amp;gt;)&amp;gt;
+&lt;span style=&quot;color: #8959a8&quot;&gt;fn&lt;/span&gt; &lt;a href=&quot;https://docs.rs/futures/0.1.13/futures/future/fn.select_ok.html&quot;&gt;select_ok&lt;/a&gt;      (&lt;span style=&quot;color: #4271ae&quot;&gt;IntoIterator&lt;/span&gt;&amp;lt;&lt;span style=&quot;color: #c82829&quot;&gt;IntoFuture&lt;/span&gt;&amp;lt;&lt;var&gt;T&lt;/var&gt;, &lt;var&gt;E&lt;/var&gt;&amp;gt;&amp;gt;) -&amp;gt; &lt;span style=&quot;color: #c82829&quot;&gt;Future&lt;/span&gt;&amp;lt;(&lt;var&gt;T&lt;/var&gt;, &lt;span style=&quot;color: #4271ae&quot;&gt;Vec&lt;/span&gt;&amp;lt;&lt;span style=&quot;color: #c82829&quot;&gt;Future&lt;/span&gt;&amp;lt;&lt;var&gt;T&lt;/var&gt;, &lt;var&gt;E&lt;/var&gt;&amp;gt;&amp;gt;), &lt;var&gt;E&lt;/var&gt;&amp;gt;
+
+&lt;span style=&quot;color: #8e908c&quot;&gt;// Utility&lt;/span&gt;
+&lt;span style=&quot;color: #8959a8&quot;&gt;fn&lt;/span&gt; &lt;a href=&quot;https://docs.rs/futures/0.1.13/futures/future/fn.lazy.html&quot;&gt;lazy&lt;/a&gt;         (&lt;span style=&quot;color: #8959a8&quot;&gt;FnOnce&lt;/span&gt;() -&amp;gt; &lt;span style=&quot;color: #c82829&quot;&gt;IntoFuture&lt;/span&gt;&amp;lt;&lt;var&gt;T&lt;/var&gt;, &lt;var&gt;E&lt;/var&gt;&amp;gt;)             -&amp;gt; &lt;span style=&quot;color: #c82829&quot;&gt;Future&lt;/span&gt;&amp;lt;&lt;var&gt;T&lt;/var&gt;, &lt;var&gt;E&lt;/var&gt;&amp;gt;
+&lt;span style=&quot;color: #8959a8&quot;&gt;fn&lt;/span&gt; &lt;a href=&quot;https://docs.rs/futures/0.1.13/futures/future/fn.loop_fn.html&quot;&gt;loop_fn&lt;/a&gt;      (&lt;var&gt;S&lt;/var&gt;, &lt;span style=&quot;color: #8959a8&quot;&gt;FnMut&lt;/span&gt;(&lt;var&gt;S&lt;/var&gt;) -&amp;gt; &lt;span style=&quot;color: #c82829&quot;&gt;IntoFuture&lt;/span&gt;&amp;lt;&lt;span style=&quot;color: #4271ae&quot;&gt;Loop&lt;/span&gt;&amp;lt;&lt;var&gt;T&lt;/var&gt;, &lt;var&gt;S&lt;/var&gt;&amp;gt;, &lt;var&gt;E&lt;/var&gt;&amp;gt;) -&amp;gt; &lt;span style=&quot;color: #c82829&quot;&gt;Future&lt;/span&gt;&amp;lt;&lt;var&gt;T&lt;/var&gt;, &lt;var&gt;E&lt;/var&gt;&amp;gt;
+&lt;span style=&quot;color: #8959a8&quot;&gt;fn&lt;/span&gt; &lt;a href=&quot;https://docs.rs/futures/0.1.13/futures/future/trait.Future.html#method.boxed&quot;&gt;Future::boxed&lt;/a&gt;(&lt;span style=&quot;color: #c82829&quot;&gt;Future&lt;/span&gt;&amp;lt;&lt;var&gt;T&lt;/var&gt;, &lt;var&gt;E&lt;/var&gt;&amp;gt;+&lt;span style=&quot;color: #4271ae&quot;&gt;Send&lt;/span&gt;+&lt;span style=&quot;color: #b76514&quot;&gt;&amp;#x27;static&lt;/span&gt;)                -&amp;gt; &lt;span style=&quot;color: #c82829&quot;&gt;Future&lt;/span&gt;&amp;lt;&lt;var&gt;T&lt;/var&gt;, &lt;var&gt;E&lt;/var&gt;&amp;gt;+&lt;span style=&quot;color: #4271ae&quot;&gt;Send&lt;/span&gt;+&lt;span style=&quot;color: #b76514&quot;&gt;&amp;#x27;static&lt;/span&gt;
+
+&lt;span style=&quot;color: #8e908c&quot;&gt;// Miscellaneous&lt;/span&gt;
+&lt;span style=&quot;color: #8959a8&quot;&gt;fn&lt;/span&gt; &lt;a href=&quot;https://docs.rs/futures/0.1.13/futures/future/trait.Future.html#method.into_stream&quot;&gt;Future::into_stream&lt;/a&gt;   (&lt;span style=&quot;color: #c82829&quot;&gt;Future&lt;/span&gt;&amp;lt;&lt;var&gt;T&lt;/var&gt;, &lt;var&gt;E&lt;/var&gt;&amp;gt;)            -&amp;gt; &lt;span style=&quot;color: #4271ae&quot;&gt;Stream&lt;/span&gt;&amp;lt;&lt;var&gt;T&lt;/var&gt;, &lt;var&gt;E&lt;/var&gt;&amp;gt;
+&lt;span style=&quot;color: #8959a8&quot;&gt;fn&lt;/span&gt; &lt;a href=&quot;https://docs.rs/futures/0.1.13/futures/future/trait.Future.html#method.flatten_stream&quot;&gt;Future::flatten_stream&lt;/a&gt;(&lt;span style=&quot;color: #c82829&quot;&gt;Future&lt;/span&gt;&amp;lt;&lt;span style=&quot;color: #4271ae&quot;&gt;Stream&lt;/span&gt;&amp;lt;&lt;var&gt;T&lt;/var&gt;, &lt;var&gt;E&lt;/var&gt;&amp;gt;, &lt;var&gt;E&lt;/var&gt;&amp;gt;) -&amp;gt; &lt;span style=&quot;color: #4271ae&quot;&gt;Stream&lt;/span&gt;&amp;lt;&lt;var&gt;T&lt;/var&gt;, &lt;var&gt;E&lt;/var&gt;&amp;gt;
+&lt;span style=&quot;color: #8959a8&quot;&gt;fn&lt;/span&gt; &lt;a href=&quot;https://docs.rs/futures/0.1.13/futures/future/trait.Future.html#method.fuse&quot;&gt;Future::fuse&lt;/a&gt;          (&lt;span style=&quot;color: #c82829&quot;&gt;Future&lt;/span&gt;&amp;lt;&lt;var&gt;T&lt;/var&gt;, &lt;var&gt;E&lt;/var&gt;&amp;gt;)            -&amp;gt; &lt;span style=&quot;color: #c82829&quot;&gt;Future&lt;/span&gt;&amp;lt;&lt;var&gt;T&lt;/var&gt;, &lt;var&gt;E&lt;/var&gt;&amp;gt;
+&lt;span style=&quot;color: #8959a8&quot;&gt;fn&lt;/span&gt; &lt;a href=&quot;https://docs.rs/futures/0.1.13/futures/future/trait.Future.html#method.catch_unwind&quot;&gt;Future::catch_unwind&lt;/a&gt;  (&lt;span style=&quot;color: #c82829&quot;&gt;Future&lt;/span&gt;&amp;lt;&lt;var&gt;T&lt;/var&gt;, &lt;var&gt;E&lt;/var&gt;&amp;gt;+&lt;span style=&quot;color: #4271ae&quot;&gt;UnwindSafe&lt;/span&gt;) -&amp;gt; &lt;span style=&quot;color: #c82829&quot;&gt;Future&lt;/span&gt;&amp;lt;&lt;span style=&quot;color: #4271ae&quot;&gt;Result&lt;/span&gt;&amp;lt;&lt;var&gt;T&lt;/var&gt;, &lt;var&gt;E&lt;/var&gt;&amp;gt;, &lt;span style=&quot;color: #4271ae&quot;&gt;Any&lt;/span&gt;+&lt;span style=&quot;color: #4271ae&quot;&gt;Send&lt;/span&gt;&amp;gt;
+&lt;span style=&quot;color: #8959a8&quot;&gt;fn&lt;/span&gt; &lt;a href=&quot;https://docs.rs/futures/0.1.13/futures/future/trait.Future.html#method.shared&quot;&gt;Future::shared&lt;/a&gt;        (&lt;span style=&quot;color: #c82829&quot;&gt;Future&lt;/span&gt;&amp;lt;&lt;var&gt;T&lt;/var&gt;, &lt;var&gt;E&lt;/var&gt;&amp;gt;)            -&amp;gt; &lt;span style=&quot;color: #c82829&quot;&gt;Future&lt;/span&gt;&amp;lt;&lt;span style=&quot;color: #4271ae&quot;&gt;SharedItem&lt;/span&gt;&amp;lt;&lt;var&gt;T&lt;/var&gt;&amp;gt;, &lt;span style=&quot;color: #4271ae&quot;&gt;SharedError&lt;/span&gt;&amp;lt;&lt;var&gt;E&lt;/var&gt;&amp;gt;&amp;gt;+&lt;span style=&quot;color: #4271ae&quot;&gt;Clone&lt;/span&gt;
+&lt;span style=&quot;color: #8959a8&quot;&gt;fn&lt;/span&gt; &lt;a href=&quot;https://docs.rs/futures/0.1.13/futures/future/trait.Future.html#method.wait&quot;&gt;Future::wait&lt;/a&gt;          (&lt;span style=&quot;color: #c82829&quot;&gt;Future&lt;/span&gt;&amp;lt;&lt;var&gt;T&lt;/var&gt;, &lt;var&gt;E&lt;/var&gt;&amp;gt;)            -&amp;gt; &lt;span style=&quot;color: #4271ae&quot;&gt;Result&lt;/span&gt;&amp;lt;&lt;var&gt;T&lt;/var&gt;, &lt;var&gt;E&lt;/var&gt;&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+</description>
+        <pubDate>Mon, 15 May 2017 00:00:00 -0700</pubDate>
+        <link>https://rufflewind.com/2017-05-15/futures-cheatsheet</link>
+        <guid isPermaLink="true">https://rufflewind.com/2017-05-15/futures-cheatsheet</guid>
+        
+        <category>rust</category>
+        
+        
+      </item>
+    
+      <item>
+        <title>Using libraries</title>
+        <description>&lt;p&gt;Note: This article is somewhat biased toward Linux-like environments.&lt;/p&gt;
+&lt;h2 id=&quot;native-vs-non-native&quot;&gt;Native vs non-native&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;&lt;strong&gt;Native libraries&lt;/strong&gt;: these are the ones you get through native compilation. This applies to languages such as C, C++, Fortran. These libraries are interoperable.&lt;/p&gt;
+&lt;p&gt;This category also applies to modern natively-compiled languages such as Haskell or Rust, but I’m not as familiar with those so I won’t discuss them here.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;&lt;strong&gt;Non-native libraries&lt;/strong&gt;: these are made of source code or bytecode that isn’t executed directly on the CPU. Examples include C#, Java, Perl, Python, Ruby, etc. Non-native libraries are usually highly language-specific and not interoperable with each other.&lt;/p&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;This article is only concerned with &lt;em&gt;native libraries&lt;/em&gt;, specifically of the older family (C, C++, Fortran).&lt;/p&gt;
+&lt;h2 id=&quot;parts-of-a-library&quot;&gt;Parts of a library&lt;/h2&gt;
+&lt;p&gt;Libraries are generally divided into two components:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;The &lt;strong&gt;library file&lt;/strong&gt;, which contains mostly machine code. This is the essential library &lt;em&gt;implementation&lt;/em&gt;.&lt;/p&gt;
+&lt;p&gt;The file extensions are usually:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;.a&lt;/code&gt;/&lt;code&gt;.so&lt;/code&gt; (&lt;a href=&quot;https://en.wikipedia.org/wiki/Executable_and_Linkable_Format&quot;&gt;ELF&lt;/a&gt; OSes like Linux),&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;.a&lt;/code&gt;/&lt;code&gt;.dylib&lt;/code&gt; (OS X),&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;.lib&lt;/code&gt;/&lt;code&gt;.dll&lt;/code&gt; (Windows).&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;The former of each pair are file extensions for static libraries, whereas the latter of each pair are for shared libraries a.k.a. dynamically-linked libraries (DLLs). The distinction is explained in the next section.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;The &lt;strong&gt;library interface&lt;/strong&gt;, which is a protocol that users of the library must abide by in order to use the library correctly. Failing to do so will often lead to crashes (segfaults) and brokenness.&lt;/p&gt;
+&lt;p&gt;For C and C++, this is usually distributed as a &lt;strong&gt;header file&lt;/strong&gt; (&lt;code&gt;.h&lt;/code&gt;, &lt;code&gt;.hpp&lt;/code&gt;, etc). There are ways to use a library even without a header file, but it is usually discouraged as it is error-prone. There is one exception though: non-C/C++ programs (e.g. a Rust program) that want to use a C/C++ library often don’t require header files.&lt;/p&gt;
+&lt;p&gt;For Fortran, the library interface is usually just the source code itself, or interchangeably the &lt;code&gt;.mod&lt;/code&gt; files.&lt;/p&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&quot;static-vs-shared-libraries&quot;&gt;Static vs shared libraries&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;In &lt;strong&gt;static libraries&lt;/strong&gt;, the library’s own code is copied and merged with the user’s code, creating one combined file. This means after compilation, the static library file itself is no longer needed nor used. (Of course, you probably want to keep it in case you want to compile more programs with that same library.)&lt;/p&gt;
+&lt;p&gt;Note that static libraries are quite dumb: you cannot link more than one copy of the same static library into the same program. You might wonder “Why would anyone do that anyway?” Well, it’s often unintentional: say you use library A and library B, both of which use library C. If this whole thing is linked statically, then both A and B will bring in their own copy of C!&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;In &lt;strong&gt;shared libraries&lt;/strong&gt;, the library’s own code remains a separate file. This means later when the program runs, it must &lt;em&gt;load&lt;/em&gt; the library as a separate step. If the shared library can’t be found the program will fail to launch. If the shared library is upgraded or changed, then the behavior of any program that depends on that library may change (this can be both useful and annoying).&lt;/p&gt;
+&lt;p&gt;Even though shared libraries are never incorporated into the final program, they are still needed during compilation because the compiler still needs to be aware of the library’s interface. On non-Windows systems, the compiler simply reads the shared library itself (&lt;code&gt;.so&lt;/code&gt; or &lt;code&gt;.dylib&lt;/code&gt;) during compilation. On Windows, compilation requires a so-called &lt;strong&gt;import library&lt;/strong&gt;, which has the extension &lt;code&gt;.lib&lt;/code&gt; (not to be confused with static libraries on Windows, which also have the same extension).&lt;/p&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&quot;installing-a-library&quot;&gt;Installing a library&lt;/h2&gt;
+&lt;p&gt;The first step to use a library is to install it, obviously. The process varies a lot. It’s best to read the documentation for that specific library. One of the most crucial things to figure out is where the library is going to be installed.&lt;/p&gt;
+&lt;p&gt;(Another crucial thing is to find out if the library has optional features, because they might be off by default, or turned off if the configuration step fails to find its dependencies!)&lt;/p&gt;
+&lt;h3 id=&quot;prefixes&quot;&gt;Prefixes&lt;/h3&gt;
+&lt;p&gt;On Unix-like OSes, libraries are usually installed to the &lt;code&gt;/usr/local&lt;/code&gt; prefix by default. This &lt;strong&gt;prefix&lt;/strong&gt; means that all of the library’s relevant files will be installed to &lt;code&gt;/usr/local/lib&lt;/code&gt; (library files), &lt;code&gt;/usr/local/include&lt;/code&gt; (header files), &lt;code&gt;/usr/local/bin&lt;/code&gt; (executable programs), etc. To change the prefix, the process varies depending on the build system used by the library:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;For &lt;a href=&quot;https://www.gnu.org/software/autoconf/autoconf.html&quot;&gt;Autoconf&lt;/a&gt;-like build systems, this can often be changed through the &lt;code&gt;./configure&lt;/code&gt; script. The command would be something like&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;./configure --prefix=/my_custom_prefix&lt;/code&gt;&lt;/pre&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;For the &lt;a href=&quot;https://cmake.org&quot;&gt;CMake&lt;/a&gt; build system, this can be changed using&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;cmake -DCMAKE_INSTALL_PREFIX=/my_custom_prefix .&lt;/code&gt;&lt;/pre&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;It is considered bad practice to install libraries to the &lt;code&gt;/usr&lt;/code&gt; prefix as that lies within the territory of the system package manager.&lt;/p&gt;
+&lt;h2 id=&quot;including-a-library&quot;&gt;Including a library&lt;/h2&gt;
+&lt;p&gt;To use the library in your C or C++ code, you’d likely have added&lt;/p&gt;
+&lt;div class=&quot;sourceCode&quot; id=&quot;cb3&quot;&gt;&lt;pre class=&quot;sourceCode c&quot;&gt;&lt;code class=&quot;sourceCode c&quot;&gt;&lt;a class=&quot;sourceLine&quot; id=&quot;cb3-1&quot; data-line-number=&quot;1&quot;&gt;&lt;span class=&quot;pp&quot;&gt;#include &lt;/span&gt;&lt;span class=&quot;im&quot;&gt;&amp;lt;some_library_header.h&amp;gt;&lt;/span&gt;&lt;/a&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;to various places in your source code to inform the compiler about the library &lt;em&gt;interface&lt;/em&gt; (by forward declaring various types, functions, and variables). These header files are found under the &lt;code&gt;include&lt;/code&gt; directory of wherever the library was installed, usually.&lt;/p&gt;
+&lt;p&gt;If the library header files exist in a standardized location such as &lt;code&gt;/usr/include&lt;/code&gt;, then the compiler will find them just fine. But if you installed them in an unusual location like &lt;code&gt;/my_custom_prefix/include&lt;/code&gt;, then you’ll have to give a hint to your compiler so it knows where to look. This can be accomplished via the &lt;code&gt;-I&lt;/code&gt; flag:&lt;/p&gt;
+&lt;div class=&quot;sourceCode&quot; id=&quot;cb4&quot;&gt;&lt;pre class=&quot;sourceCode sh&quot;&gt;&lt;code class=&quot;sourceCode bash&quot;&gt;&lt;a class=&quot;sourceLine&quot; id=&quot;cb4-1&quot; data-line-number=&quot;1&quot;&gt;&lt;span class=&quot;fu&quot;&gt;cc&lt;/span&gt; -c -I/my_custom_prefix/include my_program.c&lt;/a&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;(Replace &lt;code&gt;cc&lt;/code&gt; with whatever compiler you use.) An &lt;em&gt;alternative&lt;/em&gt; approach is to use the &lt;code&gt;C_INCLUDE_PATH&lt;/code&gt; (C) and/or &lt;code&gt;CPLUS_INCLUDE_PATH&lt;/code&gt; (C++) environment variables:&lt;/p&gt;
+&lt;div class=&quot;sourceCode&quot; id=&quot;cb5&quot;&gt;&lt;pre class=&quot;sourceCode sh&quot;&gt;&lt;code class=&quot;sourceCode bash&quot;&gt;&lt;a class=&quot;sourceLine&quot; id=&quot;cb5-1&quot; data-line-number=&quot;1&quot;&gt;&lt;span class=&quot;bu&quot;&gt;export&lt;/span&gt; &lt;span class=&quot;va&quot;&gt;C_INCLUDE_PATH=&lt;/span&gt;/my_custom_prefix/include&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb5-2&quot; data-line-number=&quot;2&quot;&gt;&lt;span class=&quot;fu&quot;&gt;cc&lt;/span&gt; -c my_program.c&lt;/a&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;You can have multiple paths in the variable using colon (&lt;code&gt;:&lt;/code&gt;), analogous to &lt;code&gt;PATH&lt;/code&gt;. These environment variables may not be recognized by all compilers, however. I know it works for &lt;code&gt;clang&lt;/code&gt; and &lt;code&gt;gcc&lt;/code&gt; at least.&lt;/p&gt;
+&lt;h2 id=&quot;linking-with-a-library&quot;&gt;Linking with a library&lt;/h2&gt;
+&lt;p&gt;When all the source files have been compiled with &lt;code&gt;-c&lt;/code&gt;, you now need to link everything together, including any libraries you use. This is done using the &lt;code&gt;-l&lt;/code&gt; flag:&lt;/p&gt;
+&lt;div class=&quot;sourceCode&quot; id=&quot;cb6&quot;&gt;&lt;pre class=&quot;sourceCode sh&quot;&gt;&lt;code class=&quot;sourceCode bash&quot;&gt;&lt;a class=&quot;sourceLine&quot; id=&quot;cb6-1&quot; data-line-number=&quot;1&quot;&gt;&lt;span class=&quot;fu&quot;&gt;cc&lt;/span&gt; my_program.o my_blah.o my_foo.o -lalpha -lbeta&lt;/a&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;The word that follows &lt;code&gt;-l&lt;/code&gt; is the &lt;strong&gt;name&lt;/strong&gt; of the library. If the library file is &lt;code&gt;libalpha.so&lt;/code&gt;, then its name is just &lt;code&gt;alpha&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;If &lt;code&gt;alpha&lt;/code&gt; and/or &lt;code&gt;beta&lt;/code&gt; are at an unconventional location &lt;code&gt;/my_custom_prefix/lib&lt;/code&gt;, then you have to pass in a flag &lt;code&gt;-L&lt;/code&gt; to tell the compiler where they could be found:&lt;/p&gt;
+&lt;div class=&quot;sourceCode&quot; id=&quot;cb7&quot;&gt;&lt;pre class=&quot;sourceCode sh&quot;&gt;&lt;code class=&quot;sourceCode bash&quot;&gt;&lt;a class=&quot;sourceLine&quot; id=&quot;cb7-1&quot; data-line-number=&quot;1&quot;&gt;&lt;span class=&quot;fu&quot;&gt;cc&lt;/span&gt; -L/my_custom_prefix/lib my_program.o my_blah.o my_foo.o -lalpha -lbeta&lt;/a&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;You can also do this using another colon-separated environment variable &lt;code&gt;LIBRARY_PATH&lt;/code&gt;:&lt;/p&gt;
+&lt;div class=&quot;sourceCode&quot; id=&quot;cb8&quot;&gt;&lt;pre class=&quot;sourceCode sh&quot;&gt;&lt;code class=&quot;sourceCode bash&quot;&gt;&lt;a class=&quot;sourceLine&quot; id=&quot;cb8-1&quot; data-line-number=&quot;1&quot;&gt;&lt;span class=&quot;bu&quot;&gt;export&lt;/span&gt; &lt;span class=&quot;va&quot;&gt;LIBRARY_PATH=&lt;/span&gt;/my_custom_prefix/lib&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb8-2&quot; data-line-number=&quot;2&quot;&gt;&lt;span class=&quot;fu&quot;&gt;cc&lt;/span&gt; my_program.o my_blah.o my_foo.o -lalpha -lbeta&lt;/a&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Again, I think only &lt;em&gt;some&lt;/em&gt; compilers recognize this variable.&lt;/p&gt;
+&lt;h2 id=&quot;loading-a-shared-library&quot;&gt;Loading a shared library&lt;/h2&gt;
+&lt;p&gt;The last step is to make sure the program can actually load the shared library. Usually this is automatic, but if the library is in an unconventional place like &lt;code&gt;/my_custom_prefix/lib&lt;/code&gt;, then you gotta give it another hint using yet-another colon-separated environment variable &lt;code&gt;LD_LIBRARY_PATH&lt;/code&gt; (or &lt;code&gt;DYLIB_LIBRARY_PATH&lt;/code&gt; if you’re using OS X):&lt;/p&gt;
+&lt;div class=&quot;sourceCode&quot; id=&quot;cb9&quot;&gt;&lt;pre class=&quot;sourceCode sh&quot;&gt;&lt;code class=&quot;sourceCode bash&quot;&gt;&lt;a class=&quot;sourceLine&quot; id=&quot;cb9-1&quot; data-line-number=&quot;1&quot;&gt;&lt;span class=&quot;bu&quot;&gt;export&lt;/span&gt; &lt;span class=&quot;va&quot;&gt;LD_LIBRARY_PATH=&lt;/span&gt;/my_custom_prefix/lib&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb9-2&quot; data-line-number=&quot;2&quot;&gt;&lt;span class=&quot;ex&quot;&gt;./a.out&lt;/span&gt;&lt;/a&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Alternatively, you can bake the library path directly into the program so you don’t need an environment variable to run the program. This is the &lt;a href=&quot;https://en.wikipedia.org/wiki/Rpath&quot;&gt;&lt;code&gt;-rpath&lt;/code&gt;&lt;/a&gt; flag:&lt;/p&gt;
+&lt;div class=&quot;sourceCode&quot; id=&quot;cb10&quot;&gt;&lt;pre class=&quot;sourceCode sh&quot;&gt;&lt;code class=&quot;sourceCode bash&quot;&gt;&lt;a class=&quot;sourceLine&quot; id=&quot;cb10-1&quot; data-line-number=&quot;1&quot;&gt;&lt;span class=&quot;fu&quot;&gt;cc&lt;/span&gt; -Wl,-rpath=/my_custom_prefix/lib my_program.o my_blah.o my_foo.o -lalpha -lbeta&lt;/a&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;You can specify a path relative to the location of the program itself using the &lt;code&gt;${ORIGIN}&lt;/code&gt; placeholder. Note that this is &lt;em&gt;not&lt;/em&gt; a shell variable, so be sure to &lt;em&gt;single-quote&lt;/em&gt; it in the shell:&lt;/p&gt;
+&lt;div class=&quot;sourceCode&quot; id=&quot;cb11&quot;&gt;&lt;pre class=&quot;sourceCode sh&quot;&gt;&lt;code class=&quot;sourceCode bash&quot;&gt;&lt;a class=&quot;sourceLine&quot; id=&quot;cb11-1&quot; data-line-number=&quot;1&quot;&gt;&lt;span class=&quot;fu&quot;&gt;cc&lt;/span&gt; -Wl,-rpath=&lt;span class=&quot;st&quot;&gt;&amp;#39;${ORIGIN}/lib&amp;#39;&lt;/span&gt; …&lt;/a&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+</description>
+        <pubDate>Sat, 25 Feb 2017 00:00:00 -0800</pubDate>
+        <link>https://rufflewind.com/2017-02-25/using-libraries</link>
+        <guid isPermaLink="true">https://rufflewind.com/2017-02-25/using-libraries</guid>
+        
+        <category>c</category>
+        
+        <category>c++</category>
+        
+        <category>libraries</category>
+        
+        
+      </item>
+    
+      <item>
+        <title>Two common problems with Git submodules</title>
+        <description>&lt;p&gt;Git submodules are useful, but their UX is a bit intrusive for users who aren’t even interacting with the submodules. Here’s a list of the two common ones I often run into. (Let me know if there’s anything else that folks often run into!)&lt;/p&gt;
+&lt;h2 id=&quot;i-cloned-a-repo-containing-submodules-but-theres-nothing-in-them&quot;&gt;I cloned a repo containing submodules, but there’s nothing in them!&lt;/h2&gt;
+&lt;p&gt;This happens if you clone a submodule without the &lt;code&gt;--recursive&lt;/code&gt; flag. The solution is to run&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;git submodule update --init --recursive&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;which will initialize everything.&lt;/p&gt;
+&lt;p&gt;I figure the main reason this is not the default is that cloning submodules can waste a lot of time, disk space, and/or bandwidth if you don’t actually need the submodules.&lt;/p&gt;
+&lt;h2 id=&quot;why-are-submodules-showing-up-in-git-status-even-though-i-never-touched-them&quot;&gt;Why are submodules showing up in &lt;code&gt;git status&lt;/code&gt; even though I never touched them?&lt;/h2&gt;
+&lt;p&gt;This can happen after &lt;code&gt;git pull&lt;/code&gt;, &lt;code&gt;git checkout&lt;/code&gt;, or &lt;code&gt;git reset&lt;/code&gt;, which change the working tree but do not update the submodules, causing them to lag behind. In &lt;code&gt;git status&lt;/code&gt;, the problem manifests as:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;modified:   mysubmodule (new commits)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;If you are sure you didn’t change any file within the submodules, you can update them using&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;git submodule update --recursive&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;I’m not sure why this isn’t the default. Perhaps it’s to avoid accidentally losing changes within the submodules?&lt;/p&gt;
+</description>
+        <pubDate>Tue, 21 Feb 2017 00:00:00 -0800</pubDate>
+        <link>https://rufflewind.com/2017-02-21/quirks-with-submodules</link>
+        <guid isPermaLink="true">https://rufflewind.com/2017-02-21/quirks-with-submodules</guid>
+        
+        <category>git</category>
+        
+        
+      </item>
+    
+      <item>
+        <title>Graphical depiction of ownership and borrowing in Rust</title>
+        <description>&lt;p&gt;Below is a graphical depiction of moving, copying, and borrowing in the &lt;a href=&quot;https://www.rust-lang.org&quot;&gt;Rust language&lt;/a&gt;. Most of these concepts are fairly specific to Rust and are therefore a common stumbling block for many learners.&lt;/p&gt;
+&lt;p&gt;To avoid clutter in the graphics, I have tried to keep the text to a minimum. It isn’t meant to be a replacement for the various tutorials out there but more of a different perspective for programmers who prefer to grok concepts visually. If you are learning Rust and find these graphics helpful, I would recommend annotating your own code with such diagrams to help solidify the concepts :)&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;/img/rust-move-copy-borrow.png&quot;&gt;&lt;img src=&quot;/img/rust-move-copy-borrow.png&quot; alt=&quot;Ownership and borrowing in Rust&quot; /&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;You can zoom in by clicking the image. You can also get it as an &lt;a href=&quot;/img/rust-move-copy-borrow.svg&quot;&gt;SVG&lt;/a&gt; or &lt;a href=&quot;/img/rust-move-copy-borrow.pdf&quot;&gt;PDF&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;The upper two figures depict the two main kinds of semantics for data that you own: either move semantics or copy semantics.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;The picture on &lt;strong&gt;move semantics&lt;/strong&gt; (⤳) looks almost too simple. There is no deception here: move semantics are strange only because most languages allow variables to be used as many times as the programmers please. This stands in contrast to much of the real world: I can’t just give someone my pen and still use it for writing! In Rust, any variable whose type does not implement the &lt;code&gt;Copy&lt;/code&gt; trait has move semantics and would behave as shown.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Copy semantics&lt;/strong&gt; (⎘) are reserved for types that do implement the &lt;code&gt;Copy&lt;/code&gt; trait. In this case, &lt;em&gt;every&lt;/em&gt; use of the object would result in a copy, as shown by the bifurcation.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;The central two figures depict the two ways in which you can borrow an object you own, and what each one offers.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;For &lt;strong&gt;mutable borrowing&lt;/strong&gt;, I used a lock symbol (🔒) to signify that the original object is effectively locked for the duration of the borrow, rendering it unusable.&lt;/li&gt;
+&lt;li&gt;In contrast, for &lt;strong&gt;non-mutable borrowing&lt;/strong&gt; I used a snowflake symbol (❄) to indicate that the original object is only &lt;em&gt;frozen&lt;/em&gt;: you can still take more non-mutable references, but you cannot move or take mutable references of it.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;In both figures, &lt;code&gt;’&lt;var&gt;ρ&lt;/var&gt;&lt;/code&gt; is a name I have chosen for the lifetime of the references. I used a Greek letter on purpose because there is no syntax for &lt;em&gt;concrete&lt;/em&gt; lifetimes in Rust, currently.&lt;/p&gt;
+&lt;p&gt;The last two figures summarize the key differences and similarities between the two kinds of references, both pictorally and in text form. The “&lt;a href=&quot;https://doc.rust-lang.org/beta/book/mutability.html#interior-vs-exterior-mutability&quot;&gt;exteriorly&lt;/a&gt;” qualifier is important, since you can still have interior mutability through &lt;a href=&quot;https://doc.rust-lang.org/std/cell/&quot;&gt;&lt;code&gt;Cell&lt;/code&gt;&lt;/a&gt;-like things.&lt;/p&gt;
+</description>
+        <pubDate>Wed, 15 Feb 2017 00:00:00 -0800</pubDate>
+        <link>https://rufflewind.com/2017-02-15/rust-move-copy-borrow</link>
+        <guid isPermaLink="true">https://rufflewind.com/2017-02-15/rust-move-copy-borrow</guid>
+        
+        <category>rust</category>
+        
+        
+      </item>
+    
+      <item>
+        <title>Reverse-mode automatic differentiation: a tutorial</title>
+        <description>&lt;p&gt;&lt;em&gt;In this post, I’ll walk through the mathematical formalism of reverse-mode &lt;a href=&quot;https://en.wikipedia.org/wiki/Automatic_differentiation&quot;&gt;automatic differentiation&lt;/a&gt; (AD) and try to explain some simple implementation strategies for reverse-mode AD. Demo programs in Python and Rust are included.&lt;/em&gt;&lt;/p&gt;
+&lt;h2 id=&quot;a-simple-example&quot;&gt;A simple example&lt;/h2&gt;
+&lt;p&gt;Suppose we want to calculate the &lt;a href=&quot;https://en.wikipedia.org/wiki/Automatic_differentiation#Forward_accumulation&quot;&gt;expression&lt;/a&gt;:&lt;/p&gt;
+&lt;p&gt;&lt;span class=&quot;math display&quot;&gt;\[z = x \cdot y + \sin(x)\]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;To do this using a program, we’d just translate it directly to code:&lt;/p&gt;
+&lt;div class=&quot;sourceCode&quot; id=&quot;cb1&quot;&gt;&lt;pre class=&quot;sourceCode py&quot;&gt;&lt;code class=&quot;sourceCode python&quot;&gt;&lt;a class=&quot;sourceLine&quot; id=&quot;cb1-1&quot; data-line-number=&quot;1&quot;&gt;z &lt;span class=&quot;op&quot;&gt;=&lt;/span&gt; x &lt;span class=&quot;op&quot;&gt;*&lt;/span&gt; y &lt;span class=&quot;op&quot;&gt;+&lt;/span&gt; sin(x)&lt;/a&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;What if we’re also interested in the derivatives of &lt;span class=&quot;math inline&quot;&gt;\(z\)&lt;/span&gt;? The “obvious” approach is to just find the expression by hand (or using a computer algebra system) and then punch it into the computer as we did before. But that assumes we have an explicit form for &lt;span class=&quot;math inline&quot;&gt;\(z\)&lt;/span&gt;. What if all we had was a program?&lt;/p&gt;
+&lt;p&gt;The important realization that leads to automatic differentiation is the fact that &lt;em&gt;even biggest, most complicated program must be built from a small set of primitive operations&lt;/em&gt; such as addition, multiplication, or trigonometric functions. The &lt;a href=&quot;https://en.wikipedia.org/wiki/Chain_rule&quot;&gt;chain rule&lt;/a&gt; allows us to take full advantage of this property.&lt;/p&gt;
+&lt;h2 id=&quot;forward-mode-automatic-differentiation&quot;&gt;Forward-mode automatic differentiation&lt;/h2&gt;
+&lt;p&gt;First, we need to think about how a &lt;em&gt;computer&lt;/em&gt; would evaluate &lt;span class=&quot;math inline&quot;&gt;\(z\)&lt;/span&gt; via a sequence of primitive operations (multiplication, sine, and addition):&lt;/p&gt;
+&lt;div class=&quot;sourceCode&quot; id=&quot;cb2&quot;&gt;&lt;pre class=&quot;sourceCode py&quot;&gt;&lt;code class=&quot;sourceCode python&quot;&gt;&lt;a class=&quot;sourceLine&quot; id=&quot;cb2-1&quot; data-line-number=&quot;1&quot;&gt;&lt;span class=&quot;co&quot;&gt;# Program A&lt;/span&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb2-2&quot; data-line-number=&quot;2&quot;&gt;x &lt;span class=&quot;op&quot;&gt;=&lt;/span&gt; ?&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb2-3&quot; data-line-number=&quot;3&quot;&gt;y &lt;span class=&quot;op&quot;&gt;=&lt;/span&gt; ?&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb2-4&quot; data-line-number=&quot;4&quot;&gt;a &lt;span class=&quot;op&quot;&gt;=&lt;/span&gt; x &lt;span class=&quot;op&quot;&gt;*&lt;/span&gt; y&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb2-5&quot; data-line-number=&quot;5&quot;&gt;b &lt;span class=&quot;op&quot;&gt;=&lt;/span&gt; sin(x)&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb2-6&quot; data-line-number=&quot;6&quot;&gt;z &lt;span class=&quot;op&quot;&gt;=&lt;/span&gt; a &lt;span class=&quot;op&quot;&gt;+&lt;/span&gt; b&lt;/a&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;The question marks indicate that &lt;code&gt;x&lt;/code&gt; and &lt;code&gt;y&lt;/code&gt; are to be supplied by the user.&lt;/p&gt;
+&lt;p&gt;I was careful to avoid &lt;a href=&quot;https://en.wikipedia.org/wiki/Static_single_assignment_form&quot;&gt;reassigning to the same variable&lt;/a&gt;: this way we can treat each assignment as a plain old &lt;a href=&quot;http://www.haskellforall.com/2013/12/equational-reasoning.html&quot;&gt;math equation&lt;/a&gt;:&lt;/p&gt;
+&lt;p&gt;&lt;span class=&quot;math display&quot;&gt;\[\begin{align}
+x &amp;amp;= {?} \\
+y &amp;amp;= {?} \\
+a &amp;amp;= x \cdot y \tag{A} \\
+b &amp;amp;= \sin(x) \\
+z &amp;amp;= a + b
+\end{align}\]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;Let’s try to differentiate each equation with respect to some yet-to-be-given variable &lt;span class=&quot;math inline&quot;&gt;\(t\)&lt;/span&gt;:&lt;/p&gt;
+&lt;p&gt;&lt;span class=&quot;math display&quot;&gt;\[\begin{align}
+\frac{\partial x}{\partial t} &amp;amp;= {?} \tag{F1} \\
+\frac{\partial y}{\partial t} &amp;amp;= {?} \\
+\frac{\partial a}{\partial t} &amp;amp;= y \cdot \frac{\partial x}{\partial t} + x \cdot \frac{\partial y}{\partial t} \\
+\frac{\partial b}{\partial t} &amp;amp;= \cos(x) \cdot \frac{\partial x}{\partial t} \\
+\frac{\partial z}{\partial t} &amp;amp;= \frac{\partial a}{\partial t} + \frac{\partial b}{\partial t}
+\end{align}\]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;To obtain this, I have made liberal use of the chain rule:&lt;/p&gt;
+&lt;p&gt;&lt;span class=&quot;math display&quot;&gt;\[\begin{align}
+\frac{\partial w}{\partial t}
+&amp;amp;= \sum_i \left(\frac{\partial w}{\partial u_i} \cdot \frac{\partial u_i}{\partial t}\right) \tag{C1} \\
+&amp;amp;= \frac{\partial w}{\partial u_1} \cdot \frac{\partial u_1}{\partial t} + \frac{\partial w}{\partial u_2} \cdot \frac{\partial u_2}{\partial t} + \cdots
+\end{align}\]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;where &lt;span class=&quot;math inline&quot;&gt;\(w\)&lt;/span&gt; denotes some output variable and &lt;span class=&quot;math inline&quot;&gt;\(u_i\)&lt;/span&gt; denotes each of the input variables that &lt;span class=&quot;math inline&quot;&gt;\(w\)&lt;/span&gt; depends on.&lt;/p&gt;
+&lt;p&gt;If we substitute &lt;span class=&quot;math inline&quot;&gt;\(t = x\)&lt;/span&gt; into equations (F1), we’d have an algorithm for calculating &lt;span class=&quot;math inline&quot;&gt;\(\partial z / \partial x\)&lt;/span&gt;. Alternatively, to get &lt;span class=&quot;math inline&quot;&gt;\(\partial z / \partial y\)&lt;/span&gt;, we could just plug in &lt;span class=&quot;math inline&quot;&gt;\(t = y\)&lt;/span&gt; instead.&lt;/p&gt;
+&lt;p&gt;Now, let’s translate the equations (F1) back into an ordinary program involving the &lt;em&gt;differential&lt;/em&gt; variables &lt;code&gt;{dx, dy, …}&lt;/code&gt;, which stand for &lt;span class=&quot;math inline&quot;&gt;\(\{\partial x / \partial t, \partial y / \partial t, \ldots\}\)&lt;/span&gt; respectively:&lt;/p&gt;
+&lt;div class=&quot;sourceCode&quot; id=&quot;cb3&quot;&gt;&lt;pre class=&quot;sourceCode py&quot;&gt;&lt;code class=&quot;sourceCode python&quot;&gt;&lt;a class=&quot;sourceLine&quot; id=&quot;cb3-1&quot; data-line-number=&quot;1&quot;&gt;&lt;span class=&quot;co&quot;&gt;# Program B&lt;/span&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb3-2&quot; data-line-number=&quot;2&quot;&gt;dx &lt;span class=&quot;op&quot;&gt;=&lt;/span&gt; ?&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb3-3&quot; data-line-number=&quot;3&quot;&gt;dy &lt;span class=&quot;op&quot;&gt;=&lt;/span&gt; ?&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb3-4&quot; data-line-number=&quot;4&quot;&gt;da &lt;span class=&quot;op&quot;&gt;=&lt;/span&gt; y &lt;span class=&quot;op&quot;&gt;*&lt;/span&gt; dx &lt;span class=&quot;op&quot;&gt;+&lt;/span&gt; x &lt;span class=&quot;op&quot;&gt;*&lt;/span&gt; dy&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb3-5&quot; data-line-number=&quot;5&quot;&gt;db &lt;span class=&quot;op&quot;&gt;=&lt;/span&gt; cos(x) &lt;span class=&quot;op&quot;&gt;*&lt;/span&gt; dx&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb3-6&quot; data-line-number=&quot;6&quot;&gt;dz &lt;span class=&quot;op&quot;&gt;=&lt;/span&gt; da &lt;span class=&quot;op&quot;&gt;+&lt;/span&gt; db&lt;/a&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;If we substitute &lt;span class=&quot;math inline&quot;&gt;\(t = x\)&lt;/span&gt; into the mathematical equations, what happens to this program? The effect is remarkably simple: we just need to initialize &lt;code&gt;dx = 1&lt;/code&gt; and &lt;code&gt;dy = 0&lt;/code&gt; as the &lt;em&gt;seed values&lt;/em&gt; for the algorithm. Hence, by choosing the seeds &lt;code&gt;dx = 1&lt;/code&gt; and &lt;code&gt;dy = 0&lt;/code&gt;, the variable &lt;code&gt;dz&lt;/code&gt; will contain the value of the derivative &lt;span class=&quot;math inline&quot;&gt;\(\partial z / \partial x\)&lt;/span&gt; upon completion of the program. Similarly, if we want &lt;span class=&quot;math inline&quot;&gt;\(\partial z / \partial y\)&lt;/span&gt;, we would use the seed &lt;code&gt;dx = 0&lt;/code&gt; and &lt;code&gt;dy = 1&lt;/code&gt; and the variable &lt;code&gt;dz&lt;/code&gt; would contain the value of &lt;span class=&quot;math inline&quot;&gt;\(\partial z / \partial y\)&lt;/span&gt;.&lt;/p&gt;
+&lt;p&gt;So far we have shown how the derivative can be calculated for a specific function like our example. To make the process fully automatic, we prescribe a set of rules for translating a program that evaluates an expression (like Program A) into a program that evaluates its derivatives (like Program B). We have already discovered 3 of these rules, in fact:&lt;/p&gt;
+&lt;div class=&quot;sourceCode&quot; id=&quot;cb4&quot;&gt;&lt;pre class=&quot;sourceCode py&quot;&gt;&lt;code class=&quot;sourceCode python&quot;&gt;&lt;a class=&quot;sourceLine&quot; id=&quot;cb4-1&quot; data-line-number=&quot;1&quot;&gt;c &lt;span class=&quot;op&quot;&gt;=&lt;/span&gt; a &lt;span class=&quot;op&quot;&gt;+&lt;/span&gt; b     &lt;span class=&quot;op&quot;&gt;=&amp;gt;&lt;/span&gt;    dc &lt;span class=&quot;op&quot;&gt;=&lt;/span&gt; da &lt;span class=&quot;op&quot;&gt;+&lt;/span&gt; db&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb4-2&quot; data-line-number=&quot;2&quot;&gt;c &lt;span class=&quot;op&quot;&gt;=&lt;/span&gt; a &lt;span class=&quot;op&quot;&gt;*&lt;/span&gt; b     &lt;span class=&quot;op&quot;&gt;=&amp;gt;&lt;/span&gt;    dc &lt;span class=&quot;op&quot;&gt;=&lt;/span&gt; b &lt;span class=&quot;op&quot;&gt;*&lt;/span&gt; da &lt;span class=&quot;op&quot;&gt;+&lt;/span&gt; a &lt;span class=&quot;op&quot;&gt;*&lt;/span&gt; db&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb4-3&quot; data-line-number=&quot;3&quot;&gt;c &lt;span class=&quot;op&quot;&gt;=&lt;/span&gt; sin(a)    &lt;span class=&quot;op&quot;&gt;=&amp;gt;&lt;/span&gt;    dc &lt;span class=&quot;op&quot;&gt;=&lt;/span&gt; cos(a) &lt;span class=&quot;op&quot;&gt;*&lt;/span&gt; da&lt;/a&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;This can be extended further for subtraction, division, powers, other trigonometric functions, etc using multivariable calculus:&lt;/p&gt;
+&lt;div class=&quot;sourceCode&quot; id=&quot;cb5&quot;&gt;&lt;pre class=&quot;sourceCode py&quot;&gt;&lt;code class=&quot;sourceCode python&quot;&gt;&lt;a class=&quot;sourceLine&quot; id=&quot;cb5-1&quot; data-line-number=&quot;1&quot;&gt;c &lt;span class=&quot;op&quot;&gt;=&lt;/span&gt; a &lt;span class=&quot;op&quot;&gt;-&lt;/span&gt; b     &lt;span class=&quot;op&quot;&gt;=&amp;gt;&lt;/span&gt;    dc &lt;span class=&quot;op&quot;&gt;=&lt;/span&gt; da &lt;span class=&quot;op&quot;&gt;-&lt;/span&gt; db&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb5-2&quot; data-line-number=&quot;2&quot;&gt;c &lt;span class=&quot;op&quot;&gt;=&lt;/span&gt; a &lt;span class=&quot;op&quot;&gt;/&lt;/span&gt; b     &lt;span class=&quot;op&quot;&gt;=&amp;gt;&lt;/span&gt;    dc &lt;span class=&quot;op&quot;&gt;=&lt;/span&gt; da &lt;span class=&quot;op&quot;&gt;/&lt;/span&gt; b &lt;span class=&quot;op&quot;&gt;-&lt;/span&gt; a &lt;span class=&quot;op&quot;&gt;*&lt;/span&gt; db &lt;span class=&quot;op&quot;&gt;/&lt;/span&gt; b &lt;span class=&quot;op&quot;&gt;**&lt;/span&gt; &lt;span class=&quot;dv&quot;&gt;2&lt;/span&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb5-3&quot; data-line-number=&quot;3&quot;&gt;c &lt;span class=&quot;op&quot;&gt;=&lt;/span&gt; a &lt;span class=&quot;op&quot;&gt;**&lt;/span&gt; b    &lt;span class=&quot;op&quot;&gt;=&amp;gt;&lt;/span&gt;    dc &lt;span class=&quot;op&quot;&gt;=&lt;/span&gt; b &lt;span class=&quot;op&quot;&gt;*&lt;/span&gt; a &lt;span class=&quot;op&quot;&gt;**&lt;/span&gt; (b &lt;span class=&quot;op&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;dv&quot;&gt;1&lt;/span&gt;) &lt;span class=&quot;op&quot;&gt;*&lt;/span&gt; da &lt;span class=&quot;op&quot;&gt;+&lt;/span&gt; log(a) &lt;span class=&quot;op&quot;&gt;*&lt;/span&gt; a &lt;span class=&quot;op&quot;&gt;**&lt;/span&gt; b &lt;span class=&quot;op&quot;&gt;*&lt;/span&gt; db&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb5-4&quot; data-line-number=&quot;4&quot;&gt;c &lt;span class=&quot;op&quot;&gt;=&lt;/span&gt; cos(a)    &lt;span class=&quot;op&quot;&gt;=&amp;gt;&lt;/span&gt;    dc &lt;span class=&quot;op&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;op&quot;&gt;-&lt;/span&gt;sin(a) &lt;span class=&quot;op&quot;&gt;*&lt;/span&gt; da&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb5-5&quot; data-line-number=&quot;5&quot;&gt;c &lt;span class=&quot;op&quot;&gt;=&lt;/span&gt; tan(a)    &lt;span class=&quot;op&quot;&gt;=&amp;gt;&lt;/span&gt;    dc &lt;span class=&quot;op&quot;&gt;=&lt;/span&gt; da &lt;span class=&quot;op&quot;&gt;/&lt;/span&gt; cos(a) &lt;span class=&quot;op&quot;&gt;**&lt;/span&gt; &lt;span class=&quot;dv&quot;&gt;2&lt;/span&gt;&lt;/a&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;To translate using the rules, we simply replace each primitive operation in the original program by its differential analog. The order of the program remains unchanged: if a statement &lt;var&gt;K&lt;/var&gt; is evaluated before another statement &lt;var&gt;L&lt;/var&gt;, then the differential analog of statement &lt;var&gt;K&lt;/var&gt; is still evaluated before the differential analog of statement &lt;var&gt;L&lt;/var&gt;. This is &lt;strong&gt;forward-mode automatic differentiation&lt;/strong&gt;.&lt;/p&gt;
+&lt;p&gt;A careful inspection of Program A and Program B reveals that it is actually possible to interleave the differential calculations with the original calculations:&lt;/p&gt;
+&lt;div class=&quot;sourceCode&quot; id=&quot;cb6&quot;&gt;&lt;pre class=&quot;sourceCode py&quot;&gt;&lt;code class=&quot;sourceCode python&quot;&gt;&lt;a class=&quot;sourceLine&quot; id=&quot;cb6-1&quot; data-line-number=&quot;1&quot;&gt;x  &lt;span class=&quot;op&quot;&gt;=&lt;/span&gt; ?&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb6-2&quot; data-line-number=&quot;2&quot;&gt;dx &lt;span class=&quot;op&quot;&gt;=&lt;/span&gt; ?&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb6-3&quot; data-line-number=&quot;3&quot;&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb6-4&quot; data-line-number=&quot;4&quot;&gt;y  &lt;span class=&quot;op&quot;&gt;=&lt;/span&gt; ?&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb6-5&quot; data-line-number=&quot;5&quot;&gt;dy &lt;span class=&quot;op&quot;&gt;=&lt;/span&gt; ?&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb6-6&quot; data-line-number=&quot;6&quot;&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb6-7&quot; data-line-number=&quot;7&quot;&gt;a  &lt;span class=&quot;op&quot;&gt;=&lt;/span&gt; x &lt;span class=&quot;op&quot;&gt;*&lt;/span&gt; y&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb6-8&quot; data-line-number=&quot;8&quot;&gt;da &lt;span class=&quot;op&quot;&gt;=&lt;/span&gt; y &lt;span class=&quot;op&quot;&gt;*&lt;/span&gt; dx &lt;span class=&quot;op&quot;&gt;+&lt;/span&gt; x &lt;span class=&quot;op&quot;&gt;*&lt;/span&gt; dy&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb6-9&quot; data-line-number=&quot;9&quot;&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb6-10&quot; data-line-number=&quot;10&quot;&gt;b  &lt;span class=&quot;op&quot;&gt;=&lt;/span&gt; sin(x)&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb6-11&quot; data-line-number=&quot;11&quot;&gt;db &lt;span class=&quot;op&quot;&gt;=&lt;/span&gt; cos(x) &lt;span class=&quot;op&quot;&gt;*&lt;/span&gt; dx&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb6-12&quot; data-line-number=&quot;12&quot;&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb6-13&quot; data-line-number=&quot;13&quot;&gt;z  &lt;span class=&quot;op&quot;&gt;=&lt;/span&gt; a &lt;span class=&quot;op&quot;&gt;+&lt;/span&gt; b&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb6-14&quot; data-line-number=&quot;14&quot;&gt;dz &lt;span class=&quot;op&quot;&gt;=&lt;/span&gt; da &lt;span class=&quot;op&quot;&gt;+&lt;/span&gt; db&lt;/a&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;This demonstrates the two main advantages of forward-mode AD:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;The differential variables usually depend on the intermediate variables, so if we do them together there’s no need to hold on to the the intermediate variables until later, saving memory.&lt;/li&gt;
+&lt;li&gt;This enables an implementation using &lt;a href=&quot;https://en.wikipedia.org/wiki/Automatic_differentiation#Automatic_differentiation_using_dual_numbers&quot;&gt;dual numbers&lt;/a&gt;. In languages with operator overloading, this translates to a very simple, direct implementation of forward-mode AD.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;For an example in &lt;a href=&quot;https://www.rust-lang.org&quot;&gt;Rust&lt;/a&gt;, see the &lt;a href=&quot;https://github.com/ibab/rust-ad&quot;&gt;rust-ad&lt;/a&gt; library.&lt;/p&gt;
+&lt;h2 id=&quot;reverse-mode-automatic-differentiation&quot;&gt;Reverse-mode automatic differentiation&lt;/h2&gt;
+&lt;p&gt;The implementation simplicity of forward-mode AD comes with a big disadvantage, which becomes evident when we want to calculate &lt;em&gt;both&lt;/em&gt; &lt;span class=&quot;math inline&quot;&gt;\(\partial z/\partial x\)&lt;/span&gt; and &lt;span class=&quot;math inline&quot;&gt;\(\partial z/\partial y\)&lt;/span&gt;. In forward-mode AD, doing so requires seeding with &lt;code&gt;dx = 1&lt;/code&gt; and &lt;code&gt;dy = 0&lt;/code&gt;, running the program, then seeding with &lt;code&gt;dx = 0&lt;/code&gt; and &lt;code&gt;dy = 1&lt;/code&gt; and running the program &lt;em&gt;again&lt;/em&gt;. In effect, the cost of the method scales linearly as &lt;code&gt;O(n)&lt;/code&gt; where &lt;code&gt;n&lt;/code&gt; is the number of input variables. This would be very costly if we wanted to calculate the &lt;a href=&quot;https://en.wikipedia.org/wiki/Gradient&quot;&gt;gradient&lt;/a&gt; of a large complicated function of many variables, which happens &lt;a href=&quot;https://en.wikipedia.org/wiki/Mathematical_optimization&quot;&gt;surprisingly often in practice&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;Let’s take a second look at the chain rule (C1) we used to derive forward-mode AD:&lt;/p&gt;
+&lt;p&gt;&lt;span class=&quot;math display&quot;&gt;\[\begin{align}
+\frac{\partial w}{\partial t}
+&amp;amp;= \sum_i \left(\frac{\partial w}{\partial u_i} \cdot \frac{\partial u_i}{\partial t}\right) \tag{C1} \\
+&amp;amp;= \frac{\partial w}{\partial u_1} \cdot \frac{\partial u_1}{\partial t} + \frac{\partial w}{\partial u_2} \cdot \frac{\partial u_2}{\partial t} + \cdots
+\end{align}\]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;To calculate the gradient using forward-mode AD, we had to perform two substitutions: one with &lt;span class=&quot;math inline&quot;&gt;\(t = x\)&lt;/span&gt; and another with &lt;span class=&quot;math inline&quot;&gt;\(t = y\)&lt;/span&gt;. This meant we had to run the entire program twice.&lt;/p&gt;
+&lt;p&gt;However, the chain rule is symmetric: it doesn’t care what’s in the “numerator” or the “denominator”. So let’s rewrite the chain rule but turn the derivatives upside down:&lt;/p&gt;
+&lt;p&gt;&lt;span class=&quot;math display&quot;&gt;\[\begin{align}
+\frac{\partial s}{\partial u}
+&amp;amp;= \sum_i \left(\frac{\partial w_i}{\partial u} \cdot \frac{\partial s}{\partial w_i}\right) \tag{C2} \\
+&amp;amp;= \frac{\partial w_1}{\partial u} \cdot \frac{\partial s}{\partial w_1} + \frac{\partial w_2}{\partial u} \cdot \frac{\partial s}{\partial w_2} + \cdots
+\end{align}\]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;In doing so, we have inverted the input-output roles of the variables. The same naming convention is used here: &lt;span class=&quot;math inline&quot;&gt;\(u\)&lt;/span&gt; for some input variable and &lt;span class=&quot;math inline&quot;&gt;\(w_i\)&lt;/span&gt; for each of the output variables that depend on &lt;span class=&quot;math inline&quot;&gt;\(u\)&lt;/span&gt;. The yet-to-given variable is now called &lt;span class=&quot;math inline&quot;&gt;\(s\)&lt;/span&gt; to highlight the change in position.&lt;/p&gt;
+&lt;p&gt;In this form, the chain rule could be applied repeatedly to every input variable &lt;span class=&quot;math inline&quot;&gt;\(u\)&lt;/span&gt;, akin to how in forward-mode AD we applied the chain rule repeatedly to every output variable &lt;span class=&quot;math inline&quot;&gt;\(w\)&lt;/span&gt; to get equation (F1). Therefore, given some &lt;span class=&quot;math inline&quot;&gt;\(t\)&lt;/span&gt;, we expect a program that uses chain rule (C2) to be able to compute both &lt;span class=&quot;math inline&quot;&gt;\(\partial s / \partial x\)&lt;/span&gt; and &lt;span class=&quot;math inline&quot;&gt;\(\partial s / \partial y\)&lt;/span&gt; in one go!&lt;/p&gt;
+&lt;p&gt;So far, this is just a hunch. Let’s try it on the example problem (A).&lt;/p&gt;
+&lt;p&gt;&lt;span class=&quot;math display&quot;&gt;\[\begin{align}
+\frac{\partial s}{\partial z} &amp;amp;= {?} \tag{R1} \\
+\frac{\partial s}{\partial b} &amp;amp;= \frac{\partial s}{\partial z} \\
+\frac{\partial s}{\partial a} &amp;amp;= \frac{\partial s}{\partial z} \\
+\frac{\partial s}{\partial y} &amp;amp;= x \cdot \frac{\partial s}{\partial a} \\
+\frac{\partial s}{\partial x} &amp;amp;= y \cdot \frac{\partial s}{\partial a} + \cos(x) \cdot \frac{\partial s}{\partial b}
+\end{align}\]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;If you haven’t done this before, I suggest taking the time to actually derive these equations using (C2). It can be quite mind-bending because everything seems “backwards”: instead of asking what input variables a given output variable depends on, we have to ask what output variables a given input variable can affect. The easiest way to see this visually is by drawing a dependency graph of the expression:&lt;/p&gt;
+&lt;figure&gt;
+&lt;img src=&quot;/img/reverse-mode-automatic-differentiation-graph.png&quot; alt=&quot;Graph of the expression&quot; /&gt;&lt;figcaption&gt;Graph of the expression&lt;/figcaption&gt;
+&lt;/figure&gt;
+&lt;p&gt;The graph shows that&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;the variable &lt;code&gt;a&lt;/code&gt; directly depends on &lt;code&gt;x&lt;/code&gt; and &lt;code&gt;y&lt;/code&gt;,&lt;/li&gt;
+&lt;li&gt;the variable &lt;code&gt;b&lt;/code&gt; directly depends on &lt;code&gt;x&lt;/code&gt;, and&lt;/li&gt;
+&lt;li&gt;the variable &lt;code&gt;z&lt;/code&gt; directly depends on &lt;code&gt;a&lt;/code&gt; and &lt;code&gt;b&lt;/code&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Or, equivalently:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;the variable &lt;code&gt;b&lt;/code&gt; can directly affect &lt;code&gt;z&lt;/code&gt;,&lt;/li&gt;
+&lt;li&gt;the variable &lt;code&gt;a&lt;/code&gt; can directly affect &lt;code&gt;z&lt;/code&gt;,&lt;/li&gt;
+&lt;li&gt;the variable &lt;code&gt;y&lt;/code&gt; can directly affect &lt;code&gt;a&lt;/code&gt;, and&lt;/li&gt;
+&lt;li&gt;the variable &lt;code&gt;x&lt;/code&gt; can directly affect &lt;code&gt;a&lt;/code&gt; and &lt;code&gt;b&lt;/code&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Let’s now translate the equations (R1) into code. As before, we replace the derivatives &lt;span class=&quot;math inline&quot;&gt;\(\{\partial s / \partial z, \partial s / \partial b, \ldots\}\)&lt;/span&gt; by variables &lt;code&gt;{gz, gb, …}&lt;/code&gt;, which we call the &lt;em&gt;adjoint&lt;/em&gt; variables. This results in:&lt;/p&gt;
+&lt;div class=&quot;sourceCode&quot; id=&quot;cb7&quot;&gt;&lt;pre class=&quot;sourceCode py&quot;&gt;&lt;code class=&quot;sourceCode python&quot;&gt;&lt;a class=&quot;sourceLine&quot; id=&quot;cb7-1&quot; data-line-number=&quot;1&quot;&gt;gz &lt;span class=&quot;op&quot;&gt;=&lt;/span&gt; ?&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb7-2&quot; data-line-number=&quot;2&quot;&gt;gb &lt;span class=&quot;op&quot;&gt;=&lt;/span&gt; gz&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb7-3&quot; data-line-number=&quot;3&quot;&gt;ga &lt;span class=&quot;op&quot;&gt;=&lt;/span&gt; gz&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb7-4&quot; data-line-number=&quot;4&quot;&gt;gy &lt;span class=&quot;op&quot;&gt;=&lt;/span&gt; x &lt;span class=&quot;op&quot;&gt;*&lt;/span&gt; ga&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb7-5&quot; data-line-number=&quot;5&quot;&gt;gx &lt;span class=&quot;op&quot;&gt;=&lt;/span&gt; y &lt;span class=&quot;op&quot;&gt;*&lt;/span&gt; ga &lt;span class=&quot;op&quot;&gt;+&lt;/span&gt; cos(x) &lt;span class=&quot;op&quot;&gt;*&lt;/span&gt; gb&lt;/a&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Going back to the equations (R1), we see that if we substitute &lt;span class=&quot;math inline&quot;&gt;\(s = z\)&lt;/span&gt;, we would obtain the gradient in the last two equations. In the program, this is equivalent to setting &lt;code&gt;gz = 1&lt;/code&gt; since &lt;code&gt;gz&lt;/code&gt; is just &lt;span class=&quot;math inline&quot;&gt;\(\partial s / \partial z\)&lt;/span&gt;. We no longer need to run the program twice! This is &lt;strong&gt;reverse-mode automatic differentiation&lt;/strong&gt;.&lt;/p&gt;
+&lt;p&gt;There is a trade-off, of course. If we want to calculate the derivative of a different &lt;em&gt;output&lt;/em&gt; variable, then we would have to re-run the program again with different seeds, so the cost of reverse-mode AD is &lt;code&gt;O(m)&lt;/code&gt; where &lt;code&gt;m&lt;/code&gt; is the number of output variables. If we had a different example such as:&lt;/p&gt;
+&lt;p&gt;&lt;span class=&quot;math display&quot;&gt;\[\begin{cases}
+z = 2 x + \sin(x) \\
+v = 4 x + \cos(x)
+\end{cases}\]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;in reverse-mode AD we would have to run the program with &lt;code&gt;gz = 1&lt;/code&gt; and &lt;code&gt;gv = 0&lt;/code&gt; (i.e. &lt;span class=&quot;math inline&quot;&gt;\(s = z\)&lt;/span&gt;) to get &lt;span class=&quot;math inline&quot;&gt;\(\partial z / \partial x\)&lt;/span&gt;, and then rerun the program with &lt;code&gt;gz = 0&lt;/code&gt; and &lt;code&gt;gv = 1&lt;/code&gt; (i.e. &lt;span class=&quot;math inline&quot;&gt;\(s = v\)&lt;/span&gt;) to get &lt;span class=&quot;math inline&quot;&gt;\(\partial v / \partial x\)&lt;/span&gt;. In contrast, in forward-mode AD, we’d just set &lt;code&gt;dx = 1&lt;/code&gt; and get both &lt;span class=&quot;math inline&quot;&gt;\(\partial z / \partial x\)&lt;/span&gt; and &lt;span class=&quot;math inline&quot;&gt;\(\partial v / \partial x\)&lt;/span&gt; in one run.&lt;/p&gt;
+&lt;p&gt;There is a more subtle problem with reverse-mode AD, however: we can’t just interleave the derivative calculations with the evaluations of the original expression anymore, since all the derivative calculations appear to be going in &lt;em&gt;reverse&lt;/em&gt; to the original program. Moreover, it’s not obvious how one would even arrive at this point in using a simple rule-based algorithm – is operator overloading even a valid strategy here? How do we put the “automatic” back into reverse-mode AD?&lt;/p&gt;
+&lt;h3 id=&quot;a-simple-implementation-in-python&quot;&gt;A simple implementation in Python&lt;/h3&gt;
+&lt;p&gt;One way is to parse the original program and then generate an &lt;em&gt;adjoint&lt;/em&gt; program that calculates the derivatives. This is usually quite complicated to implement, and its difficulty varies significantly depending on the complexity of the host language. Nonetheless, this may be worthwhile if efficient is critical, as there are more opportunities to perform optimizations in this &lt;em&gt;static&lt;/em&gt; approach.&lt;/p&gt;
+&lt;p&gt;A simpler way is to do this &lt;em&gt;dynamically&lt;/em&gt;: construct a full graph that represents our original expression as as the program runs. The goal is to get something akin to the dependency graph we drew earlier:&lt;/p&gt;
+&lt;figure&gt;
+&lt;img src=&quot;/img/reverse-mode-automatic-differentiation-graph.png&quot; alt=&quot;Graph of the expression&quot; /&gt;&lt;figcaption&gt;Graph of the expression&lt;/figcaption&gt;
+&lt;/figure&gt;
+&lt;p&gt;The “roots” of the graph are the independent variables &lt;code&gt;x&lt;/code&gt; and &lt;code&gt;y&lt;/code&gt;, which could also be thought of as &lt;a href=&quot;https://en.wikipedia.org/wiki/Arity#Nullary&quot;&gt;nullary&lt;/a&gt; operations. Constructing these nodes is a simple matter of creating an object on the heap:&lt;/p&gt;
+&lt;div class=&quot;sourceCode&quot; id=&quot;cb8&quot;&gt;&lt;pre class=&quot;sourceCode py&quot;&gt;&lt;code class=&quot;sourceCode python&quot;&gt;&lt;a class=&quot;sourceLine&quot; id=&quot;cb8-1&quot; data-line-number=&quot;1&quot;&gt;&lt;span class=&quot;kw&quot;&gt;class&lt;/span&gt; Var:&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb8-2&quot; data-line-number=&quot;2&quot;&gt;    &lt;span class=&quot;kw&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;fu&quot;&gt;__init__&lt;/span&gt;(&lt;span class=&quot;va&quot;&gt;self&lt;/span&gt;, value):&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb8-3&quot; data-line-number=&quot;3&quot;&gt;        &lt;span class=&quot;va&quot;&gt;self&lt;/span&gt;.value &lt;span class=&quot;op&quot;&gt;=&lt;/span&gt; value&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb8-4&quot; data-line-number=&quot;4&quot;&gt;        &lt;span class=&quot;va&quot;&gt;self&lt;/span&gt;.children &lt;span class=&quot;op&quot;&gt;=&lt;/span&gt; []&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb8-5&quot; data-line-number=&quot;5&quot;&gt;        …&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb8-6&quot; data-line-number=&quot;6&quot;&gt;    …&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb8-7&quot; data-line-number=&quot;7&quot;&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb8-8&quot; data-line-number=&quot;8&quot;&gt;&lt;span class=&quot;co&quot;&gt;# define the Vars for the example problem&lt;/span&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb8-9&quot; data-line-number=&quot;9&quot;&gt;&lt;span class=&quot;co&quot;&gt;# initialize x = 0.5 and y = 4.2&lt;/span&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb8-10&quot; data-line-number=&quot;10&quot;&gt;x &lt;span class=&quot;op&quot;&gt;=&lt;/span&gt; Var(&lt;span class=&quot;fl&quot;&gt;0.5&lt;/span&gt;)&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb8-11&quot; data-line-number=&quot;11&quot;&gt;y &lt;span class=&quot;op&quot;&gt;=&lt;/span&gt; Var(&lt;span class=&quot;fl&quot;&gt;4.2&lt;/span&gt;)&lt;/a&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;What does each &lt;code&gt;Var&lt;/code&gt; node store? Each node can have several &lt;em&gt;children&lt;/em&gt;, which are the other nodes that directly depend on that node. In the example, &lt;code&gt;x&lt;/code&gt; has both &lt;code&gt;a&lt;/code&gt; and &lt;code&gt;b&lt;/code&gt; as its children. Cycles are not allowed in this graph.&lt;/p&gt;
+&lt;p&gt;By default, a node is created without any children. However, whenever a new expression &lt;span class=&quot;math inline&quot;&gt;\(u\)&lt;/span&gt; is built out of existing nodes &lt;span class=&quot;math inline&quot;&gt;\(w_i\)&lt;/span&gt;, the new expression &lt;span class=&quot;math inline&quot;&gt;\(u\)&lt;/span&gt; &lt;em&gt;registers&lt;/em&gt; itself as a child of each of its dependencies &lt;span class=&quot;math inline&quot;&gt;\(w_i\)&lt;/span&gt;. During the child registration, it will also save its contributing &lt;em&gt;weight&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;&lt;span class=&quot;math display&quot;&gt;\[\frac{\partial w_i}{\partial u}\]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;which will be used later to compute the gradients. As an example, here is how we would do this for multiplication:&lt;/p&gt;
+&lt;div class=&quot;sourceCode&quot; id=&quot;cb9&quot;&gt;&lt;pre class=&quot;sourceCode py&quot;&gt;&lt;code class=&quot;sourceCode python&quot;&gt;&lt;a class=&quot;sourceLine&quot; id=&quot;cb9-1&quot; data-line-number=&quot;1&quot;&gt;&lt;span class=&quot;kw&quot;&gt;class&lt;/span&gt; Var:&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb9-2&quot; data-line-number=&quot;2&quot;&gt;    …&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb9-3&quot; data-line-number=&quot;3&quot;&gt;    &lt;span class=&quot;kw&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;fu&quot;&gt;__mul__&lt;/span&gt;(&lt;span class=&quot;va&quot;&gt;self&lt;/span&gt;, other):&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb9-4&quot; data-line-number=&quot;4&quot;&gt;        z &lt;span class=&quot;op&quot;&gt;=&lt;/span&gt; Var(&lt;span class=&quot;va&quot;&gt;self&lt;/span&gt;.value &lt;span class=&quot;op&quot;&gt;*&lt;/span&gt; other.value)&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb9-5&quot; data-line-number=&quot;5&quot;&gt;        &lt;span class=&quot;va&quot;&gt;self&lt;/span&gt;.children.append((other.value, z)) &lt;span class=&quot;co&quot;&gt;# weight = ∂z/∂self = other.value&lt;/span&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb9-6&quot; data-line-number=&quot;6&quot;&gt;        other.children.append((&lt;span class=&quot;va&quot;&gt;self&lt;/span&gt;.value, z)) &lt;span class=&quot;co&quot;&gt;# weight = ∂z/∂other = self.value&lt;/span&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb9-7&quot; data-line-number=&quot;7&quot;&gt;        &lt;span class=&quot;cf&quot;&gt;return&lt;/span&gt; z&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb9-8&quot; data-line-number=&quot;8&quot;&gt;    …&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb9-9&quot; data-line-number=&quot;9&quot;&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb9-10&quot; data-line-number=&quot;10&quot;&gt;…&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb9-11&quot; data-line-number=&quot;11&quot;&gt;&lt;span class=&quot;co&quot;&gt;# “a” is a new Var that is a child of both x and y&lt;/span&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb9-12&quot; data-line-number=&quot;12&quot;&gt;a &lt;span class=&quot;op&quot;&gt;=&lt;/span&gt; x &lt;span class=&quot;op&quot;&gt;*&lt;/span&gt; y&lt;/a&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;As you can see, this method, like most dynamic approaches for reverse-mode AD, requires doing a bunch of mutation under the hood.&lt;/p&gt;
+&lt;p&gt;Finally, to get the derivatives, we need to propagate the derivatives. This can be done using recursion, starting at the roots &lt;code&gt;x&lt;/code&gt; and &lt;code&gt;y&lt;/code&gt;. To avoid unnecessarily traversing the tree multiple times, we &lt;em&gt;cache&lt;/em&gt; the value of in an attribute called &lt;code&gt;grad_value&lt;/code&gt;.&lt;/p&gt;
+&lt;div class=&quot;sourceCode&quot; id=&quot;cb10&quot;&gt;&lt;pre class=&quot;sourceCode py&quot;&gt;&lt;code class=&quot;sourceCode python&quot;&gt;&lt;a class=&quot;sourceLine&quot; id=&quot;cb10-1&quot; data-line-number=&quot;1&quot;&gt;&lt;span class=&quot;kw&quot;&gt;class&lt;/span&gt; Var:&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb10-2&quot; data-line-number=&quot;2&quot;&gt;    &lt;span class=&quot;kw&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;fu&quot;&gt;__init__&lt;/span&gt;(&lt;span class=&quot;va&quot;&gt;self&lt;/span&gt;):&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb10-3&quot; data-line-number=&quot;3&quot;&gt;        …&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb10-4&quot; data-line-number=&quot;4&quot;&gt;        &lt;span class=&quot;co&quot;&gt;# initialize to None, which means it’s not yet evaluated&lt;/span&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb10-5&quot; data-line-number=&quot;5&quot;&gt;        &lt;span class=&quot;va&quot;&gt;self&lt;/span&gt;.grad_value &lt;span class=&quot;op&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;va&quot;&gt;None&lt;/span&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb10-6&quot; data-line-number=&quot;6&quot;&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb10-7&quot; data-line-number=&quot;7&quot;&gt;    &lt;span class=&quot;kw&quot;&gt;def&lt;/span&gt; grad(&lt;span class=&quot;va&quot;&gt;self&lt;/span&gt;):&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb10-8&quot; data-line-number=&quot;8&quot;&gt;        &lt;span class=&quot;co&quot;&gt;# recurse only if the value is not yet cached&lt;/span&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb10-9&quot; data-line-number=&quot;9&quot;&gt;        &lt;span class=&quot;cf&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;va&quot;&gt;self&lt;/span&gt;.grad_value &lt;span class=&quot;kw&quot;&gt;is&lt;/span&gt; &lt;span class=&quot;va&quot;&gt;None&lt;/span&gt;:&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb10-10&quot; data-line-number=&quot;10&quot;&gt;            &lt;span class=&quot;co&quot;&gt;# calculate derivative using chain rule&lt;/span&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb10-11&quot; data-line-number=&quot;11&quot;&gt;            &lt;span class=&quot;va&quot;&gt;self&lt;/span&gt;.grad_value &lt;span class=&quot;op&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;bu&quot;&gt;sum&lt;/span&gt;(weight &lt;span class=&quot;op&quot;&gt;*&lt;/span&gt; var.grad()&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb10-12&quot; data-line-number=&quot;12&quot;&gt;                                  &lt;span class=&quot;cf&quot;&gt;for&lt;/span&gt; weight, var &lt;span class=&quot;kw&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;va&quot;&gt;self&lt;/span&gt;.children)&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb10-13&quot; data-line-number=&quot;13&quot;&gt;        &lt;span class=&quot;cf&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;va&quot;&gt;self&lt;/span&gt;.grad_value&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb10-14&quot; data-line-number=&quot;14&quot;&gt;    …&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb10-15&quot; data-line-number=&quot;15&quot;&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb10-16&quot; data-line-number=&quot;16&quot;&gt;…&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb10-17&quot; data-line-number=&quot;17&quot;&gt;a.grad_value &lt;span class=&quot;op&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;fl&quot;&gt;1.0&lt;/span&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb10-18&quot; data-line-number=&quot;18&quot;&gt;&lt;span class=&quot;bu&quot;&gt;print&lt;/span&gt;(&lt;span class=&quot;st&quot;&gt;&amp;quot;∂a/∂x = &lt;/span&gt;&lt;span class=&quot;sc&quot;&gt;{}&lt;/span&gt;&lt;span class=&quot;st&quot;&gt;&amp;quot;&lt;/span&gt;.&lt;span class=&quot;bu&quot;&gt;format&lt;/span&gt;(x.grad())) &lt;span class=&quot;co&quot;&gt;# ∂a/∂x = 4.2&lt;/span&gt;&lt;/a&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Here is the complete &lt;a href=&quot;https://github.com/Rufflewind/revad/blob/eb3978b3ccdfa8189f3ff59d1ecee71f51c33fd7/revad.py&quot;&gt;demonstration of this approach in Python&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;Note that because we are mutating the &lt;code&gt;grad_value&lt;/code&gt; attribute of the nodes, we can’t reuse the tree to calculate the derivative of a different output variable without traversing the entire tree and resetting every &lt;code&gt;grad_value&lt;/code&gt; attribute to &lt;code&gt;None&lt;/code&gt;.&lt;/p&gt;
+&lt;h3 id=&quot;a-tape-based-implementation-in-rust&quot;&gt;A tape-based implementation in Rust&lt;/h3&gt;
+&lt;p&gt;The approach described is not very efficient: a complicated expression can contain lots of primitive operations, leading to lots of nodes being allocated on the heap.&lt;/p&gt;
+&lt;p&gt;A more space-efficient way to do this is to create nodes by appending them to an existing, growable array. Then, we could just refer to each node by its &lt;em&gt;index&lt;/em&gt; in this growable array. Note that we do &lt;em&gt;not&lt;/em&gt; use pointers here! If the vector’s capacity changes, pointers to its elements would become invalid.&lt;/p&gt;
+&lt;p&gt;Using a vector to store nodes does a great job at reducing the number of allocations, but, like any &lt;a href=&quot;https://en.wikipedia.org/wiki/Region-based_memory_management&quot;&gt;arena allocation method&lt;/a&gt;, we won’t be able to deallocate portions of the graph. It’s all or nothing.&lt;/p&gt;
+&lt;p&gt;Also, we need to somehow fit each node into a fixed amount of space. But then how would we store its list of children?&lt;/p&gt;
+&lt;p&gt;Turns out, we don’t actually &lt;em&gt;need&lt;/em&gt; to store the children. Instead, each node could just store indices to their parent nodes. Conceptually, it would look like this for our example problem:&lt;/p&gt;
+&lt;figure&gt;
+&lt;img src=&quot;/img/reverse-mode-automatic-differentiation-links.png&quot; alt=&quot;Concrete representation of the graph&quot; /&gt;&lt;figcaption&gt;Concrete representation of the graph&lt;/figcaption&gt;
+&lt;/figure&gt;
+&lt;p&gt;Note the similarity with the graph earlier.&lt;/p&gt;
+&lt;p&gt;In Rust, we can describe each node using a structure containing two weights and two parent indices:&lt;/p&gt;
+&lt;div class=&quot;sourceCode&quot; id=&quot;cb11&quot;&gt;&lt;pre class=&quot;sourceCode rs&quot;&gt;&lt;code class=&quot;sourceCode rust&quot;&gt;&lt;a class=&quot;sourceLine&quot; id=&quot;cb11-1&quot; data-line-number=&quot;1&quot;&gt;&lt;span class=&quot;kw&quot;&gt;struct&lt;/span&gt; Node &lt;span class=&quot;op&quot;&gt;{&lt;/span&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb11-2&quot; data-line-number=&quot;2&quot;&gt;    weights: &lt;span class=&quot;op&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;dt&quot;&gt;f64&lt;/span&gt;; &lt;span class=&quot;dv&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;op&quot;&gt;]&lt;/span&gt;,&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb11-3&quot; data-line-number=&quot;3&quot;&gt;    deps: &lt;span class=&quot;op&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;dt&quot;&gt;usize&lt;/span&gt;; &lt;span class=&quot;dv&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;op&quot;&gt;]&lt;/span&gt;, &lt;span class=&quot;co&quot;&gt;// parent (“dependency”) indices&lt;/span&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb11-4&quot; data-line-number=&quot;4&quot;&gt;&lt;span class=&quot;op&quot;&gt;}&lt;/span&gt;&lt;/a&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;You might wonder why we picked &lt;em&gt;two&lt;/em&gt;. This is because we are assuming all primitive operations are binary. For example, the node for the variable &lt;code&gt;a = x * y&lt;/code&gt; would look like:&lt;/p&gt;
+&lt;div class=&quot;sourceCode&quot; id=&quot;cb12&quot;&gt;&lt;pre class=&quot;sourceCode rs&quot;&gt;&lt;code class=&quot;sourceCode rust&quot;&gt;&lt;a class=&quot;sourceLine&quot; id=&quot;cb12-1&quot; data-line-number=&quot;1&quot;&gt;Node &lt;span class=&quot;op&quot;&gt;{&lt;/span&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb12-2&quot; data-line-number=&quot;2&quot;&gt;    weights: &lt;span class=&quot;op&quot;&gt;[&lt;/span&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb12-3&quot; data-line-number=&quot;3&quot;&gt;        y.value, &lt;span class=&quot;co&quot;&gt;// ∂a/∂x&lt;/span&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb12-4&quot; data-line-number=&quot;4&quot;&gt;        x.value, &lt;span class=&quot;co&quot;&gt;// ∂a/∂y&lt;/span&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb12-5&quot; data-line-number=&quot;5&quot;&gt;    &lt;span class=&quot;op&quot;&gt;]&lt;/span&gt;,&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb12-6&quot; data-line-number=&quot;6&quot;&gt;    deps: &lt;span class=&quot;op&quot;&gt;[&lt;/span&gt;x.index, y.index&lt;span class=&quot;op&quot;&gt;]&lt;/span&gt;,&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb12-7&quot; data-line-number=&quot;7&quot;&gt;&lt;span class=&quot;op&quot;&gt;}&lt;/span&gt;&lt;/a&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;But there’s unary and nullary operations too − how will we deal with those? Quite easy actually, we just set the weights to zero. For example, the node for the variable &lt;code&gt;b = sin(x)&lt;/code&gt; would look like:&lt;/p&gt;
+&lt;div class=&quot;sourceCode&quot; id=&quot;cb13&quot;&gt;&lt;pre class=&quot;sourceCode rs&quot;&gt;&lt;code class=&quot;sourceCode rust&quot;&gt;&lt;a class=&quot;sourceLine&quot; id=&quot;cb13-1&quot; data-line-number=&quot;1&quot;&gt;Node &lt;span class=&quot;op&quot;&gt;{&lt;/span&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb13-2&quot; data-line-number=&quot;2&quot;&gt;    weights: &lt;span class=&quot;op&quot;&gt;[&lt;/span&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb13-3&quot; data-line-number=&quot;3&quot;&gt;        x.value.cos(), &lt;span class=&quot;co&quot;&gt;// ∂b/∂x&lt;/span&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb13-4&quot; data-line-number=&quot;4&quot;&gt;        &lt;span class=&quot;dv&quot;&gt;0.0&lt;/span&gt;,&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb13-5&quot; data-line-number=&quot;5&quot;&gt;    &lt;span class=&quot;op&quot;&gt;]&lt;/span&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb13-6&quot; data-line-number=&quot;6&quot;&gt;    deps: &lt;span class=&quot;op&quot;&gt;[&lt;/span&gt;x.index, &lt;span class=&quot;co&quot;&gt;/* whatever */&lt;/span&gt;&lt;span class=&quot;op&quot;&gt;]&lt;/span&gt;,&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb13-7&quot; data-line-number=&quot;7&quot;&gt;&lt;span class=&quot;op&quot;&gt;}&lt;/span&gt;&lt;/a&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;As a convention, we will put the index of the node itself into &lt;code&gt;/* whatever */&lt;/code&gt;. It really doesn’t matter what we put in there as long as the index is not out of bounds.&lt;/p&gt;
+&lt;p&gt;The nodes themselves are stored in a common array (&lt;code&gt;Vec&amp;lt;Node&amp;gt;&lt;/code&gt;) that is shared by the entire expression graph, which also acts as the allocation arena. In AD literature, this shared array is often called a &lt;em&gt;tape&lt;/em&gt; (or &lt;em&gt;Wengert list&lt;/em&gt;). The tape can be thought of as a record of all the operations performed during the evaluation of the expression, which in turn contains all the information required to compute its gradient when read in reverse.&lt;/p&gt;
+&lt;p&gt;In the Python implementation, the nodes were &lt;em&gt;identified&lt;/em&gt; with expressions: nodes can be directly combined via arithmetic operations to form new nodes. In Rust, we treat the nodes and expressions as separate entities. Nodes exist solely on the tape, while expressions are just thin wrappers over &lt;em&gt;node indices&lt;/em&gt;. Here is what the expression type looks like:&lt;/p&gt;
+&lt;div class=&quot;sourceCode&quot; id=&quot;cb14&quot;&gt;&lt;pre class=&quot;sourceCode rs&quot;&gt;&lt;code class=&quot;sourceCode rust&quot;&gt;&lt;a class=&quot;sourceLine&quot; id=&quot;cb14-1&quot; data-line-number=&quot;1&quot;&gt;&lt;span class=&quot;at&quot;&gt;#[&lt;/span&gt;derive&lt;span class=&quot;at&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;bu&quot;&gt;Clone&lt;/span&gt;&lt;span class=&quot;at&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;bu&quot;&gt;Copy&lt;/span&gt;&lt;span class=&quot;at&quot;&gt;)]&lt;/span&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb14-2&quot; data-line-number=&quot;2&quot;&gt;&lt;span class=&quot;kw&quot;&gt;pub&lt;/span&gt; &lt;span class=&quot;kw&quot;&gt;struct&lt;/span&gt; Var&amp;lt;&lt;span class=&quot;ot&quot;&gt;&amp;#39;t&lt;/span&gt;&amp;gt; &lt;span class=&quot;op&quot;&gt;{&lt;/span&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb14-3&quot; data-line-number=&quot;3&quot;&gt;    tape: &amp;amp;&lt;span class=&quot;ot&quot;&gt;&amp;#39;t&lt;/span&gt; Tape,&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb14-4&quot; data-line-number=&quot;4&quot;&gt;    index: &lt;span class=&quot;dt&quot;&gt;usize&lt;/span&gt;,&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb14-5&quot; data-line-number=&quot;5&quot;&gt;    value: &lt;span class=&quot;dt&quot;&gt;f64&lt;/span&gt;,&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb14-6&quot; data-line-number=&quot;6&quot;&gt;&lt;span class=&quot;op&quot;&gt;}&lt;/span&gt;&lt;/a&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;The expression type contains a pointer to the tape, an index to the node, and an associated value. Note that the expression satisfies &lt;code&gt;Copy&lt;/code&gt;, which allows it to be duplicated freely without regard. This is necessary to maintain the illusion that the expression acts like an ordinary floating-point number.&lt;/p&gt;
+&lt;p&gt;Also, note that the tape is an &lt;em&gt;immutable&lt;/em&gt; pointer. We need to modify the tape as we build the expression, but we are going to have lots of expressions holding a pointer to the same tape. This won’t work with a mutable pointer, since they are &lt;em&gt;exclusive&lt;/em&gt;, so we must “cheat” Rust’s read-write-lock system using a &lt;code&gt;RefCell&lt;/code&gt;:&lt;/p&gt;
+&lt;div class=&quot;sourceCode&quot; id=&quot;cb15&quot;&gt;&lt;pre class=&quot;sourceCode rs&quot;&gt;&lt;code class=&quot;sourceCode rust&quot;&gt;&lt;a class=&quot;sourceLine&quot; id=&quot;cb15-1&quot; data-line-number=&quot;1&quot;&gt;&lt;span class=&quot;kw&quot;&gt;pub&lt;/span&gt; &lt;span class=&quot;kw&quot;&gt;struct&lt;/span&gt; Tape &lt;span class=&quot;op&quot;&gt;{&lt;/span&gt; nodes: RefCell&amp;lt;&lt;span class=&quot;dt&quot;&gt;Vec&lt;/span&gt;&amp;lt;Node&amp;gt;&amp;gt; &lt;span class=&quot;op&quot;&gt;}&lt;/span&gt;&lt;/a&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;The bulk of the implementation work lies in coding up the primitive operations. Here’s what the unary &lt;code&gt;sin&lt;/code&gt; function looks like:&lt;/p&gt;
+&lt;div class=&quot;sourceCode&quot; id=&quot;cb16&quot;&gt;&lt;pre class=&quot;sourceCode rs&quot;&gt;&lt;code class=&quot;sourceCode rust&quot;&gt;&lt;a class=&quot;sourceLine&quot; id=&quot;cb16-1&quot; data-line-number=&quot;1&quot;&gt;&lt;span class=&quot;kw&quot;&gt;impl&lt;/span&gt;&amp;lt;&lt;span class=&quot;ot&quot;&gt;&amp;#39;t&lt;/span&gt;&amp;gt; Var&amp;lt;&lt;span class=&quot;ot&quot;&gt;&amp;#39;t&lt;/span&gt;&amp;gt; &lt;span class=&quot;op&quot;&gt;{&lt;/span&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb16-2&quot; data-line-number=&quot;2&quot;&gt;    &lt;span class=&quot;kw&quot;&gt;pub&lt;/span&gt; &lt;span class=&quot;kw&quot;&gt;fn&lt;/span&gt; sin(&lt;span class=&quot;kw&quot;&gt;self&lt;/span&gt;) -&amp;gt; &lt;span class=&quot;kw&quot;&gt;Self&lt;/span&gt; &lt;span class=&quot;op&quot;&gt;{&lt;/span&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb16-3&quot; data-line-number=&quot;3&quot;&gt;        Var &lt;span class=&quot;op&quot;&gt;{&lt;/span&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb16-4&quot; data-line-number=&quot;4&quot;&gt;            tape: &lt;span class=&quot;kw&quot;&gt;self&lt;/span&gt;.tape,&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb16-5&quot; data-line-number=&quot;5&quot;&gt;            value: &lt;span class=&quot;kw&quot;&gt;self&lt;/span&gt;.value.sin(),&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb16-6&quot; data-line-number=&quot;6&quot;&gt;            index: &lt;span class=&quot;kw&quot;&gt;self&lt;/span&gt;.tape.push1(&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb16-7&quot; data-line-number=&quot;7&quot;&gt;                &lt;span class=&quot;kw&quot;&gt;self&lt;/span&gt;.index, &lt;span class=&quot;kw&quot;&gt;self&lt;/span&gt;.value.cos(),&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb16-8&quot; data-line-number=&quot;8&quot;&gt;            ),&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb16-9&quot; data-line-number=&quot;9&quot;&gt;        &lt;span class=&quot;op&quot;&gt;}&lt;/span&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb16-10&quot; data-line-number=&quot;10&quot;&gt;    &lt;span class=&quot;op&quot;&gt;}&lt;/span&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb16-11&quot; data-line-number=&quot;11&quot;&gt;&lt;span class=&quot;op&quot;&gt;}&lt;/span&gt;&lt;/a&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Any unary function can be implemented just like this. Here, &lt;code&gt;push1&lt;/code&gt; is a helper function that constructs the node, pushes it onto the tape, and then returns the index of this new node:&lt;/p&gt;
+&lt;div class=&quot;sourceCode&quot; id=&quot;cb17&quot;&gt;&lt;pre class=&quot;sourceCode rs&quot;&gt;&lt;code class=&quot;sourceCode rust&quot;&gt;&lt;a class=&quot;sourceLine&quot; id=&quot;cb17-1&quot; data-line-number=&quot;1&quot;&gt;&lt;span class=&quot;kw&quot;&gt;impl&lt;/span&gt; Tape &lt;span class=&quot;op&quot;&gt;{&lt;/span&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb17-2&quot; data-line-number=&quot;2&quot;&gt;    &lt;span class=&quot;kw&quot;&gt;fn&lt;/span&gt; push1(&amp;amp;&lt;span class=&quot;kw&quot;&gt;self&lt;/span&gt;, dep0: &lt;span class=&quot;dt&quot;&gt;usize&lt;/span&gt;, weight0: &lt;span class=&quot;dt&quot;&gt;f64&lt;/span&gt;) -&amp;gt; &lt;span class=&quot;dt&quot;&gt;usize&lt;/span&gt; &lt;span class=&quot;op&quot;&gt;{&lt;/span&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb17-3&quot; data-line-number=&quot;3&quot;&gt;        &lt;span class=&quot;kw&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;kw&quot;&gt;mut&lt;/span&gt; nodes = &lt;span class=&quot;kw&quot;&gt;self&lt;/span&gt;.nodes.borrow_mut();&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb17-4&quot; data-line-number=&quot;4&quot;&gt;        &lt;span class=&quot;kw&quot;&gt;let&lt;/span&gt; len = nodes.len();&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb17-5&quot; data-line-number=&quot;5&quot;&gt;        nodes.push(Node &lt;span class=&quot;op&quot;&gt;{&lt;/span&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb17-6&quot; data-line-number=&quot;6&quot;&gt;            weights: &lt;span class=&quot;op&quot;&gt;[&lt;/span&gt;weight0, &lt;span class=&quot;dv&quot;&gt;0.0&lt;/span&gt;&lt;span class=&quot;op&quot;&gt;]&lt;/span&gt;,&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb17-7&quot; data-line-number=&quot;7&quot;&gt;            deps: &lt;span class=&quot;op&quot;&gt;[&lt;/span&gt;dep0, len&lt;span class=&quot;op&quot;&gt;]&lt;/span&gt;,&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb17-8&quot; data-line-number=&quot;8&quot;&gt;        &lt;span class=&quot;op&quot;&gt;}&lt;/span&gt;);&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb17-9&quot; data-line-number=&quot;9&quot;&gt;        len&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb17-10&quot; data-line-number=&quot;10&quot;&gt;    &lt;span class=&quot;op&quot;&gt;}&lt;/span&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb17-11&quot; data-line-number=&quot;11&quot;&gt;&lt;span class=&quot;op&quot;&gt;}&lt;/span&gt;&lt;/a&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Finally, when it’s time to do the derivative calculation, we need to traverse the entire tape in reverse and accumulate the derivatives using the chain rule. This is done by the &lt;code&gt;grad&lt;/code&gt; function associated with the &lt;code&gt;Var&lt;/code&gt; object:&lt;/p&gt;
+&lt;div class=&quot;sourceCode&quot; id=&quot;cb18&quot;&gt;&lt;pre class=&quot;sourceCode rs&quot;&gt;&lt;code class=&quot;sourceCode rust&quot;&gt;&lt;a class=&quot;sourceLine&quot; id=&quot;cb18-1&quot; data-line-number=&quot;1&quot;&gt;&lt;span class=&quot;kw&quot;&gt;impl&lt;/span&gt;&amp;lt;&lt;span class=&quot;ot&quot;&gt;&amp;#39;t&lt;/span&gt;&amp;gt; Var&amp;lt;&lt;span class=&quot;ot&quot;&gt;&amp;#39;t&lt;/span&gt;&amp;gt; &lt;span class=&quot;op&quot;&gt;{&lt;/span&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb18-2&quot; data-line-number=&quot;2&quot;&gt;    &lt;span class=&quot;kw&quot;&gt;pub&lt;/span&gt; &lt;span class=&quot;kw&quot;&gt;fn&lt;/span&gt; grad(&amp;amp;&lt;span class=&quot;kw&quot;&gt;self&lt;/span&gt;) -&amp;gt; Grad &lt;span class=&quot;op&quot;&gt;{&lt;/span&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb18-3&quot; data-line-number=&quot;3&quot;&gt;        &lt;span class=&quot;kw&quot;&gt;let&lt;/span&gt; len = &lt;span class=&quot;kw&quot;&gt;self&lt;/span&gt;.tape.len();&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb18-4&quot; data-line-number=&quot;4&quot;&gt;        &lt;span class=&quot;kw&quot;&gt;let&lt;/span&gt; nodes = &lt;span class=&quot;kw&quot;&gt;self&lt;/span&gt;.tape.nodes.borrow();&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb18-5&quot; data-line-number=&quot;5&quot;&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb18-6&quot; data-line-number=&quot;6&quot;&gt;        &lt;span class=&quot;co&quot;&gt;// allocate the array of derivatives (specifically: adjoints)&lt;/span&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb18-7&quot; data-line-number=&quot;7&quot;&gt;        &lt;span class=&quot;kw&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;kw&quot;&gt;mut&lt;/span&gt; derivs = &lt;span class=&quot;pp&quot;&gt;vec!&lt;/span&gt;&lt;span class=&quot;op&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;dv&quot;&gt;0.0&lt;/span&gt;; len&lt;span class=&quot;op&quot;&gt;]&lt;/span&gt;;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb18-8&quot; data-line-number=&quot;8&quot;&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb18-9&quot; data-line-number=&quot;9&quot;&gt;        &lt;span class=&quot;co&quot;&gt;// seed&lt;/span&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb18-10&quot; data-line-number=&quot;10&quot;&gt;        derivs&lt;span class=&quot;op&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;kw&quot;&gt;self&lt;/span&gt;.index&lt;span class=&quot;op&quot;&gt;]&lt;/span&gt; = &lt;span class=&quot;dv&quot;&gt;1.0&lt;/span&gt;;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb18-11&quot; data-line-number=&quot;11&quot;&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb18-12&quot; data-line-number=&quot;12&quot;&gt;        &lt;span class=&quot;co&quot;&gt;// traverse the tape in reverse&lt;/span&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb18-13&quot; data-line-number=&quot;13&quot;&gt;        &lt;span class=&quot;kw&quot;&gt;for&lt;/span&gt; i &lt;span class=&quot;kw&quot;&gt;in&lt;/span&gt; (&lt;span class=&quot;dv&quot;&gt;0&lt;/span&gt; .. len).rev() &lt;span class=&quot;op&quot;&gt;{&lt;/span&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb18-14&quot; data-line-number=&quot;14&quot;&gt;            &lt;span class=&quot;kw&quot;&gt;let&lt;/span&gt; node = nodes&lt;span class=&quot;op&quot;&gt;[&lt;/span&gt;i&lt;span class=&quot;op&quot;&gt;]&lt;/span&gt;;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb18-15&quot; data-line-number=&quot;15&quot;&gt;            &lt;span class=&quot;kw&quot;&gt;let&lt;/span&gt; deriv = derivs&lt;span class=&quot;op&quot;&gt;[&lt;/span&gt;i&lt;span class=&quot;op&quot;&gt;]&lt;/span&gt;;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb18-16&quot; data-line-number=&quot;16&quot;&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb18-17&quot; data-line-number=&quot;17&quot;&gt;            &lt;span class=&quot;co&quot;&gt;// update the adjoints for its parent nodes&lt;/span&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb18-18&quot; data-line-number=&quot;18&quot;&gt;            &lt;span class=&quot;kw&quot;&gt;for&lt;/span&gt; j &lt;span class=&quot;kw&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;dv&quot;&gt;0&lt;/span&gt; .. &lt;span class=&quot;dv&quot;&gt;2&lt;/span&gt; &lt;span class=&quot;op&quot;&gt;{&lt;/span&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb18-19&quot; data-line-number=&quot;19&quot;&gt;                derivs&lt;span class=&quot;op&quot;&gt;[&lt;/span&gt;node.deps&lt;span class=&quot;op&quot;&gt;[&lt;/span&gt;j&lt;span class=&quot;op&quot;&gt;]]&lt;/span&gt; += node.weights&lt;span class=&quot;op&quot;&gt;[&lt;/span&gt;j&lt;span class=&quot;op&quot;&gt;]&lt;/span&gt; * deriv;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb18-20&quot; data-line-number=&quot;20&quot;&gt;            &lt;span class=&quot;op&quot;&gt;}&lt;/span&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb18-21&quot; data-line-number=&quot;21&quot;&gt;        &lt;span class=&quot;op&quot;&gt;}&lt;/span&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb18-22&quot; data-line-number=&quot;22&quot;&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb18-23&quot; data-line-number=&quot;23&quot;&gt;        Grad &lt;span class=&quot;op&quot;&gt;{&lt;/span&gt; derivs: derivs &lt;span class=&quot;op&quot;&gt;}&lt;/span&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb18-24&quot; data-line-number=&quot;24&quot;&gt;    &lt;span class=&quot;op&quot;&gt;}&lt;/span&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb18-25&quot; data-line-number=&quot;25&quot;&gt;&lt;span class=&quot;op&quot;&gt;}&lt;/span&gt;&lt;/a&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;The crucial part lies in the loop. Here, we do &lt;em&gt;not&lt;/em&gt; sum over all the derivatives at the same time like in chain rule (C2) or like in the Python program. Rather, we break chain rule up into a sequence of addition-assignments:&lt;/p&gt;
+&lt;p&gt;&lt;span class=&quot;math display&quot;&gt;\[\frac{\partial s}{\partial u} \leftarrow \frac{\partial s}{\partial u} + \frac{\partial w_i}{\partial u} \frac{\partial s}{\partial w_i}\]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;The reason we’re doing this is because we don’t keep track of children anymore. So rather than accumulating all the derivatives contributed by each child all at once, we let each node make its contributions to their parents at their own pace.&lt;/p&gt;
+&lt;p&gt;Another major difference from the Python program is that the derivatives are now stored on a separate array &lt;code&gt;derivs&lt;/code&gt;, which is then disguised as a &lt;code&gt;Grad&lt;/code&gt; object:&lt;/p&gt;
+&lt;div class=&quot;sourceCode&quot; id=&quot;cb19&quot;&gt;&lt;pre class=&quot;sourceCode rs&quot;&gt;&lt;code class=&quot;sourceCode rust&quot;&gt;&lt;a class=&quot;sourceLine&quot; id=&quot;cb19-1&quot; data-line-number=&quot;1&quot;&gt;&lt;span class=&quot;kw&quot;&gt;pub&lt;/span&gt; &lt;span class=&quot;kw&quot;&gt;struct&lt;/span&gt; Grad &lt;span class=&quot;op&quot;&gt;{&lt;/span&gt; derivs: &lt;span class=&quot;dt&quot;&gt;Vec&lt;/span&gt;&amp;lt;&lt;span class=&quot;dt&quot;&gt;f64&lt;/span&gt;&amp;gt; &lt;span class=&quot;op&quot;&gt;}&lt;/span&gt;&lt;/a&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;This means that, unlike the Python program, where all the derivatives are stored in the &lt;code&gt;grad_value&lt;/code&gt; attribute of each node, we have decoupled the tape from the storage of the derivatives, allowing the tape / expression graph to be re-used for multiple reverse-mode AD calculations (in case we have multiple output variables).&lt;/p&gt;
+&lt;p&gt;The &lt;code&gt;derivs&lt;/code&gt; array contains all the adjoints / derivatives at the same index as its associated node. Hence, to get the adjoint of a variable whose node is located at index &lt;code&gt;3&lt;/code&gt;, we just need to grab the element the &lt;code&gt;derivs&lt;/code&gt; array at index &lt;code&gt;3&lt;/code&gt;. This is implemented by the &lt;code&gt;wrt&lt;/code&gt; (“with respect to”) function of the &lt;code&gt;Grad&lt;/code&gt; object:&lt;/p&gt;
+&lt;div class=&quot;sourceCode&quot; id=&quot;cb20&quot;&gt;&lt;pre class=&quot;sourceCode rs&quot;&gt;&lt;code class=&quot;sourceCode rust&quot;&gt;&lt;a class=&quot;sourceLine&quot; id=&quot;cb20-1&quot; data-line-number=&quot;1&quot;&gt;&lt;span class=&quot;kw&quot;&gt;impl&lt;/span&gt; Grad &lt;span class=&quot;op&quot;&gt;{&lt;/span&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb20-2&quot; data-line-number=&quot;2&quot;&gt;    &lt;span class=&quot;kw&quot;&gt;pub&lt;/span&gt; &lt;span class=&quot;kw&quot;&gt;fn&lt;/span&gt; wrt&amp;lt;&lt;span class=&quot;ot&quot;&gt;&amp;#39;t&lt;/span&gt;&amp;gt;(&amp;amp;&lt;span class=&quot;kw&quot;&gt;self&lt;/span&gt;, var: Var&amp;lt;&lt;span class=&quot;ot&quot;&gt;&amp;#39;t&lt;/span&gt;&amp;gt;) -&amp;gt; &lt;span class=&quot;dt&quot;&gt;f64&lt;/span&gt; &lt;span class=&quot;op&quot;&gt;{&lt;/span&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb20-3&quot; data-line-number=&quot;3&quot;&gt;        &lt;span class=&quot;kw&quot;&gt;self&lt;/span&gt;.derivs&lt;span class=&quot;op&quot;&gt;[&lt;/span&gt;var.index&lt;span class=&quot;op&quot;&gt;]&lt;/span&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb20-4&quot; data-line-number=&quot;4&quot;&gt;    &lt;span class=&quot;op&quot;&gt;}&lt;/span&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb20-5&quot; data-line-number=&quot;5&quot;&gt;&lt;span class=&quot;op&quot;&gt;}&lt;/span&gt;&lt;/a&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Here’s the full &lt;a href=&quot;https://github.com/Rufflewind/revad/blob/83a86f458e7d72d45253ef805675f80e3700eab0/src/tape.rs&quot;&gt;demonstration of reverse-mode AD in Rust&lt;/a&gt;. To use this rudimentary AD library, you would write:&lt;/p&gt;
+&lt;div class=&quot;sourceCode&quot; id=&quot;cb21&quot;&gt;&lt;pre class=&quot;sourceCode rs&quot;&gt;&lt;code class=&quot;sourceCode rust&quot;&gt;&lt;a class=&quot;sourceLine&quot; id=&quot;cb21-1&quot; data-line-number=&quot;1&quot;&gt;&lt;span class=&quot;kw&quot;&gt;let&lt;/span&gt; t = Tape::new();&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb21-2&quot; data-line-number=&quot;2&quot;&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb21-3&quot; data-line-number=&quot;3&quot;&gt;&lt;span class=&quot;kw&quot;&gt;let&lt;/span&gt; x = t.var(&lt;span class=&quot;dv&quot;&gt;0.5&lt;/span&gt;);&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb21-4&quot; data-line-number=&quot;4&quot;&gt;&lt;span class=&quot;kw&quot;&gt;let&lt;/span&gt; y = t.var(&lt;span class=&quot;dv&quot;&gt;4.2&lt;/span&gt;);&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb21-5&quot; data-line-number=&quot;5&quot;&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb21-6&quot; data-line-number=&quot;6&quot;&gt;&lt;span class=&quot;kw&quot;&gt;let&lt;/span&gt; z = x * y + x.sin();&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb21-7&quot; data-line-number=&quot;7&quot;&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb21-8&quot; data-line-number=&quot;8&quot;&gt;&lt;span class=&quot;kw&quot;&gt;let&lt;/span&gt; grad = z.grad();&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb21-9&quot; data-line-number=&quot;9&quot;&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb21-10&quot; data-line-number=&quot;10&quot;&gt;&lt;span class=&quot;pp&quot;&gt;println!&lt;/span&gt;(&lt;span class=&quot;st&quot;&gt;&amp;quot;z = {}&amp;quot;&lt;/span&gt;, z.value);         &lt;span class=&quot;co&quot;&gt;// z = 2.579425538604203&lt;/span&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb21-11&quot; data-line-number=&quot;11&quot;&gt;&lt;span class=&quot;pp&quot;&gt;println!&lt;/span&gt;(&lt;span class=&quot;st&quot;&gt;&amp;quot;∂z/∂x = {}&amp;quot;&lt;/span&gt;, grad.wrt(x)); &lt;span class=&quot;co&quot;&gt;// ∂z/∂x = 5.077582561890373&lt;/span&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb21-12&quot; data-line-number=&quot;12&quot;&gt;&lt;span class=&quot;pp&quot;&gt;println!&lt;/span&gt;(&lt;span class=&quot;st&quot;&gt;&amp;quot;∂z/∂y = {}&amp;quot;&lt;/span&gt;, grad.wrt(y)); &lt;span class=&quot;co&quot;&gt;// ∂z/∂y = 0.5&lt;/span&gt;&lt;/a&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h3 id=&quot;total-differentials-and-differential-operators&quot;&gt;Total differentials and differential operators&lt;/h3&gt;
+&lt;p&gt;Notice that if we throw away the &lt;span class=&quot;math inline&quot;&gt;\(\partial t\)&lt;/span&gt; from the denominators of equation (F1), we end up with a set of equations relating the &lt;a href=&quot;https://en.wikipedia.org/wiki/Differential_of_a_function#Differentials_in_several_variables&quot;&gt;total differentials&lt;/a&gt; of each variable:&lt;/p&gt;
+&lt;p&gt;&lt;span class=&quot;math display&quot;&gt;\[\begin{align}
+\mathrm{d} x &amp;amp;= {?} \\
+\mathrm{d} y &amp;amp;= {?} \\
+\mathrm{d} a &amp;amp;= y \cdot \mathrm{d} x + x \cdot \mathrm{d} y \\
+\mathrm{d} b &amp;amp;= \cos(x) \cdot \mathrm{d} x \\
+\mathrm{d} z &amp;amp;= \mathrm{d} a + \mathrm{d} b
+\end{align}\]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;This is why variables such as &lt;code&gt;dx&lt;/code&gt; are called “differentials”. We can also write chain rule (C1) in a similar form:&lt;/p&gt;
+&lt;p&gt;&lt;span class=&quot;math display&quot;&gt;\[\mathrm{d} w = \sum_i \left(\frac{\partial w}{\partial u_i} \cdot \mathrm{d} u_i\right)\]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;Similarly, we can throw away the &lt;span class=&quot;math inline&quot;&gt;\(s\)&lt;/span&gt; in equation (R1), which then becomes an equation of &lt;a href=&quot;https://en.wikipedia.org/wiki/Differential_operator&quot;&gt;differential operators&lt;/a&gt;:&lt;/p&gt;
+&lt;p&gt;&lt;span class=&quot;math display&quot;&gt;\[\begin{align}
+\frac{\partial}{\partial z} &amp;amp;= {?} \\
+\frac{\partial}{\partial b} &amp;amp;= \frac{\partial}{\partial z} \\
+\frac{\partial}{\partial a} &amp;amp;= \frac{\partial}{\partial z} \\
+\frac{\partial}{\partial y} &amp;amp;= x \cdot \frac{\partial}{\partial a} \\
+\frac{\partial}{\partial x} &amp;amp;= y \cdot \frac{\partial}{\partial a} + \cos(x) \cdot \frac{\partial}{\partial b}
+\end{align}\]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;We can do the same for (C2):&lt;/p&gt;
+&lt;p&gt;&lt;span class=&quot;math display&quot;&gt;\[\frac{\partial}{\partial u} = \sum_i \left(\frac{\partial w_i}{\partial u} \cdot \frac{\partial}{\partial w_i}\right) \tag{C4}\]&lt;/span&gt;&lt;/p&gt;
+&lt;h3 id=&quot;saving-memory-via-a-ctz-based-strategy&quot;&gt;Saving memory via a CTZ-based strategy&lt;/h3&gt;
+&lt;p&gt;OK, this section is not really part of the tutorial, but more of a discussion regarding a particular optimization strategy that I felt was interesting enough to deserve some elaboration (it was briefly explained on in &lt;a href=&quot;https://doi.org/10.1080/10556789208805505&quot;&gt;a paper by Griewank&lt;/a&gt;).&lt;/p&gt;
+&lt;p&gt;So far, we have resigned ourselves to the fact that reverse-mode AD requires storage proportional to the number of intermediate variables.&lt;/p&gt;
+&lt;p&gt;However, this is not entirely true. If we’re willing to &lt;em&gt;repeat&lt;/em&gt; some intermediate calculations, we can make do with quite a bit less storage.&lt;/p&gt;
+&lt;p&gt;Suppose we have an expression graph that is more or less a straight line from input to output, with &lt;code&gt;N&lt;/code&gt; intermediate variables lying in between. So this is not so much an expression graph anymore, but a &lt;em&gt;chain&lt;/em&gt;. In the naive solution, we would require &lt;code&gt;O(N)&lt;/code&gt; storage space for this very long expression chain.&lt;/p&gt;
+&lt;p&gt;Now, instead of caching all the intermediate variables, we construct a hierarchy of caches and &lt;em&gt;maintain&lt;/em&gt; this hierachy throughout the reverse sweep:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;cache_0&lt;/code&gt; stores the initial value&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;cache_1&lt;/code&gt; stores the result halfway down the chain&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;cache_2&lt;/code&gt; stores the result 3/4 of the way down the chain&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;cache_3&lt;/code&gt; stores the result 7/8 of the way down the chain&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;cache_4&lt;/code&gt; stores the result 15/16 of the way down the chain&lt;/li&gt;
+&lt;li&gt;…&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Notice that the storage requirement is reduced to &lt;code&gt;O(log(N))&lt;/code&gt; because we never have more than &lt;code&gt;log2(N) + 1&lt;/code&gt; values cached.&lt;/p&gt;
+&lt;p&gt;During the forward sweep, maintaining such a hierarchy would require evicting older cache entries at an index determined by a &lt;a href=&quot;https://github.com/Rufflewind/revad/blob/de509269fe878bc9d564775abc25c4fa663d8a5e/src/chain.rs#L96-L118&quot;&gt;formula that involves the count-trailing-zeros function&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;The easiest way to understand the CTZ-based strategy is to look at an example. Let’s say we have a chain of 16 operations, where &lt;code&gt;0&lt;/code&gt; is the initial input and &lt;code&gt;f&lt;/code&gt; is the final output:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt; 0 1 2 3 4 5 6 7 8 9 a b c d e f&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Suppose we have already finished the forward sweep from &lt;code&gt;0&lt;/code&gt; to &lt;code&gt;f&lt;/code&gt;. In doing so, we have cached &lt;code&gt;0&lt;/code&gt;, &lt;code&gt;8&lt;/code&gt;, &lt;code&gt;c&lt;/code&gt;, &lt;code&gt;e&lt;/code&gt;, and &lt;code&gt;f&lt;/code&gt;:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt; 0 1 2 3 4 5 6 7 8 9 a b c d e f
+                                ^
+ X---------------X-------X---X-X&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;The &lt;code&gt;X&lt;/code&gt; symbol indicates that the result is cached, while &lt;code&gt;^&lt;/code&gt; indicates the status of our reverse sweep. Now let’s start moving backward. Both &lt;code&gt;e&lt;/code&gt; and &lt;code&gt;f&lt;/code&gt; are available so we can move past &lt;code&gt;e&lt;/code&gt; without issue:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt; 0 1 2 3 4 5 6 7 8 9 a b c d e f
+                            ^
+ X---------------X-------X---X-X&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Now we hit the first problem: we are missing &lt;code&gt;d&lt;/code&gt;. So we recompute &lt;code&gt;d&lt;/code&gt; from &lt;code&gt;c&lt;/code&gt;:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt; 0 1 2 3 4 5 6 7 8 9 a b c d e f
+                            ^
+ X---------------X-------X---X-X
+                         |
+                         +-X&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;We then march on past &lt;code&gt;c&lt;/code&gt;.&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt; 0 1 2 3 4 5 6 7 8 9 a b c d e f
+                        ^
+ X---------------X-------X---X-X
+                         |
+                         +-X&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Now we’re missing &lt;code&gt;b&lt;/code&gt;. So we recompute starting at &lt;code&gt;8&lt;/code&gt;, but in doing so we &lt;em&gt;also&lt;/em&gt; cache &lt;code&gt;a&lt;/code&gt;:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt; 0 1 2 3 4 5 6 7 8 9 a b c d e f
+                        ^
+ X---------------X-------X---X-X
+                 |       |
+                 +---X-X +-X&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;We continue on past &lt;code&gt;a&lt;/code&gt;:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt; 0 1 2 3 4 5 6 7 8 9 a b c d e f
+                    ^
+ X---------------X-------X---X-X
+                 |       |
+                 +---X-X +-X&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Now &lt;code&gt;9&lt;/code&gt; is missing, so recompute it from &lt;code&gt;8&lt;/code&gt;:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt; 0 1 2 3 4 5 6 7 8 9 a b c d e f
+                    ^
+ X---------------X-------X---X-X
+                 |       |
+                 +---X-X +-X
+                 |
+                 +-X&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Then we move past &lt;code&gt;8&lt;/code&gt;:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt; 0 1 2 3 4 5 6 7 8 9 a b c d e f
+                ^
+ X---------------X-------X---X-X
+                 |       |
+                 +---X-X +-X
+                 |
+                 +-X&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;To get &lt;code&gt;7&lt;/code&gt;, we recompute starting from &lt;code&gt;0&lt;/code&gt;, but in doing so we also keep &lt;code&gt;4&lt;/code&gt; and &lt;code&gt;6&lt;/code&gt;:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt; 0 1 2 3 4 5 6 7 8 9 a b c d e f
+                ^
+ X---------------X-------X---X-X
+ |               |       |
+ +-------X---X-X +---X-X +-X
+                 |
+                 +-X&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;By now you can probably see the pattern. Here are the next couple steps:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt; 0 1 2 3 4 5 6 7 8 9 a b c d e f
+            ^
+ X---------------X-------X---X-X
+ |               |       |
+ +-------X---X-X +---X-X +-X
+         |       |
+         +-X     +-X
+
+ 0 1 2 3 4 5 6 7 8 9 a b c d e f
+        ^
+ X---------------X-------X---X-X
+ |               |       |
+ +-------X---X-X +---X-X +-X
+         |       |
+         +-X     +-X
+
+ 0 1 2 3 4 5 6 7 8 9 a b c d e f
+        ^
+ X---------------X-------X---X-X
+ |               |       |
+ +-------X---X-X +---X-X +-X
+ |       |       |
+ +---X-X +-X     +-X
+
+ 0 1 2 3 4 5 6 7 8 9 a b c d e f
+    ^
+ X---------------X-------X---X-X
+ |               |       |
+ +-------X---X-X +---X-X +-X
+ |       |       |
+ +---X-X +-X     +-X
+
+ 0 1 2 3 4 5 6 7 8 9 a b c d e f
+    ^
+ X---------------X-------X---X-X
+ |               |       |
+ +-------X---X-X +---X-X +-X
+ |       |       |
+ +---X-X +-X     +-X
+ |
+ +-X
+
+ 0 1 2 3 4 5 6 7 8 9 a b c d e f
+^
+ X---------------X-------X---X-X
+ |               |       |
+ +-------X---X-X +---X-X +-X
+ |       |       |
+ +---X-X +-X     +-X
+ |
+ +-X&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;From here it’s fairly evident that the number of times the calculations get repeated is bounded by &lt;code&gt;O(log(N))&lt;/code&gt;, since the diagrams above are just flattened binary trees and their height is bounded logarithmically.&lt;/p&gt;
+&lt;p&gt;Here is a &lt;a href=&quot;https://github.com/Rufflewind/revad/blob/de509269fe878bc9d564775abc25c4fa663d8a5e/src/chain.rs&quot;&gt;demonstration of the CTZ-based chaining strategy&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;As Griewank noted, this strategy is not the most optimal one, but it does have the advantage of being quite simple to implement, especially when the number of calculation steps is not known &lt;em&gt;a priori&lt;/em&gt;. There are other strategies that you might find interesting in &lt;a href=&quot;https://doi.org/10.1080/10556789208805505&quot;&gt;his paper&lt;/a&gt;.&lt;/p&gt;
+&lt;hr /&gt;
+&lt;p&gt;For a more advanced review of automatic differentiation, see &lt;a href=&quot;https://doi.org/10.1016/S0377-0427%2800%2900422-2&quot;&gt;Bartholomew-Biggs et al “Automatic differentiation of algorithms”&lt;/a&gt;&lt;/p&gt;
+</description>
+        <pubDate>Fri, 30 Dec 2016 00:00:00 -0800</pubDate>
+        <link>https://rufflewind.com/2016-12-30/reverse-mode-automatic-differentiation</link>
+        <guid isPermaLink="true">https://rufflewind.com/2016-12-30/reverse-mode-automatic-differentiation</guid>
+        
+        <category>calculus</category>
+        
+        <category>math</category>
+        
+        <category>numerical</category>
+        
+        <category>python</category>
+        
+        <category>rust</category>
+        
+        
+      </item>
+    
+      <item>
+        <title>Making Jekyll play nice with MathJax: switching from Redcarpet to Pandoc</title>
+        <description>&lt;p&gt;In the process of writing a math-heavy blog post, I ran into several problems with the existing &lt;a href=&quot;https://jekyllrb.com&quot;&gt;Jekyll&lt;/a&gt; configuration. I had set up Jekyll to use Redcarpet as the Markdown renderer, but it simply does not play well with MathJax: it will screw up &lt;code&gt;\&lt;/code&gt; and &lt;code&gt;&amp;amp;&lt;/code&gt; inside the MathJax code.&lt;/p&gt;
+&lt;p&gt;It is said that Kramdown does better with MathJax, but it doesn’t support syntax highlighting on fenced code blocks and its MathJax syntax is very non-standard: &lt;code&gt;$$&lt;/code&gt; for inline math is just weird.&lt;/p&gt;
+&lt;p&gt;As a last resort, I decided to integrate Jekyll with &lt;a href=&quot;https://pandoc.org&quot;&gt;Pandoc&lt;/a&gt;, which is arguably &lt;em&gt;the&lt;/em&gt; Swiss army knife of markup formats. It is unopinionated and has a lot of flexibility in what it can do.&lt;/p&gt;
+&lt;p&gt;Fortunately, there is already a &lt;a href=&quot;https://github.com/mfenner/jekyll-pandoc&quot;&gt;jekyll-pandoc&lt;/a&gt; plugin to do this. It was as simple as running &lt;code&gt;gem install jekyll-pandoc&lt;/code&gt; and then tweaking the configuration file:&lt;/p&gt;
+&lt;div class=&quot;sourceCode&quot; id=&quot;cb1&quot;&gt;&lt;pre class=&quot;sourceCode yaml&quot;&gt;&lt;code class=&quot;sourceCode yaml&quot;&gt;&lt;a class=&quot;sourceLine&quot; id=&quot;cb1-1&quot; data-line-number=&quot;1&quot;&gt;&lt;span class=&quot;fu&quot;&gt;markdown:&lt;/span&gt;&lt;span class=&quot;at&quot;&gt; Pandoc&lt;/span&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb1-2&quot; data-line-number=&quot;2&quot;&gt;&lt;span class=&quot;fu&quot;&gt;gems:&lt;/span&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb1-3&quot; data-line-number=&quot;3&quot;&gt;&lt;span class=&quot;kw&quot;&gt;-&lt;/span&gt; …&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb1-4&quot; data-line-number=&quot;4&quot;&gt;&lt;span class=&quot;kw&quot;&gt;-&lt;/span&gt; jekyll-pandoc&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb1-5&quot; data-line-number=&quot;5&quot;&gt;&lt;span class=&quot;fu&quot;&gt;pandoc:&lt;/span&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb1-6&quot; data-line-number=&quot;6&quot;&gt;  &lt;span class=&quot;fu&quot;&gt;extensions:&lt;/span&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb1-7&quot; data-line-number=&quot;7&quot;&gt;  &lt;span class=&quot;kw&quot;&gt;-&lt;/span&gt; mathjax&lt;/a&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;I had wanted to integrate with Pygments as well, but Pandoc’s &lt;a href=&quot;https://github.com/jgm/highlighting-kate&quot;&gt;highlight-kate&lt;/a&gt; isn’t too bad and I didn’t feel like adding another complication to the process, so I will just stick with it unless I run into something I don’t like.&lt;/p&gt;
+&lt;p&gt;To make the colors show up, I just needed to write some CSS akin to the &lt;a href=&quot;https://github.com/jgm/highlighting-kate/tree/master/css&quot;&gt;default themes&lt;/a&gt; (see &lt;a href=&quot;https://docs.kde.org/stable5/en/applications/katepart/highlight.html&quot;&gt;Kate docs&lt;/a&gt; for details on the categories):&lt;/p&gt;
+&lt;div class=&quot;sourceCode&quot; id=&quot;cb2&quot;&gt;&lt;pre class=&quot;sourceCode css&quot;&gt;&lt;code class=&quot;sourceCode css&quot;&gt;&lt;a class=&quot;sourceLine&quot; id=&quot;cb2-1&quot; data-line-number=&quot;1&quot;&gt;code&lt;span class=&quot;fu&quot;&gt;.sourceCode&lt;/span&gt; span&lt;span class=&quot;fu&quot;&gt;.co&lt;/span&gt; { &lt;span class=&quot;kw&quot;&gt;color&lt;/span&gt;: …; } &lt;span class=&quot;co&quot;&gt;/* comment */&lt;/span&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb2-2&quot; data-line-number=&quot;2&quot;&gt;code&lt;span class=&quot;fu&quot;&gt;.sourceCode&lt;/span&gt; span&lt;span class=&quot;fu&quot;&gt;.al&lt;/span&gt; { &lt;span class=&quot;kw&quot;&gt;color&lt;/span&gt;: …; } &lt;span class=&quot;co&quot;&gt;/* alert (warning) */&lt;/span&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb2-3&quot; data-line-number=&quot;3&quot;&gt;code&lt;span class=&quot;fu&quot;&gt;.sourceCode&lt;/span&gt; span&lt;span class=&quot;fu&quot;&gt;.er&lt;/span&gt; { &lt;span class=&quot;kw&quot;&gt;color&lt;/span&gt;: …; } &lt;span class=&quot;co&quot;&gt;/* error (wrong_syntax) */&lt;/span&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb2-4&quot; data-line-number=&quot;4&quot;&gt;code&lt;span class=&quot;fu&quot;&gt;.sourceCode&lt;/span&gt; span&lt;span class=&quot;fu&quot;&gt;.bn&lt;/span&gt; { &lt;span class=&quot;kw&quot;&gt;color&lt;/span&gt;: …; } &lt;span class=&quot;co&quot;&gt;/* base_n (nondecimal) */&lt;/span&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb2-5&quot; data-line-number=&quot;5&quot;&gt;code&lt;span class=&quot;fu&quot;&gt;.sourceCode&lt;/span&gt; span&lt;span class=&quot;fu&quot;&gt;.dv&lt;/span&gt; { &lt;span class=&quot;kw&quot;&gt;color&lt;/span&gt;: …; } &lt;span class=&quot;co&quot;&gt;/* decimal_value */&lt;/span&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb2-6&quot; data-line-number=&quot;6&quot;&gt;code&lt;span class=&quot;fu&quot;&gt;.sourceCode&lt;/span&gt; span&lt;span class=&quot;fu&quot;&gt;.fl&lt;/span&gt; { &lt;span class=&quot;kw&quot;&gt;color&lt;/span&gt;: …; } &lt;span class=&quot;co&quot;&gt;/* float */&lt;/span&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb2-7&quot; data-line-number=&quot;7&quot;&gt;code&lt;span class=&quot;fu&quot;&gt;.sourceCode&lt;/span&gt; span&lt;span class=&quot;fu&quot;&gt;.ch&lt;/span&gt; { &lt;span class=&quot;kw&quot;&gt;color&lt;/span&gt;: …; } &lt;span class=&quot;co&quot;&gt;/* character */&lt;/span&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb2-8&quot; data-line-number=&quot;8&quot;&gt;code&lt;span class=&quot;fu&quot;&gt;.sourceCode&lt;/span&gt; span&lt;span class=&quot;fu&quot;&gt;.st&lt;/span&gt; { &lt;span class=&quot;kw&quot;&gt;color&lt;/span&gt;: …; } &lt;span class=&quot;co&quot;&gt;/* string */&lt;/span&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb2-9&quot; data-line-number=&quot;9&quot;&gt;code&lt;span class=&quot;fu&quot;&gt;.sourceCode&lt;/span&gt; span&lt;span class=&quot;fu&quot;&gt;.dt&lt;/span&gt; { &lt;span class=&quot;kw&quot;&gt;color&lt;/span&gt;: …; } &lt;span class=&quot;co&quot;&gt;/* data_type */&lt;/span&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb2-10&quot; data-line-number=&quot;10&quot;&gt;code&lt;span class=&quot;fu&quot;&gt;.sourceCode&lt;/span&gt; span&lt;span class=&quot;fu&quot;&gt;.fu&lt;/span&gt; { &lt;span class=&quot;kw&quot;&gt;color&lt;/span&gt;: …; } &lt;span class=&quot;co&quot;&gt;/* function */&lt;/span&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb2-11&quot; data-line-number=&quot;11&quot;&gt;code&lt;span class=&quot;fu&quot;&gt;.sourceCode&lt;/span&gt; span&lt;span class=&quot;fu&quot;&gt;.im&lt;/span&gt; { &lt;span class=&quot;kw&quot;&gt;color&lt;/span&gt;: …; } &lt;span class=&quot;co&quot;&gt;/* import */&lt;/span&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb2-12&quot; data-line-number=&quot;12&quot;&gt;code&lt;span class=&quot;fu&quot;&gt;.sourceCode&lt;/span&gt; span&lt;span class=&quot;fu&quot;&gt;.cf&lt;/span&gt; { &lt;span class=&quot;kw&quot;&gt;color&lt;/span&gt;: …; } &lt;span class=&quot;co&quot;&gt;/* control_flow */&lt;/span&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb2-13&quot; data-line-number=&quot;13&quot;&gt;code&lt;span class=&quot;fu&quot;&gt;.sourceCode&lt;/span&gt; span&lt;span class=&quot;fu&quot;&gt;.kw&lt;/span&gt; { &lt;span class=&quot;kw&quot;&gt;color&lt;/span&gt;: …; } &lt;span class=&quot;co&quot;&gt;/* keyword */&lt;/span&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb2-14&quot; data-line-number=&quot;14&quot;&gt;code&lt;span class=&quot;fu&quot;&gt;.sourceCode&lt;/span&gt; span&lt;span class=&quot;fu&quot;&gt;.pp&lt;/span&gt; { &lt;span class=&quot;kw&quot;&gt;color&lt;/span&gt;: …; } &lt;span class=&quot;co&quot;&gt;/* preprocessor */&lt;/span&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb2-15&quot; data-line-number=&quot;15&quot;&gt;code&lt;span class=&quot;fu&quot;&gt;.sourceCode&lt;/span&gt; span&lt;span class=&quot;fu&quot;&gt;.re&lt;/span&gt; { &lt;span class=&quot;kw&quot;&gt;color&lt;/span&gt;: …; } &lt;span class=&quot;co&quot;&gt;/* region_marker */&lt;/span&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb2-16&quot; data-line-number=&quot;16&quot;&gt;code&lt;span class=&quot;fu&quot;&gt;.sourceCode&lt;/span&gt; span&lt;span class=&quot;fu&quot;&gt;.ot&lt;/span&gt; { &lt;span class=&quot;kw&quot;&gt;color&lt;/span&gt;: …; } &lt;span class=&quot;co&quot;&gt;/* other */&lt;/span&gt;&lt;/a&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Hopefully none of the older posts broke. If so, &lt;a href=&quot;/about#contact-me&quot;&gt;let me know&lt;/a&gt;!&lt;/p&gt;
+</description>
+        <pubDate>Wed, 14 Dec 2016 00:00:00 -0800</pubDate>
+        <link>https://rufflewind.com/2016-12-14/from-redcarpet-to-pandoc</link>
+        <guid isPermaLink="true">https://rufflewind.com/2016-12-14/from-redcarpet-to-pandoc</guid>
+        
+        <category>math</category>
+        
+        <category>markup</category>
+        
+        <category>website</category>
+        
+        
+      </item>
+    
+      <item>
+        <title>Computational interpretation of double negation elimination</title>
+        <description>&lt;p&gt;Today’s shower thought is: Is there a way to interpret &lt;a href=&quot;https://en.wikipedia.org/wiki/Double_negation#Double_negative_elimination&quot;&gt;double negation elimination&lt;/a&gt; as a program?&lt;/p&gt;
+&lt;div class=&quot;sourceCode&quot; id=&quot;cb1&quot;&gt;&lt;pre class=&quot;sourceCode hs&quot;&gt;&lt;code class=&quot;sourceCode haskell&quot;&gt;&lt;a class=&quot;sourceLine&quot; id=&quot;cb1-1&quot; data-line-number=&quot;1&quot;&gt;((a &lt;span class=&quot;ot&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;dt&quot;&gt;Void&lt;/span&gt;) &lt;span class=&quot;ot&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;dt&quot;&gt;Void&lt;/span&gt;) &lt;span class=&quot;ot&quot;&gt;-&amp;gt;&lt;/span&gt; a&lt;/a&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;(Here, &lt;a href=&quot;https://hackage.haskell.org/package/base-4.9.0.0/docs/Data-Void.html#t:Void&quot;&gt;&lt;code&gt;Void&lt;/code&gt;&lt;/a&gt; denotes the empty type.)&lt;/p&gt;
+&lt;p&gt;At first glance, it seems preposterous: how does one expect to produce a return value of a completely arbitrary type &lt;code&gt;a&lt;/code&gt; merely from a function of type &lt;code&gt;(a -&amp;gt; Void) -&amp;gt; Void&lt;/code&gt;, which doesn’t even return a value of type &lt;code&gt;a&lt;/code&gt;?&lt;/p&gt;
+&lt;p&gt;A hint comes from &lt;a href=&quot;https://en.wikipedia.org/wiki/Peirce&amp;#39;s_law&quot;&gt;Peirce’s law&lt;/a&gt;, also known as &lt;a href=&quot;https://en.wikipedia.org/wiki/Call-with-current-continuation&quot;&gt;call-with-current-continuation&lt;/a&gt;, which has a similar form:&lt;/p&gt;
+&lt;div class=&quot;sourceCode&quot; id=&quot;cb2&quot;&gt;&lt;pre class=&quot;sourceCode hs&quot;&gt;&lt;code class=&quot;sourceCode haskell&quot;&gt;&lt;a class=&quot;sourceLine&quot; id=&quot;cb2-1&quot; data-line-number=&quot;1&quot;&gt;&lt;span class=&quot;ot&quot;&gt;callCC ::&lt;/span&gt; ((a &lt;span class=&quot;ot&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;dt&quot;&gt;Cont&lt;/span&gt; r) &lt;span class=&quot;ot&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;dt&quot;&gt;Cont&lt;/span&gt; a) &lt;span class=&quot;ot&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;dt&quot;&gt;Cont&lt;/span&gt; a&lt;/a&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;(We use &lt;a href=&quot;https://hackage.haskell.org/package/mtl-2.2.1/docs/Control-Monad-Cont.html#t:Cont&quot;&gt;&lt;code&gt;Cont&lt;/code&gt;&lt;/a&gt; to allow the code to be tested in a Haskell program.)&lt;/p&gt;
+&lt;p&gt;Peirce’s law gives the program full control over its own state (i.e. stack frame). The application of &lt;a href=&quot;https://hackage.haskell.org/package/mtl-2.2.1/docs/Control-Monad-Cont.html#v:callCC&quot;&gt;&lt;code&gt;callCC&lt;/code&gt;&lt;/a&gt; to a callee &lt;code&gt;g :: (a -&amp;gt; Cont r) -&amp;gt; Cont a&lt;/code&gt; bestows upon it the power of a nonlocal jump:&lt;/p&gt;
+&lt;div class=&quot;sourceCode&quot; id=&quot;cb3&quot;&gt;&lt;pre class=&quot;sourceCode hs&quot;&gt;&lt;code class=&quot;sourceCode haskell&quot;&gt;&lt;a class=&quot;sourceLine&quot; id=&quot;cb3-1&quot; data-line-number=&quot;1&quot;&gt;&lt;span class=&quot;ot&quot;&gt;example ::&lt;/span&gt; &lt;span class=&quot;dt&quot;&gt;Cont&lt;/span&gt; &lt;span class=&quot;dt&quot;&gt;String&lt;/span&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb3-2&quot; data-line-number=&quot;2&quot;&gt;example &lt;span class=&quot;fu&quot;&gt;=&lt;/span&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb3-3&quot; data-line-number=&quot;3&quot;&gt;  callCC &lt;span class=&quot;fu&quot;&gt;$&lt;/span&gt; \ yield &lt;span class=&quot;ot&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;kw&quot;&gt;do&lt;/span&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb3-4&quot; data-line-number=&quot;4&quot;&gt;    yield &lt;span class=&quot;st&quot;&gt;&amp;quot;escaped&amp;quot;&lt;/span&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb3-5&quot; data-line-number=&quot;5&quot;&gt;    pure &lt;span class=&quot;st&quot;&gt;&amp;quot;stayed&amp;quot;&lt;/span&gt;&lt;/a&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;This would return &lt;code&gt;&amp;quot;escaped&amp;quot;&lt;/code&gt; rather than &lt;code&gt;&amp;quot;stayed&amp;quot;&lt;/code&gt;. It’s as if the inner function performed a &lt;code&gt;goto&lt;/code&gt;/&lt;code&gt;return&lt;/code&gt;/&lt;code&gt;break&lt;/code&gt;/&lt;code&gt;longjmp&lt;/code&gt; to the outer scope, passing the result along the way.&lt;/p&gt;
+&lt;p&gt;Turns out &lt;code&gt;doubleNegationElimination&lt;/code&gt; can be expressed in terms of &lt;code&gt;callCC&lt;/code&gt;:&lt;/p&gt;
+&lt;div class=&quot;sourceCode&quot; id=&quot;cb4&quot;&gt;&lt;pre class=&quot;sourceCode hs&quot;&gt;&lt;code class=&quot;sourceCode haskell&quot;&gt;&lt;a class=&quot;sourceLine&quot; id=&quot;cb4-1&quot; data-line-number=&quot;1&quot;&gt;&lt;span class=&quot;ot&quot;&gt;doubleNegationElimination ::&lt;/span&gt; ((a &lt;span class=&quot;ot&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;dt&quot;&gt;Cont&lt;/span&gt; &lt;span class=&quot;dt&quot;&gt;Void&lt;/span&gt;) &lt;span class=&quot;ot&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;dt&quot;&gt;Cont&lt;/span&gt; &lt;span class=&quot;dt&quot;&gt;Void&lt;/span&gt;) &lt;span class=&quot;ot&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;dt&quot;&gt;Cont&lt;/span&gt; a&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb4-2&quot; data-line-number=&quot;2&quot;&gt;doubleNegationElimination doubleNegation &lt;span class=&quot;fu&quot;&gt;=&lt;/span&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb4-3&quot; data-line-number=&quot;3&quot;&gt;  callCC &lt;span class=&quot;fu&quot;&gt;$&lt;/span&gt; \ yield &lt;span class=&quot;ot&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;kw&quot;&gt;do&lt;/span&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb4-4&quot; data-line-number=&quot;4&quot;&gt;    void &lt;span class=&quot;ot&quot;&gt;&amp;lt;-&lt;/span&gt; doubleNegation &lt;span class=&quot;fu&quot;&gt;$&lt;/span&gt; \ x &lt;span class=&quot;ot&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb4-5&quot; data-line-number=&quot;5&quot;&gt;      yield x &lt;span class=&quot;co&quot;&gt;-- goodbye!&lt;/span&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb4-6&quot; data-line-number=&quot;6&quot;&gt;    absurd void&lt;/a&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;From this, we can see the loophole: by passing in a &lt;em&gt;continuation&lt;/em&gt; &lt;code&gt;a -&amp;gt; Cont Void&lt;/code&gt; into the &lt;code&gt;doubleNegation :: (a -&amp;gt; Cont Void) -&amp;gt; Cont Void&lt;/code&gt;, the program can capture and send the result to the caller through a non-local jump. The remaining part involving &lt;a href=&quot;https://hackage.haskell.org/package/base-4.9.0.0/docs/Data-Void.html#v:absurd&quot;&gt;&lt;code&gt;absurd&lt;/code&gt;&lt;/a&gt; is just to satisfy the type checker.&lt;/p&gt;
+&lt;p&gt;For example, if the &lt;code&gt;doubleNegation&lt;/code&gt; was constructed like this:&lt;/p&gt;
+&lt;div class=&quot;sourceCode&quot; id=&quot;cb5&quot;&gt;&lt;pre class=&quot;sourceCode hs&quot;&gt;&lt;code class=&quot;sourceCode haskell&quot;&gt;&lt;a class=&quot;sourceLine&quot; id=&quot;cb5-1&quot; data-line-number=&quot;1&quot;&gt;&lt;span class=&quot;ot&quot;&gt;doubleNegation ::&lt;/span&gt; (&lt;span class=&quot;dt&quot;&gt;String&lt;/span&gt; &lt;span class=&quot;ot&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;dt&quot;&gt;Cont&lt;/span&gt; &lt;span class=&quot;dt&quot;&gt;Void&lt;/span&gt;) &lt;span class=&quot;ot&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;dt&quot;&gt;Cont&lt;/span&gt; &lt;span class=&quot;dt&quot;&gt;Void&lt;/span&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb5-2&quot; data-line-number=&quot;2&quot;&gt;doubleNegation negation &lt;span class=&quot;fu&quot;&gt;=&lt;/span&gt; negation &lt;span class=&quot;st&quot;&gt;&amp;quot;strings do exist&amp;quot;&lt;/span&gt;&lt;/a&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;then &lt;code&gt;doubleNegationElimination&lt;/code&gt; would be able to manifest the evidence &lt;code&gt;&amp;quot;strings do exist&amp;quot;&lt;/code&gt; by capturing the value and then immediately jumping to the outer scope, avoiding the crash that would have arisen from evaluating a &lt;code&gt;Void&lt;/code&gt;.&lt;/p&gt;
+&lt;hr /&gt;
+&lt;p&gt;On a sidenote, &lt;code&gt;callCC&lt;/code&gt; is &lt;em&gt;crazy powerful&lt;/em&gt;. You can implement Python-style generators with them!&lt;/p&gt;
+&lt;div class=&quot;sourceCode&quot; id=&quot;cb6&quot;&gt;&lt;pre class=&quot;sourceCode hs&quot;&gt;&lt;code class=&quot;sourceCode haskell&quot;&gt;&lt;a class=&quot;sourceLine&quot; id=&quot;cb6-1&quot; data-line-number=&quot;1&quot;&gt;&lt;span class=&quot;kw&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;dt&quot;&gt;Control.Monad.Cont&lt;/span&gt; (&lt;span class=&quot;dt&quot;&gt;MonadCont&lt;/span&gt;, &lt;span class=&quot;dt&quot;&gt;MonadIO&lt;/span&gt;, (&amp;lt;=&amp;lt;),&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb6-2&quot; data-line-number=&quot;2&quot;&gt;                           callCC, forever, liftIO, runContT)&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb6-3&quot; data-line-number=&quot;3&quot;&gt;&lt;span class=&quot;kw&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;dt&quot;&gt;Data.Foldable&lt;/span&gt; (for_)&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb6-4&quot; data-line-number=&quot;4&quot;&gt;&lt;span class=&quot;kw&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;dt&quot;&gt;Data.IORef&lt;/span&gt; (&lt;span class=&quot;dt&quot;&gt;IORef&lt;/span&gt;)&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb6-5&quot; data-line-number=&quot;5&quot;&gt;&lt;span class=&quot;kw&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;dt&quot;&gt;Data.Void&lt;/span&gt; (&lt;span class=&quot;dt&quot;&gt;Void&lt;/span&gt;, absurd)&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb6-6&quot; data-line-number=&quot;6&quot;&gt;&lt;span class=&quot;kw&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;kw&quot;&gt;qualified&lt;/span&gt; &lt;span class=&quot;dt&quot;&gt;Data.IORef&lt;/span&gt; &lt;span class=&quot;kw&quot;&gt;as&lt;/span&gt; &lt;span class=&quot;dt&quot;&gt;IO&lt;/span&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb6-7&quot; data-line-number=&quot;7&quot;&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb6-8&quot; data-line-number=&quot;8&quot;&gt;&lt;span class=&quot;ot&quot;&gt;main ::&lt;/span&gt; &lt;span class=&quot;dt&quot;&gt;IO&lt;/span&gt; ()&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb6-9&quot; data-line-number=&quot;9&quot;&gt;main &lt;span class=&quot;fu&quot;&gt;=&lt;/span&gt; runContT generatorExample pure&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb6-10&quot; data-line-number=&quot;10&quot;&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb6-11&quot; data-line-number=&quot;11&quot;&gt;&lt;span class=&quot;ot&quot;&gt;generatorExample ::&lt;/span&gt; (&lt;span class=&quot;dt&quot;&gt;MonadCont&lt;/span&gt; m, &lt;span class=&quot;dt&quot;&gt;MonadIO&lt;/span&gt; m) &lt;span class=&quot;ot&quot;&gt;=&amp;gt;&lt;/span&gt; m ()&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb6-12&quot; data-line-number=&quot;12&quot;&gt;generatorExample &lt;span class=&quot;fu&quot;&gt;=&lt;/span&gt; callCC &lt;span class=&quot;fu&quot;&gt;$&lt;/span&gt; \ stop &lt;span class=&quot;ot&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;kw&quot;&gt;do&lt;/span&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb6-13&quot; data-line-number=&quot;13&quot;&gt;  g &lt;span class=&quot;ot&quot;&gt;&amp;lt;-&lt;/span&gt; newGenerator [&lt;span class=&quot;dv&quot;&gt;0&lt;/span&gt; &lt;span class=&quot;fu&quot;&gt;..&lt;/span&gt; &lt;span class=&quot;dv&quot;&gt;9&lt;/span&gt;&lt;span class=&quot;ot&quot;&gt; ::&lt;/span&gt; &lt;span class=&quot;dt&quot;&gt;Integer&lt;/span&gt;]&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb6-14&quot; data-line-number=&quot;14&quot;&gt;  forever &lt;span class=&quot;fu&quot;&gt;$&lt;/span&gt; &lt;span class=&quot;kw&quot;&gt;do&lt;/span&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb6-15&quot; data-line-number=&quot;15&quot;&gt;    result &lt;span class=&quot;ot&quot;&gt;&amp;lt;-&lt;/span&gt; g&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb6-16&quot; data-line-number=&quot;16&quot;&gt;    &lt;span class=&quot;kw&quot;&gt;case&lt;/span&gt; result &lt;span class=&quot;kw&quot;&gt;of&lt;/span&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb6-17&quot; data-line-number=&quot;17&quot;&gt;      &lt;span class=&quot;dt&quot;&gt;Nothing&lt;/span&gt; &lt;span class=&quot;ot&quot;&gt;-&amp;gt;&lt;/span&gt; stop ()&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb6-18&quot; data-line-number=&quot;18&quot;&gt;      &lt;span class=&quot;dt&quot;&gt;Just&lt;/span&gt; x  &lt;span class=&quot;ot&quot;&gt;-&amp;gt;&lt;/span&gt; liftIO (print x)&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb6-19&quot; data-line-number=&quot;19&quot;&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb6-20&quot; data-line-number=&quot;20&quot;&gt;&lt;span class=&quot;ot&quot;&gt;newGenerator ::&lt;/span&gt; (&lt;span class=&quot;dt&quot;&gt;MonadCont&lt;/span&gt; m, &lt;span class=&quot;dt&quot;&gt;MonadIO&lt;/span&gt; m) &lt;span class=&quot;ot&quot;&gt;=&amp;gt;&lt;/span&gt; [a] &lt;span class=&quot;ot&quot;&gt;-&amp;gt;&lt;/span&gt; m (m (&lt;span class=&quot;dt&quot;&gt;Maybe&lt;/span&gt; a))&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb6-21&quot; data-line-number=&quot;21&quot;&gt;newGenerator xs &lt;span class=&quot;fu&quot;&gt;=&lt;/span&gt; callCC&amp;#39; &lt;span class=&quot;fu&quot;&gt;$&lt;/span&gt; \ ret &lt;span class=&quot;ot&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;kw&quot;&gt;do&lt;/span&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb6-22&quot; data-line-number=&quot;22&quot;&gt;  &lt;span class=&quot;co&quot;&gt;-- rNext stores the function used to jump back into the generator&lt;/span&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb6-23&quot; data-line-number=&quot;23&quot;&gt;  rNext &lt;span class=&quot;ot&quot;&gt;&amp;lt;-&lt;/span&gt; newIORef (&lt;span class=&quot;fu&quot;&gt;$&lt;/span&gt; &lt;span class=&quot;dt&quot;&gt;Nothing&lt;/span&gt;)&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb6-24&quot; data-line-number=&quot;24&quot;&gt;  &lt;span class=&quot;co&quot;&gt;-- rYield stores the function used to jump out of the generator&lt;/span&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb6-25&quot; data-line-number=&quot;25&quot;&gt;  rYield &lt;span class=&quot;ot&quot;&gt;&amp;lt;-&lt;/span&gt; newIORef &lt;span class=&quot;fu&quot;&gt;&amp;lt;=&amp;lt;&lt;/span&gt; callCC&amp;#39; &lt;span class=&quot;fu&quot;&gt;$&lt;/span&gt; \ next &lt;span class=&quot;ot&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;kw&quot;&gt;do&lt;/span&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb6-26&quot; data-line-number=&quot;26&quot;&gt;    writeIORef rNext next&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb6-27&quot; data-line-number=&quot;27&quot;&gt;    ret &lt;span class=&quot;fu&quot;&gt;$&lt;/span&gt; &lt;span class=&quot;kw&quot;&gt;do&lt;/span&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb6-28&quot; data-line-number=&quot;28&quot;&gt;      &lt;span class=&quot;co&quot;&gt;-- the generator itself is just a function that saves the current&lt;/span&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb6-29&quot; data-line-number=&quot;29&quot;&gt;      &lt;span class=&quot;co&quot;&gt;-- continuation and jumps back into the generator via rNext&lt;/span&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb6-30&quot; data-line-number=&quot;30&quot;&gt;      callCC&amp;#39; &lt;span class=&quot;fu&quot;&gt;$&lt;/span&gt; \ yield &lt;span class=&quot;ot&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;kw&quot;&gt;do&lt;/span&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb6-31&quot; data-line-number=&quot;31&quot;&gt;        readIORef rNext &lt;span class=&quot;fu&quot;&gt;&amp;gt;&amp;gt;=&lt;/span&gt; (&lt;span class=&quot;fu&quot;&gt;$&lt;/span&gt; yield)&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb6-32&quot; data-line-number=&quot;32&quot;&gt;  for_ xs &lt;span class=&quot;fu&quot;&gt;$&lt;/span&gt; \ i &lt;span class=&quot;ot&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;kw&quot;&gt;do&lt;/span&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb6-33&quot; data-line-number=&quot;33&quot;&gt;    &lt;span class=&quot;co&quot;&gt;-- save the current continuation then jump out of the generator&lt;/span&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb6-34&quot; data-line-number=&quot;34&quot;&gt;    writeIORef rYield &lt;span class=&quot;fu&quot;&gt;&amp;lt;=&amp;lt;&lt;/span&gt; callCC&amp;#39; &lt;span class=&quot;fu&quot;&gt;$&lt;/span&gt; \ next &lt;span class=&quot;ot&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;kw&quot;&gt;do&lt;/span&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb6-35&quot; data-line-number=&quot;35&quot;&gt;      writeIORef rNext next&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb6-36&quot; data-line-number=&quot;36&quot;&gt;      readIORef rYield &lt;span class=&quot;fu&quot;&gt;&amp;gt;&amp;gt;=&lt;/span&gt; (&lt;span class=&quot;fu&quot;&gt;$&lt;/span&gt; &lt;span class=&quot;dt&quot;&gt;Just&lt;/span&gt; i)&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb6-37&quot; data-line-number=&quot;37&quot;&gt;  readIORef rYield &lt;span class=&quot;fu&quot;&gt;&amp;gt;&amp;gt;=&lt;/span&gt; (&lt;span class=&quot;fu&quot;&gt;$&lt;/span&gt; &lt;span class=&quot;dt&quot;&gt;Nothing&lt;/span&gt;)&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb6-38&quot; data-line-number=&quot;38&quot;&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb6-39&quot; data-line-number=&quot;39&quot;&gt;&lt;span class=&quot;co&quot;&gt;-- | This is just double negation elimination under a different name, which&lt;/span&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb6-40&quot; data-line-number=&quot;40&quot;&gt;&lt;span class=&quot;co&quot;&gt;-- turns out to be a little more convenient than &amp;#39;callCC&amp;#39; here.&lt;/span&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb6-41&quot; data-line-number=&quot;41&quot;&gt;&lt;span class=&quot;ot&quot;&gt;callCC&amp;#39; ::&lt;/span&gt; &lt;span class=&quot;dt&quot;&gt;MonadCont&lt;/span&gt; m &lt;span class=&quot;ot&quot;&gt;=&amp;gt;&lt;/span&gt; ((a &lt;span class=&quot;ot&quot;&gt;-&amp;gt;&lt;/span&gt; m &lt;span class=&quot;dt&quot;&gt;Void&lt;/span&gt;) &lt;span class=&quot;ot&quot;&gt;-&amp;gt;&lt;/span&gt; m &lt;span class=&quot;dt&quot;&gt;Void&lt;/span&gt;) &lt;span class=&quot;ot&quot;&gt;-&amp;gt;&lt;/span&gt; m a&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb6-42&quot; data-line-number=&quot;42&quot;&gt;callCC&amp;#39; action &lt;span class=&quot;fu&quot;&gt;=&lt;/span&gt; callCC ((absurd &lt;span class=&quot;fu&quot;&gt;&amp;lt;$&amp;gt;&lt;/span&gt;) &lt;span class=&quot;fu&quot;&gt;.&lt;/span&gt; action)&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb6-43&quot; data-line-number=&quot;43&quot;&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb6-44&quot; data-line-number=&quot;44&quot;&gt;&lt;span class=&quot;ot&quot;&gt;newIORef ::&lt;/span&gt; &lt;span class=&quot;dt&quot;&gt;MonadIO&lt;/span&gt; m &lt;span class=&quot;ot&quot;&gt;=&amp;gt;&lt;/span&gt; a &lt;span class=&quot;ot&quot;&gt;-&amp;gt;&lt;/span&gt; m (&lt;span class=&quot;dt&quot;&gt;IORef&lt;/span&gt; a)&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb6-45&quot; data-line-number=&quot;45&quot;&gt;newIORef value &lt;span class=&quot;fu&quot;&gt;=&lt;/span&gt; liftIO (&lt;span class=&quot;dt&quot;&gt;IO&lt;/span&gt;&lt;span class=&quot;fu&quot;&gt;.&lt;/span&gt;newIORef value)&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb6-46&quot; data-line-number=&quot;46&quot;&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb6-47&quot; data-line-number=&quot;47&quot;&gt;&lt;span class=&quot;ot&quot;&gt;readIORef ::&lt;/span&gt; &lt;span class=&quot;dt&quot;&gt;MonadIO&lt;/span&gt; m &lt;span class=&quot;ot&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;dt&quot;&gt;IORef&lt;/span&gt; a &lt;span class=&quot;ot&quot;&gt;-&amp;gt;&lt;/span&gt; m a&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb6-48&quot; data-line-number=&quot;48&quot;&gt;readIORef ref &lt;span class=&quot;fu&quot;&gt;=&lt;/span&gt; liftIO (&lt;span class=&quot;dt&quot;&gt;IO&lt;/span&gt;&lt;span class=&quot;fu&quot;&gt;.&lt;/span&gt;readIORef ref)&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb6-49&quot; data-line-number=&quot;49&quot;&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb6-50&quot; data-line-number=&quot;50&quot;&gt;&lt;span class=&quot;ot&quot;&gt;writeIORef ::&lt;/span&gt; &lt;span class=&quot;dt&quot;&gt;MonadIO&lt;/span&gt; m &lt;span class=&quot;ot&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;dt&quot;&gt;IORef&lt;/span&gt; a &lt;span class=&quot;ot&quot;&gt;-&amp;gt;&lt;/span&gt; a &lt;span class=&quot;ot&quot;&gt;-&amp;gt;&lt;/span&gt; m ()&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb6-51&quot; data-line-number=&quot;51&quot;&gt;writeIORef ref value &lt;span class=&quot;fu&quot;&gt;=&lt;/span&gt; liftIO (&lt;span class=&quot;dt&quot;&gt;IO&lt;/span&gt;&lt;span class=&quot;fu&quot;&gt;.&lt;/span&gt;writeIORef ref value)&lt;/a&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+</description>
+        <pubDate>Sun, 11 Dec 2016 00:00:00 -0800</pubDate>
+        <link>https://rufflewind.com/2016-12-11/double-negation-elimination</link>
+        <guid isPermaLink="true">https://rufflewind.com/2016-12-11/double-negation-elimination</guid>
+        
+        <category>haskell</category>
+        
+        <category>logic</category>
+        
+        <category>math</category>
+        
+        
+      </item>
+    
+      <item>
+        <title>The need to associate function pointers with environments</title>
+        <description>&lt;p&gt;A friend once asked me a question like this:&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;div class=&quot;sourceCode&quot; id=&quot;cb1&quot;&gt;&lt;pre class=&quot;sourceCode c&quot;&gt;&lt;code class=&quot;sourceCode c&quot;&gt;&lt;a class=&quot;sourceLine&quot; id=&quot;cb1-1&quot; data-line-number=&quot;1&quot;&gt;&lt;span class=&quot;dt&quot;&gt;void&lt;/span&gt; register_event_handler(&lt;span class=&quot;dt&quot;&gt;void&lt;/span&gt; *f_ctx, &lt;span class=&quot;dt&quot;&gt;void&lt;/span&gt; (*f)(&lt;span class=&quot;dt&quot;&gt;void&lt;/span&gt; *ctx));&lt;/a&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;I’m a little confused about the purpose of &lt;code&gt;f_ctx&lt;/code&gt;. Here, &lt;code&gt;f&lt;/code&gt; is a handler function that gets called when the event is triggered, and &lt;code&gt;f_ctx&lt;/code&gt; is − according to the documentation – some pointer argument that gets passed to &lt;code&gt;f&lt;/code&gt; whenever it gets called. Why do we need &lt;code&gt;f_ctx&lt;/code&gt;? Wouldn’t &lt;code&gt;f&lt;/code&gt; alone suffice?&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;This is a trick for low-level languages like C where functions are represented using a raw function pointer, which does not store an &lt;em&gt;enclosing environment&lt;/em&gt; (sometimes called a &lt;em&gt;context&lt;/em&gt;). It is not needed in higher-level languages with support for &lt;a href=&quot;https://en.wikipedia.org/wiki/First-class_function&quot;&gt;&lt;em&gt;first-class functions&lt;/em&gt;&lt;/a&gt;, such as Python, as these languages allow functions to be nested inside other functions and will automatically store the enclosing environment within the function objects in a combination called a &lt;a href=&quot;https://en.wikipedia.org/wiki/Closure_(computer_programming)&quot;&gt;closure&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;The need for an environment pointer &lt;code&gt;f_ctx&lt;/code&gt; arises when you want to write a function that depends on external parameters not known at compile time. The &lt;code&gt;f_ctx&lt;/code&gt; parameter allows you to smuggle these external parameters into &lt;code&gt;f&lt;/code&gt; however you like.&lt;/p&gt;
+&lt;p&gt;It might be best to illustrate this with an example. Consider a 1-dimensional numerical integrator like this:&lt;/p&gt;
+&lt;div class=&quot;sourceCode&quot; id=&quot;cb2&quot;&gt;&lt;pre class=&quot;sourceCode c&quot;&gt;&lt;code class=&quot;sourceCode c&quot;&gt;&lt;a class=&quot;sourceLine&quot; id=&quot;cb2-1&quot; data-line-number=&quot;1&quot;&gt;&lt;span class=&quot;dt&quot;&gt;double&lt;/span&gt; integrate_1(&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb2-2&quot; data-line-number=&quot;2&quot;&gt;    &lt;span class=&quot;dt&quot;&gt;double&lt;/span&gt; (*f)(&lt;span class=&quot;dt&quot;&gt;double&lt;/span&gt; x), &lt;span class=&quot;co&quot;&gt;/* function to be integrated */&lt;/span&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb2-3&quot; data-line-number=&quot;3&quot;&gt;    &lt;span class=&quot;dt&quot;&gt;double&lt;/span&gt; x1,&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb2-4&quot; data-line-number=&quot;4&quot;&gt;    &lt;span class=&quot;dt&quot;&gt;double&lt;/span&gt; x2&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb2-5&quot; data-line-number=&quot;5&quot;&gt;);&lt;/a&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;This works fine if you know the complete form of the function &lt;code&gt;f&lt;/code&gt; ahead of time. But what if this is not the case – what if the function requires parameters? Say we want to calculate the &lt;a href=&quot;https://en.wikipedia.org/wiki/Gamma_function&quot;&gt;gamma function&lt;/a&gt; using an integral:&lt;/p&gt;
+&lt;div class=&quot;sourceCode&quot; id=&quot;cb3&quot;&gt;&lt;pre class=&quot;sourceCode c&quot;&gt;&lt;code class=&quot;sourceCode c&quot;&gt;&lt;a class=&quot;sourceLine&quot; id=&quot;cb3-1&quot; data-line-number=&quot;1&quot;&gt;&lt;span class=&quot;dt&quot;&gt;double&lt;/span&gt; integrand(&lt;span class=&quot;dt&quot;&gt;double&lt;/span&gt; x)&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb3-2&quot; data-line-number=&quot;2&quot;&gt;{&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb3-3&quot; data-line-number=&quot;3&quot;&gt;    &lt;span class=&quot;dt&quot;&gt;double&lt;/span&gt; t = &lt;span class=&quot;co&quot;&gt;/* where do we get &amp;quot;t&amp;quot; from?? */&lt;/span&gt;;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb3-4&quot; data-line-number=&quot;4&quot;&gt;    &lt;span class=&quot;cf&quot;&gt;return&lt;/span&gt; pow(x, t - &lt;span class=&quot;fl&quot;&gt;1.0&lt;/span&gt;) * exp(-x);&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb3-5&quot; data-line-number=&quot;5&quot;&gt;}&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb3-6&quot; data-line-number=&quot;6&quot;&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb3-7&quot; data-line-number=&quot;7&quot;&gt;&lt;span class=&quot;dt&quot;&gt;double&lt;/span&gt; gamma_function(&lt;span class=&quot;dt&quot;&gt;double&lt;/span&gt; t)&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb3-8&quot; data-line-number=&quot;8&quot;&gt;{&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb3-9&quot; data-line-number=&quot;9&quot;&gt;    &lt;span class=&quot;co&quot;&gt;/* how do we send the value of &amp;quot;t&amp;quot; into &amp;quot;integrand&amp;quot;? */&lt;/span&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb3-10&quot; data-line-number=&quot;10&quot;&gt;    &lt;span class=&quot;cf&quot;&gt;return&lt;/span&gt; integrate_1(&amp;amp;integrand, &lt;span class=&quot;fl&quot;&gt;0.0&lt;/span&gt;, INFINITY) / M_PI;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb3-11&quot; data-line-number=&quot;11&quot;&gt;}&lt;/a&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Using &lt;code&gt;integrand_1&lt;/code&gt; there are only three ways to do this:&lt;/p&gt;
+&lt;ol type=&quot;1&quot;&gt;
+&lt;li&gt;&lt;p&gt;Store &lt;code&gt;t&lt;/code&gt; into a global variable, sacrificing &lt;a href=&quot;https://en.wikipedia.org/wiki/Thread_safety&quot;&gt;thread safety&lt;/a&gt;. It would be bad to simultaneously call &lt;code&gt;gamma_function&lt;/code&gt; from different threads as they will both attempt to use the same global variable.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Use a thread-local variable, a feature not available until &lt;a href=&quot;https://en.wikipedia.org/wiki/C11_(C_standard_revision)&quot;&gt;C11&lt;/a&gt;. At least it is thread-safe now, but it is still not &lt;a href=&quot;https://en.wikipedia.org/wiki/Reentrancy_(computing)&quot;&gt;reentrant&lt;/a&gt;.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Write raw machine code to create an integrand on the fly. This can be implemented in a thread-safe and reentrant manner, but it is both inefficient, &lt;a href=&quot;https://en.wikipedia.org/wiki/Software_portability&quot;&gt;unportable&lt;/a&gt;, and inhibits compiler optimizations.&lt;/p&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;However, if the numerical integrator were to be re-designed like this:&lt;/p&gt;
+&lt;div class=&quot;sourceCode&quot; id=&quot;cb4&quot;&gt;&lt;pre class=&quot;sourceCode c&quot;&gt;&lt;code class=&quot;sourceCode c&quot;&gt;&lt;a class=&quot;sourceLine&quot; id=&quot;cb4-1&quot; data-line-number=&quot;1&quot;&gt;&lt;span class=&quot;dt&quot;&gt;double&lt;/span&gt; integrate_2(&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb4-2&quot; data-line-number=&quot;2&quot;&gt;    &lt;span class=&quot;dt&quot;&gt;double&lt;/span&gt; (*f)(&lt;span class=&quot;dt&quot;&gt;void&lt;/span&gt; *f_ctx, &lt;span class=&quot;dt&quot;&gt;double&lt;/span&gt; x),&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb4-3&quot; data-line-number=&quot;3&quot;&gt;    &lt;span class=&quot;dt&quot;&gt;void&lt;/span&gt; *f_ctx, &lt;span class=&quot;co&quot;&gt;/* passed into every invocation of &amp;quot;f&amp;quot; */&lt;/span&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb4-4&quot; data-line-number=&quot;4&quot;&gt;    &lt;span class=&quot;dt&quot;&gt;double&lt;/span&gt; x1,&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb4-5&quot; data-line-number=&quot;5&quot;&gt;    &lt;span class=&quot;dt&quot;&gt;double&lt;/span&gt; x2&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb4-6&quot; data-line-number=&quot;6&quot;&gt;);&lt;/a&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Then there is a much simpler solution that avoids all of these problems:&lt;/p&gt;
+&lt;div class=&quot;sourceCode&quot; id=&quot;cb5&quot;&gt;&lt;pre class=&quot;sourceCode c&quot;&gt;&lt;code class=&quot;sourceCode c&quot;&gt;&lt;a class=&quot;sourceLine&quot; id=&quot;cb5-1&quot; data-line-number=&quot;1&quot;&gt;&lt;span class=&quot;dt&quot;&gt;double&lt;/span&gt; integrand(&lt;span class=&quot;dt&quot;&gt;void&lt;/span&gt; *ctx, &lt;span class=&quot;dt&quot;&gt;double&lt;/span&gt; x)&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb5-2&quot; data-line-number=&quot;2&quot;&gt;{&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb5-3&quot; data-line-number=&quot;3&quot;&gt;    &lt;span class=&quot;dt&quot;&gt;double&lt;/span&gt; t = *(&lt;span class=&quot;dt&quot;&gt;double&lt;/span&gt; *)ctx;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb5-4&quot; data-line-number=&quot;4&quot;&gt;    &lt;span class=&quot;cf&quot;&gt;return&lt;/span&gt; pow(x, t - &lt;span class=&quot;fl&quot;&gt;1.0&lt;/span&gt;) * exp(-x);&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb5-5&quot; data-line-number=&quot;5&quot;&gt;}&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb5-6&quot; data-line-number=&quot;6&quot;&gt;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb5-7&quot; data-line-number=&quot;7&quot;&gt;&lt;span class=&quot;dt&quot;&gt;double&lt;/span&gt; gamma_function(&lt;span class=&quot;dt&quot;&gt;double&lt;/span&gt; t)&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb5-8&quot; data-line-number=&quot;8&quot;&gt;{&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb5-9&quot; data-line-number=&quot;9&quot;&gt;    &lt;span class=&quot;cf&quot;&gt;return&lt;/span&gt; integrate_2(&amp;amp;integrand, &amp;amp;t, &lt;span class=&quot;fl&quot;&gt;0.0&lt;/span&gt;, INFINITY) / M_PI;&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb5-10&quot; data-line-number=&quot;10&quot;&gt;}&lt;/a&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;This is thread-safe, reentrant, efficient, and portable.&lt;/p&gt;
+&lt;p&gt;As mentioned earlier, this problem does not exist in languages like Python where functions can be nested inside other functions (or rather, it is automatically taken care of by the language itself):&lt;/p&gt;
+&lt;div class=&quot;sourceCode&quot; id=&quot;cb6&quot;&gt;&lt;pre class=&quot;sourceCode py&quot;&gt;&lt;code class=&quot;sourceCode python&quot;&gt;&lt;a class=&quot;sourceLine&quot; id=&quot;cb6-1&quot; data-line-number=&quot;1&quot;&gt;&lt;span class=&quot;kw&quot;&gt;def&lt;/span&gt; gamma_function(t):&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb6-2&quot; data-line-number=&quot;2&quot;&gt;    &lt;span class=&quot;kw&quot;&gt;def&lt;/span&gt; integrand(x):&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb6-3&quot; data-line-number=&quot;3&quot;&gt;        &lt;span class=&quot;cf&quot;&gt;return&lt;/span&gt; x &lt;span class=&quot;op&quot;&gt;**&lt;/span&gt; (t &lt;span class=&quot;op&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;fl&quot;&gt;1.0&lt;/span&gt;) &lt;span class=&quot;op&quot;&gt;*&lt;/span&gt; math.exp(&lt;span class=&quot;op&quot;&gt;-&lt;/span&gt;x)&lt;/a&gt;
+&lt;a class=&quot;sourceLine&quot; id=&quot;cb6-4&quot; data-line-number=&quot;4&quot;&gt;    &lt;span class=&quot;cf&quot;&gt;return&lt;/span&gt; integrate(integrand, &lt;span class=&quot;fl&quot;&gt;0.0&lt;/span&gt;, math.inf) &lt;span class=&quot;op&quot;&gt;/&lt;/span&gt; math.pi&lt;/a&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+</description>
+        <pubDate>Wed, 21 Sep 2016 00:00:00 -0700</pubDate>
+        <link>https://rufflewind.com/2016-09-21/function-pointer-context</link>
+        <guid isPermaLink="true">https://rufflewind.com/2016-09-21/function-pointer-context</guid>
+        
+        <category>c</category>
+        
+        <category>data-structure</category>
+        
+        <category>math</category>
+        
+        
+      </item>
+    
+      <item>
+        <title>Sorting with a random comparator</title>
+        <description>&lt;p&gt;Most sorting algorithms rely on the correct implementation of a comparison function that returns the ordering between two elements – that is, a function that takes two elements and returns whether the first is less than, equal to, or greater than the second:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;function compare(x, y) {
+    if (x &amp;lt; y) {
+        return LESS_THAN;
+    } else if (x &amp;gt; y) {
+        return GREATER_THAN;
+    } else {
+        return EQUAL;
+    }
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;The comparison function is required to define a valid &lt;a href=&quot;https://en.wikipedia.org/wiki/Total_order&quot;&gt;total ordering&lt;/a&gt; on the elements in the sequence in order for the sorting algorithm to make any sense.&lt;/p&gt;
+&lt;p&gt;It is tempting to ask whether using a random comparison function would offer a clever way to shuffle a sequence. The short answer is no, generally speaking. It’s really not a good idea to do that even if it does somehow magically work. The correct solution is to use the &lt;a href=&quot;https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle&quot;&gt;Fisher-Yates shuffling algorithm&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;From an engineering perspective, sorting functions are &lt;em&gt;designed to sort things&lt;/em&gt;. Abusing it to shuffle an array is kind of just asking for trouble, because you never know if a change in the sorting algorithm down the road might break the “shuffling” algorithm. Worse, the breakage could be subtle, creating biases in the output that might be hard to detect unless the tests rigorously verify the statistics. Moreover, some sorting algorithms can run unusually slow with a random comparator, or take a very long time if the randomness was not in their favor.&lt;/p&gt;
+&lt;p&gt;From a mathematical perspective, bounded-time deterministic comparison sorts just can’t give you a high quality distribution of random permutations! In fact, if you use a random comparator with an equal probability of returning &lt;code&gt;LESS_THAN&lt;/code&gt; or &lt;code&gt;GREATER_THAN&lt;/code&gt; (a “uniformly random comparator”), it’s &lt;em&gt;provably&lt;/em&gt; impossible for a such an algorithm to shuffle correctly.&lt;/p&gt;
+&lt;p&gt;Suppose you have an array of size &lt;code&gt;N&lt;/code&gt;. The probability of any element (say, the first element) ending up at any position (say, the last position) is always &lt;code&gt;1/N&lt;/code&gt; in a perfect shuffle.&lt;/p&gt;
+&lt;p&gt;At every step of a deterministic comparison sort algorithm, it must make some sort of binary decision based on the ordering between two selected elements, leading to a binary &lt;a href=&quot;https://en.wikipedia.org/wiki/Decision_tree&quot;&gt;decision tree&lt;/a&gt;. The outcome of these decisions determine the final sorted output.&lt;/p&gt;
+&lt;p&gt;Now if you feed it a uniformly random comparator, the decisions made are always random. This means every decision has a &lt;code&gt;1/2&lt;/code&gt; probability of going one way or another. This leads to a path &lt;code&gt;p&lt;/code&gt; down the decision tree that eventually terminates after &lt;code&gt;n[p]&lt;/code&gt; rounds, since we are assuming bounded time. Certain paths in this decision tree will lead to the scenario where the first element ends up at the last position. Thus, the overall probability of this scenario is the sum of the probability of every path &lt;code&gt;p&lt;/code&gt; that leads to the desired scenario:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;∑[p ∈ all_desired_paths] (1/2)^(n[p])&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Adding up powers of &lt;code&gt;1/2&lt;/code&gt; will always yield a fraction where the denominator is some power of &lt;code&gt;2&lt;/code&gt;. Since the correct probability is &lt;code&gt;1/N&lt;/code&gt;, unless &lt;code&gt;N&lt;/code&gt; is also a power of two, there is simply no way for the result to be correct! Hence, there’s no way to get the exact probability &lt;code&gt;1/N&lt;/code&gt; in general.&lt;/p&gt;
+&lt;p&gt;Edit: Chris P. pointed out that the algorithm must have bounded time for this proof to work. Thanks!&lt;/p&gt;
+</description>
+        <pubDate>Fri, 16 Sep 2016 00:00:00 -0700</pubDate>
+        <link>https://rufflewind.com/2016-09-16/random-comparator-sort</link>
+        <guid isPermaLink="true">https://rufflewind.com/2016-09-16/random-comparator-sort</guid>
+        
+        <category>algorithm</category>
+        
+        <category>math</category>
+        
+        
+      </item>
+    
+  </channel>
+</rss>

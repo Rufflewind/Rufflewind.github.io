@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html class="no-js">
+  <head>
+    <meta charset="utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>Uninstalling Cabal packages - Rufflewind's Scratchpad</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Fira+Mono|Fira+Sans|Oxygen"/>
+    <link rel="stylesheet" href="/css/normalize.css"/>
+    <link rel="stylesheet" href="/css/syntax.css"/>
+    <link rel="stylesheet" href="/css/main.css"/>
+    <link rel="icon" href="/favicon.ico"/>
+    <link rel="alternate" type="application/rss+xml" href="/feed"/>
+    <script src="/js/vendor/modernizr.custom.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+      ga('create', 'UA-48515395-1', 'rufflewind.com');
+      ga('send', 'pageview');
+    </script>
+  </head>
+  <body prefix="schema: http://schema.org/" typeof="schema:Blog">
+    <div class="upper">
+      <header class="root">
+        <div class="header-title">
+          <h1><a href="/">Rufflewind's Scratchpad</a></h1>
+        </div>
+        <div class="header-banner">
+          <nav>
+            <ul>
+              <li><a class="extra" href="/">Home</a></li>
+              <li><a class="extra" href="/archive">Archive</a></li>
+              <li><a class="extra" href="/about">About</a></li>
+            </ul>
+            <form class="search" method="get" action="//google.com/search">
+              <input type="hidden" name="sitesearch" value="rufflewind.com"/>
+              <input id="search-input" type="search" name="q" placeholder="Search"/>
+              <button id="search-button">
+                <svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 100 100">
+                  <circle cx="42" cy="42" r="30" stroke="white" stroke-width="12" fill="none"/>
+                  <path d="m 60 60 35 35" stroke="white" stroke-width="12" fill="none"/>
+                </svg>
+                <span>Search</span>
+              </button>
+            </form>
+          </nav>
+        </div>
+      </header>
+      <div class="content">
+        <article class="h-entry post" property="schema:blogPost" typeof="schema:BlogPosting">
+  <header>
+    <h1><a class="p-name u-url" href="" property="schema:headline schema:name">Uninstalling Cabal packages</a></h1>
+    <div class="meta">
+      <time class="dt-published date" property="schema:datePublished">2015-02-01</time>
+      <ul class="tags">
+        
+        <li property="schema:keywords"><a class="p-category tag" href="/archive/tag#tag-haskell">haskell</a></li>
+        
+        <li property="schema:keywords"><a class="p-category tag" href="/archive/tag#tag-cabal">cabal</a></li>
+        
+        <li property="schema:keywords"><a class="p-category tag" href="/archive/tag#tag-package">package</a></li>
+        
+      </ul>
+    </div>
+  </header>
+  <div class="e-content post-content" property="schema:articleBody">
+    <p><i>Edit (2015-08-10): the tools have been updated to fix a few bugs as well as incompatibilities with the latest GHC; they now also work on Cabal sandboxes.</i></p>
+<h2 id="problems">Problems</h2>
+<h3 id="a.-there-is-no-way-to-uninstall-packages-in-cabal">A. There is no way to uninstall packages in Cabal</h3>
+<p>Currently, <a href="https://haskell.org/cabal">cabal-install</a> <a href="https://github.com/haskell/cabal/issues/227">doesn’t know how to</a> <a href="https://www.reddit.com/r/haskell/comments/lrc39/why_is_there_no_cabal_">uninstall packages</a>. The best you can do is to <a href="https://stackoverflow.com/a/10587933">unregister</a> the package with the GHC package-database manager, eliminating the package metadata from the database without removing the actual files.</p>
+<p>There is a package called <a href="https://hackage.haskell.org/package/cabal-uninstall">cabal-uninstall</a> (and probably a few others) that remedies this to some extent, but it doesn’t work if the package has <em>already</em> been unregistered.</p>
+<p>Additionally, while ghc-pkg does warn you of dependency breakage, it doesn’t provide an easy way to remove a package and all its dependents transitively.</p>
+<h3 id="b.-removing-broken-packages-is-a-tedious-chore">B. Removing broken packages is a tedious chore</h3>
+<p>If for some reason your packages get broken, there’s no easy way to clean up the mess.</p>
+<p>On my system, this usually happens because Arch Linux upgrades some of the globally-installed packages, breaking swaths of user-installed packages in the process (or it could be due to a GHC upgrade).</p>
+<p>To fix this you’d have to unregister all of the broken packages. And if you want to reclaim the space used by the dead packages, you’d have to dive into <code>~/.cabal</code> and remove them manually.</p>
+<h2 id="tools">Tools</h2>
+<p>To help fix the issues outlined above, here are some scripts to assist the process:</p>
+<ul>
+<li><p><a href="https://github.com/Rufflewind/config/blob/master/home/sbin/cabal-gc">cabal-gc</a>: a “garbage collector” that searches for any lingering packages whose files still remain but are no longer registered. (<em>Note: it does not remove any executables in the <code>bin</code> directory.</em>)</p></li>
+<li><p><a href="https://github.com/Rufflewind/config/blob/master/home/sbin/ghc-pkg-check">ghc-pkg-check</a>: a thin wrapper around <code>ghc-pkg check</code> that suppresses the <a href="https://ghc.haskell.org/trac/ghc/ticket/8981">haddock warnings</a> that <a href="https://stackoverflow.com/q/22554498">no-one seems to care about</a>.</p></li>
+<li><p><a href="https://github.com/Rufflewind/config/blob/master/home/sbin/ghc-pkg-unregister">ghc-pkg-unregister</a>: a thin wrapper around <code>ghc-pkg unregister</code> that allows multiple packages to be unregistered in one call.</p></li>
+</ul>
+<p>While it’s possible to fully automate this process, it’s best to do them one at a time to make sure nothing bad happens.</p>
+<h2 id="tutorial">Tutorial</h2>
+<p>First off, if you want to manage packages in a <strong>sandbox</strong>, be sure to run this command <em>prior to</em> everything else below:</p>
+<pre><code class="shell"><p>cabal <span class="metatoken">[</span>--sandbox-config-file=<var>./cabal.sandbox.config</var><span class="metatoken">]</span> exec -- "$SHELL"</p></code></pre>
+<p>(The <code>--sandbox-config-file=…</code> flag is optional.)</p>
+<p>Now,</p>
+<ul>
+<li>if your goal is to <strong>uninstall a specific package</strong> as well as its dependents, then follow all the steps below;</li>
+<li>if your goal is to only <strong>remove broken packages</strong>, then jump straight to step 2.</li>
+</ul>
+<h3 id="remove-the-target-packages">1. Remove the target packages</h3>
+<p>To remove packages, the first thing to do would be to run:</p>
+<pre><code class="shell"><p>ghc-pkg-unregister <var>my-package-0.5.0 some-package-1.0.0</var> <span class="metatoken">…</span></p></code></pre>
+<p>If there are any dependent packages, you will receive an error telling you that those will be broken:</p>
+<pre><samp>ghc-pkg: unregistering <var>some-package-1.0.0</var> would break the following packages: <var>other-package-2.0.0 another-package-3.0.0</var> (use --force to override)</samp></pre>
+<p>If you’re alright with this, add the <code>--force</code> flag to remove it for good. We’ll eliminate the broken packages shortly.</p>
+<pre><code class="shell"><p>ghc-pkg-unregister --force <var>some-package-1.0.0</var> <span class="metatoken">…</span></p></code>
+<samp>unregistering <var>some-package-1.0.0</var> would break the following packages: <var>other-package-2.0.0 another-package-3.0.0</var> (ignoring)</samp></pre>
+<p>Despite the <a href="https://en.wikipedia.org/wiki/Uses_of_English_verb_forms#Conditional">conditional mood</a> in the message, the package will indeed be unregistered.</p>
+<h3 id="remove-the-dependent-packages">2. Remove the dependent packages</h3>
+<p>Now, we need to get rid of the broken packages. Let’s see which packages are broken:</p>
+<pre><code class="shell"><p>ghc-pkg-check</p></code>
+<samp>There are problems in package <var>other-package-2.0.0</var>:
+  dependency "<var>some-package-1.0.0-…</var>" doesn't exist
+There are problems in package <var>another-package-3.0.0</var>:
+  dependency "<var>some-package-1.0.0-…</var>" doesn't exist
+
+The following packages are broken, either because they have a problem
+listed above, or because they depend on a broken package.
+<var>other-package-2.0.0</var>
+<var>another-package-3.0.0</var></samp></pre>
+<p>To remove <em>all</em> of these broken packages, run:</p>
+<pre><code class="shell"><p>ghc-pkg-check --simple-output | xargs ghc-pkg-unregister --force </p></code></pre>
+<p>To make sure all of the broken packages are taken care of, run <code>ghc-pkg-check</code> again. If there are more broken packages, you’ll need to keep repeating this step until all of them have been eliminated.</p>
+<h3 id="delete-the-associated-files">3. Delete the associated files</h3>
+<p>This step is optional, although it can be useful to reclaim some disk space.</p>
+<p>Since we will be <em>deleting files</em>, it’s best to perform a dry run first:</p>
+<pre><code class="shell"><p>cabal-gc</p></code>
+<samp>can be removed: /home/<var>user</var>/.cabal/lib/<var>x86_64-linux-ghc-7.10.1/anoth_d9K7jTHCBftCdWJFHesDel</var>
+can be removed: /home/<var>user</var>/.cabal/lib/<var>x86_64-linux-ghc-7.10.1/other_8j0AdSQVkKosS3ev8r3pBu</var>
+can be removed: /home/<var>user</var>/.cabal/lib/<var>x86_64-linux-ghc-7.10.1/mypac_XYf894wKraySpNs9RUwwMV</var>
+can be removed: /home/<var>user</var>/.cabal/lib/<var>x86_64-linux-ghc-7.10.1/somep_x3XTaLFeSmcMHNpv7Ng8xw</var>
+can be removed: /home/<var>user</var>/.cabal/share/doc/<var>x86_64-linux-ghc-7.10.1/another-package-3.0.0</var>
+can be removed: /home/<var>user</var>/.cabal/share/doc/<var>x86_64-linux-ghc-7.10.1/other-package-2.0.0</var>
+can be removed: /home/<var>user</var>/.cabal/share/doc/<var>x86_64-linux-ghc-7.10.1/my-package-0.5.0</var>
+can be removed: /home/<var>user</var>/.cabal/share/doc/<var>x86_64-linux-ghc-7.10.1/some-package-1.0.0</var></samp></pre>
+<p>If everything looks okay, go ahead and delete them for real:</p>
+<pre><code class="shell"><p>cabal-gc -r</p></code>
+<samp>removed: /home/<var>user</var>/.cabal/lib/<var>x86_64-linux-ghc-7.10.1/anoth_d9K7jTHCBftCdWJFHesDel</var>
+removed: /home/<var>user</var>/.cabal/lib/<var>x86_64-linux-ghc-7.10.1/other_8j0AdSQVkKosS3ev8r3pBu</var>
+removed: /home/<var>user</var>/.cabal/lib/<var>x86_64-linux-ghc-7.10.1/mypac_XYf894wKraySpNs9RUwwMV</var>
+removed: /home/<var>user</var>/.cabal/lib/<var>x86_64-linux-ghc-7.10.1/somep_x3XTaLFeSmcMHNpv7Ng8xw</var>
+removed: /home/<var>user</var>/.cabal/share/doc/<var>x86_64-linux-ghc-7.10.1/another-package-3.0.0</var>
+removed: /home/<var>user</var>/.cabal/share/doc/<var>x86_64-linux-ghc-7.10.1/other-package-2.0.0</var>
+removed: /home/<var>user</var>/.cabal/share/doc/<var>x86_64-linux-ghc-7.10.1/my-package-0.5.0</var>
+removed: /home/<var>user</var>/.cabal/share/doc/<var>x86_64-linux-ghc-7.10.1/some-package-1.0.0</var></samp></pre>
+
+  </div>
+  <div id="comments" property="schema:comment">
+    <p><a class="link-button" id="show-disqus-button" href="#comments">Show Disqus comments</a></p>
+    <div id="disqus_thread"></div>
+    <a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+    <script type="text/javascript">
+      var button = document.getElementById('show-disqus-button');
+      var brlink = document.getElementsByClassName('dsq-brlink')[0];
+      brlink.style.display = 'none';
+      button.onclick = function() {
+        button.style.display = 'none';
+        brlink.style.display = 'block';
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//rufflewind.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+      };
+    </script>
+  </div>
+</article>
+
+      </div>
+    </div>
+    <div class="lower">
+      <footer class="root">
+        <small>
+          Hosted on <a href="https://pages.github.com">GitHub Pages</a>.
+          Built with <a href="http://jekyllrb.com">Jekyll</a>.
+          Some rights reserved
+          (<a rel="license" href="https://creativecommons.org/licenses/by/4.0" property="schema:license">CC BY 4.0</a>).
+          <a href="/feed.xml">
+            <svg xmlns="http://www.w3.org/2000/svg"
+                 version="1.1" width="1em" height="1em" viewBox="0 0 256 256">
+              <defs>
+                <linearGradient id="RSSg" x1="0.085" y1="0.085" x2="0.915" y2="0.915">
+                  <stop offset="0.0" stop-color="#e3702d"/>
+                  <stop offset="0.1071" stop-color="#ea7d31"/>
+                  <stop offset="0.3503" stop-color="#f69537"/>
+                  <stop offset="0.5" stop-color="#fb9e3a"/>
+                  <stop offset="0.7016" stop-color="#ea7c31"/>
+                  <stop offset="0.8866" stop-color="#de642b"/>
+                  <stop offset="1.0" stop-color="#d95b29"/>
+                </linearGradient>
+              </defs>
+              <rect width="256" height="256" rx="55" ry="55" x="0" y="0" fill="#cc5d15"/>
+              <rect width="246" height="246" rx="50" ry="50" x="5" y="5" fill="#f49c52"/>
+              <rect width="236" height="236" rx="47" ry="47" x="10" y="10" fill="url(#RSSg)"/>
+              <circle cx="68" cy="189" r="24" fill="#fff"/>
+              <path d="M160 213h-34a82 82 0 0 0 -82 -82v-34a116 116 0 0 1 116 116z" fill="#fff"/>
+              <path d="M184 213A140 140 0 0 0 44 73 V 38a175 175 0 0 1 175 175z" fill="#fff"/>
+            </svg>
+          </a>
+        </small>
+      </footer>
+    </div>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <script>
+      window.jQuery ||
+      document.write('<script src="/js/vendor/jquery-1.11.3.min.js"><\/script>')
+    </script>
+    <script src="/js/plugins.js"></script>
+    <script src="/js/main.js"></script>
+  </body>
+</html>

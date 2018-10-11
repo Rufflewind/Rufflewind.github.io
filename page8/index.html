@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html class="no-js">
+  <head>
+    <meta charset="utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>Rufflewind's Scratchpad</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Fira+Mono|Fira+Sans|Oxygen"/>
+    <link rel="stylesheet" href="/css/normalize.css"/>
+    <link rel="stylesheet" href="/css/syntax.css"/>
+    <link rel="stylesheet" href="/css/main.css"/>
+    <link rel="icon" href="/favicon.ico"/>
+    <link rel="alternate" type="application/rss+xml" href="/feed"/>
+    <script src="/js/vendor/modernizr.custom.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+      ga('create', 'UA-48515395-1', 'rufflewind.com');
+      ga('send', 'pageview');
+    </script>
+  </head>
+  <body prefix="schema: http://schema.org/" typeof="schema:Blog">
+    <div class="upper">
+      <header class="root">
+        <div class="header-title">
+          <h1><a href="/">Rufflewind's Scratchpad</a></h1>
+        </div>
+        <div class="header-banner">
+          <nav>
+            <ul>
+              <li><a class="extra" href="/">Home</a></li>
+              <li><a class="extra" href="/archive">Archive</a></li>
+              <li><a class="extra" href="/about">About</a></li>
+            </ul>
+            <form class="search" method="get" action="//google.com/search">
+              <input type="hidden" name="sitesearch" value="rufflewind.com"/>
+              <input id="search-input" type="search" name="q" placeholder="Search"/>
+              <button id="search-button">
+                <svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 100 100">
+                  <circle cx="42" cy="42" r="30" stroke="white" stroke-width="12" fill="none"/>
+                  <path d="m 60 60 35 35" stroke="white" stroke-width="12" fill="none"/>
+                </svg>
+                <span>Search</span>
+              </button>
+            </form>
+          </nav>
+        </div>
+      </header>
+      <div class="content">
+        
+
+
+
+<nav class="pagination">
+ 
+  <a class="prev" href="/page7">&lArr; Prev</a>
+ 
+
+ 
+  
+  
+  <a class="page" href="/">1</a>
+  
+ 
+  
+  
+  <a class="page" href="/page2">2</a>
+  
+ 
+  
+  
+  <a class="page" href="/page3">3</a>
+  
+ 
+  
+  
+  <a class="page" href="/page4">4</a>
+  
+ 
+  
+  
+  <a class="page" href="/page5">5</a>
+  
+ 
+  
+  
+  <a class="page" href="/page6">6</a>
+  
+ 
+  
+  
+  <a class="page" href="/page7">7</a>
+  
+ 
+  
+  
+  <strong class="page">8</strong>
+  
+ 
+  
+  
+  <a class="page" href="/page9">9</a>
+  
+ 
+
+ 
+  <a class="next" href="/page9">Next &rArr;</a>
+ 
+</nav>
+
+
+
+
+<article class="h-entry post" property="schema:blogPost" typeof="schema:BlogPosting">
+  <header>
+    <h1 property="schema:headline schema:name"><a class="p-name u-url" href="/2014-08-03/haskell-numeric-type-classes-hierarchy">Chart: hierarchy of the numeric type classes in Haskell</a></h1>
+    <div class="meta">
+      <time class="dt-published date" property="schema:datePublished">2014-08-03</time>
+      <ul class="tags">
+        
+        <li property="schema:keywords"><a class="p-category tag" href="/archive/tag#tag-haskell">haskell</a></li>
+        
+      </ul>
+    </div>
+  </header>
+  <div class="e-content post-content" property="schema:articleBody">
+    <p>Here’s a simple chart that shows the hierarchy of the various number-related type classes in Haskell. Also shown are the methods required for a minimal complete definition. (Click to zoom in!)</p>
+<p>You can also <a href="/img/haskell-numeric-type-classes.svg">get the SVG version</a>.</p>
+<p><a href="/img/haskell-numeric-type-classes.png"><img src="/img/haskell-numeric-type-classes.png" alt="hierarchy of the numeric type classes" /></a></p>
+
+  </div>
+  <p><a class="link-button" href="/2014-08-03/haskell-numeric-type-classes-hierarchy#comments">Comments</a></p>
+</article>
+
+<article class="h-entry post" property="schema:blogPost" typeof="schema:BlogPosting">
+  <header>
+    <h1 property="schema:headline schema:name"><a class="p-name u-url" href="/2014-07-20/pasting-unicode-in-emacs-on-windows">Pasting Unicode characters in Emacs (Windows)</a></h1>
+    <div class="meta">
+      <time class="dt-published date" property="schema:datePublished">2014-07-20</time>
+      <ul class="tags">
+        
+        <li property="schema:keywords"><a class="p-category tag" href="/archive/tag#tag-emacs">emacs</a></li>
+        
+        <li property="schema:keywords"><a class="p-category tag" href="/archive/tag#tag-windows">windows</a></li>
+        
+      </ul>
+    </div>
+  </header>
+  <div class="e-content post-content" property="schema:articleBody">
+    <p>Previously, I ran into an issue with pasting non-ASCII characters into Emacs on my Windows system. For example, copying a <span class="unicode-name">Greek small letter rho</span> (<code>ρ</code>) would result in a <span class="unicode-name">question mark</span> (<code>?</code>) appearing in the Emacs editor. Oddly enough, copying Unicode characters <em>from</em> Emacs generally worked fine.</p>
+<p>Originally, I assumed it was a bug in Emacs. Yet, I couldn’t find any bug reports about it so that seemed unlikely. Eventually, I came to realize that one of the settings in my Emacs profile (<code>.emacs</code> or <code>init.el</code>) caused the problem:</p>
+<pre class="common-lisp"><code>(set-selection-coding-system &#39;utf-8)              ; wrong</code></pre>
+<p>As it turns out, the correct value is <code>'utf-16-le</code> because the Windows API is built entirely on top of UTF-16:</p>
+<pre class="common-lisp"><code>(set-selection-coding-system &#39;utf-16-le)          ; correct</code></pre>
+<p>The problem was introduced a while back: it was part of a hack to force Emacs to use UTF-8 as the default buffer encoding. At the time, I copied the code from this <a href="http://stackoverflow.com/a/2903256/1435577">StackOverflow answer</a> (fixed now) without too much thought, not realizing it would cause a bug discovered several months later. It turns out that <code>set-selection-coding-system</code> and <code>set-clipboard-coding-system</code> actually do the same thing, but the connection between <em>selections</em> and <em>clipboards</em> is not exactly obvious until one becomes familiar with the Emacs jargon.</p>
+<p>Fortunately, the choice of the <code>selection-coding-system</code> doesn’t affect the encoding of the buffer itself, so it doesn’t invalidate the hack I used to enforce UTF-8 as the default buffer encoding.</p>
+
+  </div>
+  <p><a class="link-button" href="/2014-07-20/pasting-unicode-in-emacs-on-windows#comments">Comments</a></p>
+</article>
+
+<article class="h-entry post" property="schema:blogPost" typeof="schema:BlogPosting">
+  <header>
+    <h1 property="schema:headline schema:name"><a class="p-name u-url" href="/2014-07-16/custom-cabal-build-type">The custom build type in Cabal</a></h1>
+    <div class="meta">
+      <time class="dt-published date" property="schema:datePublished">2014-07-16</time>
+      <ul class="tags">
+        
+        <li property="schema:keywords"><a class="p-category tag" href="/archive/tag#tag-haskell">haskell</a></li>
+        
+      </ul>
+    </div>
+  </header>
+  <div class="e-content post-content" property="schema:articleBody">
+    <p>This story does not have a happy ending. Rather, it explores the various difficulties I encountered while trying to customize <a href="http://haskell.org/cabal">Cabal</a>’s build process.</p>
+<p>The default setup of Cabal generally works fine … as long as you’re not doing anything unusual. What I needed to do was to try and find some platform-dependent C libraries and also do a little bit of custom preprocessing on the source code. Cabal’s way of finding C libraries is not very sophisticated and it only supports a limited number of known preprocessors (such as C2HS), so I had to cook up the solution myself.</p>
+<p>The “Custom” build type provided by Cabal is very powerful, since you are given full control of the Cabal library. All you have to do is to edit your <code>*.cabal</code> file to say</p>
+<pre><code>build-type: Custom</code></pre>
+<p>and then homebrew your own <code>Setup.hs</code>. Sounds simple, right?</p>
+<p>Unfortunately, it’s not so easy because there just isn’t a whole lot of documentation about writing custom Cabal builds. The <a href="http://haskell.org/cabal/release/latest/doc/users-guide/developing-packages.html#more-complex-packages">User Guide</a> doesn’t say much about it other than mentioning the flag and ending with an ominous “Good luck”. And there’s about <a href="http://stackoverflow.com/a/16261412/440302">one example on StackOverflow</a>.</p>
+<p>I mean, at least the official <a href="http://hackage.haskell.org/package/Cabal">documentation for the Cabal library</a> isn’t bad, but it’s so overwhelming that you are sort of left wondering <em>where to even begin</em>.</p>
+<p>The <a href="http://stackoverflow.com/a/16261412/440302">example on StackOverflow</a> was helpful for getting started though. It turns out most of the time all you care about is writing hooks. <a href="http://hackage.haskell.org/package/Cabal/docs/Distribution-Simple-UserHooks.html">Hooks</a> allow existing Cabal functionality to be overriden by your own functions. The names of the hooks are relatively descriptive, but the argument lists can be somewhat daunting at first because there are quite a few record-like data types used by Cabal. (Records are also somewhat painful to work with in Haskell, especially ones that are heavily nested.)</p>
+<p>I’ll use the one that I worked with as an example: the <code>postConf</code> (post-configuration) hook. The others are similar (I hope), but I’ve not actually played with them.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode hs"><code class="sourceCode haskell"><a class="sourceLine" id="cb2-1" data-line-number="1">postConf<span class="ot"> _ ::</span> <span class="dt">Args</span></a>
+<a class="sourceLine" id="cb2-2" data-line-number="2">           <span class="ot">-&gt;</span> <span class="dt">ConfigFlags</span></a>
+<a class="sourceLine" id="cb2-3" data-line-number="3">           <span class="ot">-&gt;</span> <span class="dt">PackageDescription</span></a>
+<a class="sourceLine" id="cb2-4" data-line-number="4">           <span class="ot">-&gt;</span> <span class="dt">LocalBuildInfo</span></a>
+<a class="sourceLine" id="cb2-5" data-line-number="5">           <span class="ot">-&gt;</span> <span class="dt">IO</span> ()</a></code></pre></div>
+<p>I’m not entirely clear what the docs mean by “after [the] configure command” though! My guess is that it occurs immediately after parsing the <code>*.cabal</code> file and evaluating with the conditionals in the <code>*.cabal</code> file. Why? If you look at <code>confHook</code> instead, you will find that it has <code>GenericPackageDescription</code> instead of <code>PackageDescription</code>. The <code>GenericPackageDescription</code> contains the unevaluated conditionals, and thus you’ll find that the package description is still incomplete (lots of <code>Nothing</code>) if you use <code>confHook</code> instead of <code>postConf</code>.</p>
+<p>The arguments are relatively self-explanatory if you examine their types, so I won’t say much about those.</p>
+<p>How do you write the hook then? Here’s a basic template:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode hs"><code class="sourceCode haskell"><a class="sourceLine" id="cb3-1" data-line-number="1">myPostConf args cf pd lbi <span class="fu">=</span> <span class="kw">do</span></a>
+<a class="sourceLine" id="cb3-2" data-line-number="2">  <span class="co">-- ... do something ...</span></a>
+<a class="sourceLine" id="cb3-3" data-line-number="3">  postConf simpleUserHooks args cf pd lbi</a></code></pre></div>
+<p>Simply define a function with the right signature, and then call the default hook after doing whatever you wanted to do in the hook. The default hooks are all conveniently stored in <code>simpleUserHooks</code>.</p>
+<p>The <code>main</code> function is straightforward:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode hs"><code class="sourceCode haskell"><a class="sourceLine" id="cb4-1" data-line-number="1">main <span class="fu">=</span> defaultMainWithHooks simpleUserHooks</a>
+<a class="sourceLine" id="cb4-2" data-line-number="2">       { postConf <span class="fu">=</span> myPostConf</a>
+<a class="sourceLine" id="cb4-3" data-line-number="3">       <span class="co">-- ... additional hooks ...</span></a>
+<a class="sourceLine" id="cb4-4" data-line-number="4">       }</a></code></pre></div>
+<p>So all in all it doesn’t seem <em>too</em> difficult. However, it turns out I didn’t fully understand what the hook does.</p>
+<p>The <code>postConf</code> hook is <em>not</em> guaranteed to run if you are building or installing or doing anything else. Furthermore, even if you modify the package description and pass it into the default hook, (due to some weird reasons I’ve yet to figure out) it affects the configuration process but won’t affect the actual build!</p>
+<p>So I spent a few hours futilely debugging a problem only to realize the changes I made to <code>postConf</code> didn’t actually affect the build. There is probably a way to make it work though, but it would likely involve binding it to more hooks.</p>
+<p>After that “profound” realization, I’ve not really looked into this further. I settled for the simple build type instead because it’s just not worth all the trouble (and I found alternative, simpler solutions). :c</p>
+
+  </div>
+  <p><a class="link-button" href="/2014-07-16/custom-cabal-build-type#comments">Comments</a></p>
+</article>
+
+
+      </div>
+    </div>
+    <div class="lower">
+      <footer class="root">
+        <small>
+          Hosted on <a href="https://pages.github.com">GitHub Pages</a>.
+          Built with <a href="http://jekyllrb.com">Jekyll</a>.
+          Some rights reserved
+          (<a rel="license" href="https://creativecommons.org/licenses/by/4.0" property="schema:license">CC BY 4.0</a>).
+          <a href="/feed.xml">
+            <svg xmlns="http://www.w3.org/2000/svg"
+                 version="1.1" width="1em" height="1em" viewBox="0 0 256 256">
+              <defs>
+                <linearGradient id="RSSg" x1="0.085" y1="0.085" x2="0.915" y2="0.915">
+                  <stop offset="0.0" stop-color="#e3702d"/>
+                  <stop offset="0.1071" stop-color="#ea7d31"/>
+                  <stop offset="0.3503" stop-color="#f69537"/>
+                  <stop offset="0.5" stop-color="#fb9e3a"/>
+                  <stop offset="0.7016" stop-color="#ea7c31"/>
+                  <stop offset="0.8866" stop-color="#de642b"/>
+                  <stop offset="1.0" stop-color="#d95b29"/>
+                </linearGradient>
+              </defs>
+              <rect width="256" height="256" rx="55" ry="55" x="0" y="0" fill="#cc5d15"/>
+              <rect width="246" height="246" rx="50" ry="50" x="5" y="5" fill="#f49c52"/>
+              <rect width="236" height="236" rx="47" ry="47" x="10" y="10" fill="url(#RSSg)"/>
+              <circle cx="68" cy="189" r="24" fill="#fff"/>
+              <path d="M160 213h-34a82 82 0 0 0 -82 -82v-34a116 116 0 0 1 116 116z" fill="#fff"/>
+              <path d="M184 213A140 140 0 0 0 44 73 V 38a175 175 0 0 1 175 175z" fill="#fff"/>
+            </svg>
+          </a>
+        </small>
+      </footer>
+    </div>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <script>
+      window.jQuery ||
+      document.write('<script src="/js/vendor/jquery-1.11.3.min.js"><\/script>')
+    </script>
+    <script src="/js/plugins.js"></script>
+    <script src="/js/main.js"></script>
+  </body>
+</html>

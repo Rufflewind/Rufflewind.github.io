@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html class="no-js">
+  <head>
+    <meta charset="utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>Rufflewind's Scratchpad</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Fira+Mono|Fira+Sans|Oxygen"/>
+    <link rel="stylesheet" href="/css/normalize.css"/>
+    <link rel="stylesheet" href="/css/syntax.css"/>
+    <link rel="stylesheet" href="/css/main.css"/>
+    <link rel="icon" href="/favicon.ico"/>
+    <link rel="alternate" type="application/rss+xml" href="/feed"/>
+    <script src="/js/vendor/modernizr.custom.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+      ga('create', 'UA-48515395-1', 'rufflewind.com');
+      ga('send', 'pageview');
+    </script>
+  </head>
+  <body prefix="schema: http://schema.org/" typeof="schema:Blog">
+    <div class="upper">
+      <header class="root">
+        <div class="header-title">
+          <h1><a href="/">Rufflewind's Scratchpad</a></h1>
+        </div>
+        <div class="header-banner">
+          <nav>
+            <ul>
+              <li><a class="extra" href="/">Home</a></li>
+              <li><a class="extra" href="/archive">Archive</a></li>
+              <li><a class="extra" href="/about">About</a></li>
+            </ul>
+            <form class="search" method="get" action="//google.com/search">
+              <input type="hidden" name="sitesearch" value="rufflewind.com"/>
+              <input id="search-input" type="search" name="q" placeholder="Search"/>
+              <button id="search-button">
+                <svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 100 100">
+                  <circle cx="42" cy="42" r="30" stroke="white" stroke-width="12" fill="none"/>
+                  <path d="m 60 60 35 35" stroke="white" stroke-width="12" fill="none"/>
+                </svg>
+                <span>Search</span>
+              </button>
+            </form>
+          </nav>
+        </div>
+      </header>
+      <div class="content">
+        
+
+
+
+<nav class="pagination">
+ 
+  <a class="prev" href="/page6">&lArr; Prev</a>
+ 
+
+ 
+  
+  
+  <a class="page" href="/">1</a>
+  
+ 
+  
+  
+  <a class="page" href="/page2">2</a>
+  
+ 
+  
+  
+  <a class="page" href="/page3">3</a>
+  
+ 
+  
+  
+  <a class="page" href="/page4">4</a>
+  
+ 
+  
+  
+  <a class="page" href="/page5">5</a>
+  
+ 
+  
+  
+  <a class="page" href="/page6">6</a>
+  
+ 
+  
+  
+  <strong class="page">7</strong>
+  
+ 
+  
+  
+  <a class="page" href="/page8">8</a>
+  
+ 
+  
+  
+  <a class="page" href="/page9">9</a>
+  
+ 
+
+ 
+  <a class="next" href="/page8">Next &rArr;</a>
+ 
+</nav>
+
+
+
+
+<article class="h-entry post" property="schema:blogPost" typeof="schema:BlogPosting">
+  <header>
+    <h1 property="schema:headline schema:name"><a class="p-name u-url" href="/2014-08-23/windows-bash-slow">Bash on Windows is really slow</a></h1>
+    <div class="meta">
+      <time class="dt-published date" property="schema:datePublished">2014-08-23</time>
+      <ul class="tags">
+        
+        <li property="schema:keywords"><a class="p-category tag" href="/archive/tag#tag-cygwin">cygwin</a></li>
+        
+        <li property="schema:keywords"><a class="p-category tag" href="/archive/tag#tag-mingw">mingw</a></li>
+        
+        <li property="schema:keywords"><a class="p-category tag" href="/archive/tag#tag-shell">shell</a></li>
+        
+        <li property="schema:keywords"><a class="p-category tag" href="/archive/tag#tag-windows">windows</a></li>
+        
+      </ul>
+    </div>
+  </header>
+  <div class="e-content post-content" property="schema:articleBody">
+    <p>Bash is <em>really slow</em> on Windows. See for yourself:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode sh"><code class="sourceCode bash"><a class="sourceLine" id="cb1-1" data-line-number="1"><span class="co"># builtin command</span></a>
+<a class="sourceLine" id="cb1-2" data-line-number="2"><span class="bu">time</span> { :<span class="kw">;</span> }</a>
+<a class="sourceLine" id="cb1-3" data-line-number="3"><span class="co"># Linux:   0.000s</span></a>
+<a class="sourceLine" id="cb1-4" data-line-number="4"><span class="co"># Windows: 0.000s</span></a>
+<a class="sourceLine" id="cb1-5" data-line-number="5"></a>
+<a class="sourceLine" id="cb1-6" data-line-number="6"><span class="co"># builtin command in a subshell</span></a>
+<a class="sourceLine" id="cb1-7" data-line-number="7"><span class="bu">time</span> { ( : ); }</a>
+<a class="sourceLine" id="cb1-8" data-line-number="8"><span class="co"># Linux:   0.001s</span></a>
+<a class="sourceLine" id="cb1-9" data-line-number="9"><span class="co"># Windows: 0.054s</span></a>
+<a class="sourceLine" id="cb1-10" data-line-number="10"></a>
+<a class="sourceLine" id="cb1-11" data-line-number="11"><span class="co"># non-builtin command</span></a>
+<a class="sourceLine" id="cb1-12" data-line-number="12"><span class="bu">time</span> { date<span class="kw">;</span> }</a>
+<a class="sourceLine" id="cb1-13" data-line-number="13"><span class="co"># Linux:   0.002s</span></a>
+<a class="sourceLine" id="cb1-14" data-line-number="14"><span class="co"># Windows: 0.108s</span></a></code></pre></div>
+<p>Notice that running a non-<a href="http://gnu.org/software/bash/manual/html_node/Bash-Builtins.html">builtin</a> command can be <em>two orders of magnitude</em> more expensive on Windows than on Linux. Creating a <a href="http://pubs.opengroup.org/onlinepubs/009695399/utilities/xcu_chap02.html#tag_02_12">subshell</a> is also very slow. Running 10 commands could cost as much as a full second, if not more! This is why shell scripts such as <a href="https://en.wikipedia.org/wiki/Configure_script">configure scripts</a> are incredibly slow on Windows.</p>
+<p>The results here are from Cygwin, but those from Mingw are in the same ballpark. This is probably due to the fact that <a href="https://cygwin.com/faq.html#faq.api.fork">forking is inherently slow on Windows</a> due to the lack of direct support from the OS, so there’s little that can be done to avoid the performance penalty.</p>
+<p>Moral of the story? If you are writing shell scripts for Windows, try to avoid making calls to non-builtin commands and avoid making subshells when possible. Unfortunately, there’s not much you can do with <em>only</em> builtin commands. Furthermore, many operations, such as <a href="http://pubs.opengroup.org/onlinepubs/009695399/utilities/xcu_chap02.html#tag_02_06_03">command substitution</a> <code>$(…)</code> and <a href="http://pubs.opengroup.org/onlinepubs/009695399/utilities/xcu_chap02.html#tag_02_09_02">pipelines</a> <code>… | …</code> will implicitly spawn subshells. :(</p>
+<p>On the bright side, <code>printf</code> is a builtin command in Bash, so at least you don’t have to choose between <code>printf</code> and <code>echo</code> for performance reasons (the latter being a <a href="http://pubs.opengroup.org/onlinepubs/9699919799/utilities/echo.html#tag_20_37_16">portability nightmare</a>).</p>
+
+  </div>
+  <p><a class="link-button" href="/2014-08-23/windows-bash-slow#comments">Comments</a></p>
+</article>
+
+<article class="h-entry post" property="schema:blogPost" typeof="schema:BlogPosting">
+  <header>
+    <h1 property="schema:headline schema:name"><a class="p-name u-url" href="/2014-08-17/usual-arithmetic-conversions">The usual arithmetic conversions</a></h1>
+    <div class="meta">
+      <time class="dt-published date" property="schema:datePublished">2014-08-17</time>
+      <ul class="tags">
+        
+        <li property="schema:keywords"><a class="p-category tag" href="/archive/tag#tag-c">c</a></li>
+        
+        <li property="schema:keywords"><a class="p-category tag" href="/archive/tag#tag-c++">c++</a></li>
+        
+      </ul>
+    </div>
+  </header>
+  <div class="e-content post-content" property="schema:articleBody">
+    <p>In C and C++, the <strong>usual arithmetic conversions</strong> are a set of implicit conversions performed to match the operand types in built-in binary operations such as addition, subtraction, less-than, etc (note that bit-shifts are <em>not</em> included). These conversions can occasionally result in subtle bugs, such as:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode c"><code class="sourceCode c"><a class="sourceLine" id="cb1-1" data-line-number="1"><span class="co">/* this&#39;ll never terminate :C */</span></a>
+<a class="sourceLine" id="cb1-2" data-line-number="2"><span class="dt">int</span> i;</a>
+<a class="sourceLine" id="cb1-3" data-line-number="3"><span class="dt">unsigned</span> n = <span class="dv">10</span>;</a>
+<a class="sourceLine" id="cb1-4" data-line-number="4"><span class="cf">for</span> (i = <span class="dv">0</span>; n - i &gt;= <span class="dv">0</span>; ++i) { <span class="co">/* ... */</span> }</a></code></pre></div>
+<p>A somewhat contrived example, but the point is that mixing signed and unsigned integers can often result in unexpected conversions. In the expression <code>n - i</code> of this example, because <code>n</code> is unsigned and has the same <em>conversion rank</em> as <code>i</code>, <code>i</code> is implicitly converted into <code>unsigned</code>. The result is therefore also <code>unsigned</code>, causing the loop condition to be trivially satisfied. Therefore, it’s always a good idea to enable compiler warnings for sign-to-unsigned conversions (<code>-Wsign-conversion</code> in GCC and Clang).</p>
+<p>The <a href="http://en.cppreference.com/w/cpp/language/operator_arithmetic#Conversions">exact rules are rather long and arcane</a> so I won’t duplicate them here, but the key is recognize that there is actually a <em>rationale</em> behind it, which can be summarized as the following rules:</p>
+<ul>
+<li><em>Rule A.</em> The final conversion rank is always the larger of the two, no more, no less. The rank is related to the size of integer types, so you’ll never get a type whose size is larger than expected.</li>
+<li><em>Rule B.</em> The conversion will never cause a signed integer overflow, so undefined behavior won’t occur due to the conversion itself (it can still occur due to the operation, however).</li>
+</ul>
+<p><small>Note: Although Rule A holds for the usual arithmetic conversions, <a href="http://en.cppreference.com/w/cpp/language/implicit_cast#Integral_conversions"><strong>integer promotion</strong> <em>does</em> violate Rule A</a>. In addition, the rationale presented here is a “best guess” and doesn’t necessarily correlate with the rationale of the standards committee.</small></p>
+<p>The unfortunate corollary of the two rules is that frequently you will end up with signed-to-unsigned conversions because the compiler is <em>actively avoiding</em> a potential signed overflow while preserving Rule A. When can this happen? When <em>both</em> of the following hold:</p>
+<ul>
+<li>Naturally, one operand needs to be <em>unsigned</em> and the other operand needs to be <em>signed</em>.</li>
+<li>The type of the signed operand <em>can’t represent every possible value</em> in the type of the unsigned operand. That is, when an overflow of the signed operand would otherwise occur.</li>
+</ul>
+<p>In fact, this is really the only scenario that you have to worry about as far as the usual arithmetic conversions are concerned (for integers). In all other cases, the value is preserved by this conversion and hence you won’t see any surprises.</p>
+<p><small>Note: I haven’t actually said anything about floating-point numbers. They are like a trump card: any time a floating-point number is present, the conversion will favor the most precise floating-point number. This is not quite as bad as the signed-to-unsigned conversions, but <a href="http://stackoverflow.com/a/1848762">it can still be lossy if you have very large integers</a>.</small></p>
+<p>Official reference: <a href="http://open-std.org/jtc1/sc22/wg14/www/docs/n1570.pdf">N1570 Section 6.3.1.8</a>.</p>
+
+  </div>
+  <p><a class="link-button" href="/2014-08-17/usual-arithmetic-conversions#comments">Comments</a></p>
+</article>
+
+<article class="h-entry post" property="schema:blogPost" typeof="schema:BlogPosting">
+  <header>
+    <h1 property="schema:headline schema:name"><a class="p-name u-url" href="/2014-08-08/scientific-ratio-comparison-algorithm">An algorithm for comparing large rational numbers in scientific notation</a></h1>
+    <div class="meta">
+      <time class="dt-published date" property="schema:datePublished">2014-08-08</time>
+      <ul class="tags">
+        
+        <li property="schema:keywords"><a class="p-category tag" href="/archive/tag#tag-math">math</a></li>
+        
+        <li property="schema:keywords"><a class="p-category tag" href="/archive/tag#tag-algorithm">algorithm</a></li>
+        
+      </ul>
+    </div>
+  </header>
+  <div class="e-content post-content" property="schema:articleBody">
+    <p>Say you’re given two numbers in the following representation:</p>
+<pre><code>x / y × 10 ^ a
+u / v × 10 ^ b</code></pre>
+<p>with all the variables being integers and, in particular, <code>y</code> and <code>v</code> being always positive. How would you compare these two numbers efficiently in software? For sufficiently small numbers, it’s not a problem since we can rely on floating-point hardware. But what about exact, arbitrarily large numbers?</p>
+<p>You could convert them both into fractions with the same denominator and then compare the integers, but that can be rather inefficient if <code>a</code> and <code>b</code> are wildly different. (Similarly, addition and subtraction can be quite expensive if <code>a</code> and <code>b</code> differ greatly, but sadly there’s no way to get around that.)</p>
+<h2 id="the-algorithm">The algorithm</h2>
+<p>We can write this in the form of an inequality:</p>
+<pre><code>x / y × 10 ^ a  ~  u / v × 10 ^ b</code></pre>
+<p>where the “unknown variable” to be solved is <code>~</code> and can be <code>&gt;</code>, <code>=</code>, or <code>&lt;</code>. We can manipulate this just like an equation, but with one caveat: we mustn’t multiply or divide by a number unless we are absolutely sure that it’s positive.</p>
+<p>Since <code>y</code> and <code>v</code> are both positive, we can safely multiply by those to obtain:</p>
+<pre><code>x × v × 10 ^ a  ~  u × y × 10 ^ b</code></pre>
+<p>Now let’s define some variables to clean up the inequality:</p>
+<pre><code>m ≡ x × v
+n ≡ u × y</code></pre>
+<p>It’s helpful to split the variables <code>m</code> and <code>n</code> into their signs and moduli:</p>
+<pre><code>σ ≡ sgn m
+τ ≡ sgn n
+
+M ≡ |m|
+N ≡ |n|</code></pre>
+<p>The inequality then becomes:</p>
+<pre><code>σ × M × 10 ^ a  ~  τ × N × 10 ^ b</code></pre>
+<p>The signs <code>σ</code> and <code>τ</code> can already be used to determine the ordering in 7 out of the 9 cases:</p>
+<pre><code> σ   τ  ~
+---------
+−1  −1  ?
+−1   0  &lt;
+−1  +1  &lt;
+ 0  −1  &gt;
+ 0   0  =
+ 0  +1  &lt;
++1  −1  &gt;
++1   0  &gt;
++1  +1  ?</code></pre>
+<p>That leaves us with the two nontrivial cases where both signs are positive or both signs are negative. In these cases:</p>
+<pre><code>σ = τ = +1   ⟹   M × 10 ^ a  ~  N × 10 ^ b
+σ = τ = −1   ⟹   N × 10 ^ b  ~  M × 10 ^ a</code></pre>
+<p>We’ll consider only the first case. The second case is identical, just reversed.</p>
+<p>The trick to making the comparisons more efficient is to use <em>logarithms</em>: since the logarithmic function is monotonic, they preserve the ordering and can be safely applied to both sides of the inequality:</p>
+<pre><code>log M + a  ~  log N + b</code></pre>
+<p>The problem is that logarithms aren’t that easy to compute. But we can substitute this by computing <em>floored</em> logarithms (<code>ilog</code>) and its fractional part (<code>rlog</code>), which satisfy the following for any positive <code>z</code>:</p>
+<pre><code>log z ≡ ilog z + rlog z
+
+0 ≤ rlog z &lt; 1
+
+ilog z ∈ ℕ</code></pre>
+<p>Floored logarithms are easy to calculate: simply combine trial division with <a href="https://en.wikipedia.org/wiki/Exponential_search">exponential search</a>. Here is an example of such in Haskell, based on the implementation of <code>integerLogBase</code> in <a href="https://haskell.org/onlinereport/numeric.html#sect14">section 14.4 of The Haskell 98 Language Report</a>:</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode hs"><code class="sourceCode haskell"><a class="sourceLine" id="cb11-1" data-line-number="1"><span class="co">-- precondition: `base` is greater than one and `num` is positive</span></a>
+<a class="sourceLine" id="cb11-2" data-line-number="2"><span class="ot">ilogBase ::</span> (<span class="dt">Integral</span> a, <span class="dt">Integral</span> b) <span class="ot">=&gt;</span> a <span class="ot">-&gt;</span> a <span class="ot">-&gt;</span> b</a>
+<a class="sourceLine" id="cb11-3" data-line-number="3">ilogBase base num <span class="fu">=</span> fst (ilogr base num)</a>
+<a class="sourceLine" id="cb11-4" data-line-number="4">  <span class="kw">where</span> ilogr b n <span class="fu">|</span> n  <span class="fu">&lt;</span> b    <span class="fu">=</span>      (<span class="dv">0</span>, n)</a>
+<a class="sourceLine" id="cb11-5" data-line-number="5">                  <span class="fu">|</span> n&#39; <span class="fu">&lt;</span> b    <span class="fu">=</span>     (l2, n&#39;)</a>
+<a class="sourceLine" id="cb11-6" data-line-number="6">                  <span class="fu">|</span> otherwise <span class="fu">=</span> (<span class="dv">1</span> <span class="fu">+</span> l2, n&#39; <span class="ot">`div`</span> b)</a>
+<a class="sourceLine" id="cb11-7" data-line-number="7">          <span class="kw">where</span> (l, n&#39;) <span class="fu">=</span> ilogr (b <span class="fu">*</span> b) n</a>
+<a class="sourceLine" id="cb11-8" data-line-number="8">                l2      <span class="fu">=</span> l <span class="fu">*</span> <span class="dv">2</span></a></code></pre></div>
+<p>Applying <code>ilog</code> and <code>rlog</code> to the inequality, we obtain:</p>
+<pre><code>ilog M + rlog M + a  ~  ilog N + rlog N + b</code></pre>
+<p>Notice that the fractional parts of the inequality satisfies:</p>
+<pre><code>|rlog N − rlog M| &lt; 1</code></pre>
+<p>thus, <em>as long as the integral parts of the inequality differ, the comparison can be done without even worrying about the the fractional parts</em>:</p>
+<pre><code>ilog M + a  ~  ilog N + b</code></pre>
+<p>Lastly, what about the situation where the integral parts are equal? We could use the fractional part of the logarithm somehow but that would introduce unnecessary complexities here. Instead, we can consult the previous equation:</p>
+<pre><code>M × 10 ^ a  ~  N × 10 ^ b</code></pre>
+<p>To perform this comparison without using rational arithmetic, we can divide both sides by <code>10 ^ min (a, b)</code> to make the exponent nonnegative:</p>
+<pre><code>M × 10 ^ (a − min(a, b))  ~  N × 10 ^ (b − min(a, b))</code></pre>
+<p>Now, this comparison can be computed directly using only integer arithmetic.</p>
+<h2 id="algorithmic-complexity">Algorithmic complexity</h2>
+<p>The algorithm involves performing some integer arithmetic and comparisons, as well as handling several subcases. Let</p>
+<pre><code>X = max(|x|, |u|)
+Y = max(y, v)
+A = max(|a|, |b|)</code></pre>
+<p>The complexity of this algorithm has no “unexpected surprises”: in the worst case, one would need to calculate the floored logarithm, which is roughly <code>O(max (log X, log Y))</code>. Therefore, the overall complexity is roughly:</p>
+<pre><code>O(max(log X, log Y, log A))</code></pre>
+<p>Compare this to the naive technique that involves converting both numbers into fractions, which in the worst case could be as bad as <code>O(A)</code>.</p>
+
+  </div>
+  <p><a class="link-button" href="/2014-08-08/scientific-ratio-comparison-algorithm#comments">Comments</a></p>
+</article>
+
+
+      </div>
+    </div>
+    <div class="lower">
+      <footer class="root">
+        <small>
+          Hosted on <a href="https://pages.github.com">GitHub Pages</a>.
+          Built with <a href="http://jekyllrb.com">Jekyll</a>.
+          Some rights reserved
+          (<a rel="license" href="https://creativecommons.org/licenses/by/4.0" property="schema:license">CC BY 4.0</a>).
+          <a href="/feed.xml">
+            <svg xmlns="http://www.w3.org/2000/svg"
+                 version="1.1" width="1em" height="1em" viewBox="0 0 256 256">
+              <defs>
+                <linearGradient id="RSSg" x1="0.085" y1="0.085" x2="0.915" y2="0.915">
+                  <stop offset="0.0" stop-color="#e3702d"/>
+                  <stop offset="0.1071" stop-color="#ea7d31"/>
+                  <stop offset="0.3503" stop-color="#f69537"/>
+                  <stop offset="0.5" stop-color="#fb9e3a"/>
+                  <stop offset="0.7016" stop-color="#ea7c31"/>
+                  <stop offset="0.8866" stop-color="#de642b"/>
+                  <stop offset="1.0" stop-color="#d95b29"/>
+                </linearGradient>
+              </defs>
+              <rect width="256" height="256" rx="55" ry="55" x="0" y="0" fill="#cc5d15"/>
+              <rect width="246" height="246" rx="50" ry="50" x="5" y="5" fill="#f49c52"/>
+              <rect width="236" height="236" rx="47" ry="47" x="10" y="10" fill="url(#RSSg)"/>
+              <circle cx="68" cy="189" r="24" fill="#fff"/>
+              <path d="M160 213h-34a82 82 0 0 0 -82 -82v-34a116 116 0 0 1 116 116z" fill="#fff"/>
+              <path d="M184 213A140 140 0 0 0 44 73 V 38a175 175 0 0 1 175 175z" fill="#fff"/>
+            </svg>
+          </a>
+        </small>
+      </footer>
+    </div>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <script>
+      window.jQuery ||
+      document.write('<script src="/js/vendor/jquery-1.11.3.min.js"><\/script>')
+    </script>
+    <script src="/js/plugins.js"></script>
+    <script src="/js/main.js"></script>
+  </body>
+</html>

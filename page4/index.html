@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html class="no-js">
+  <head>
+    <meta charset="utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>Rufflewind's Scratchpad</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Fira+Mono|Fira+Sans|Oxygen"/>
+    <link rel="stylesheet" href="/css/normalize.css"/>
+    <link rel="stylesheet" href="/css/syntax.css"/>
+    <link rel="stylesheet" href="/css/main.css"/>
+    <link rel="icon" href="/favicon.ico"/>
+    <link rel="alternate" type="application/rss+xml" href="/feed"/>
+    <script src="/js/vendor/modernizr.custom.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+      ga('create', 'UA-48515395-1', 'rufflewind.com');
+      ga('send', 'pageview');
+    </script>
+  </head>
+  <body prefix="schema: http://schema.org/" typeof="schema:Blog">
+    <div class="upper">
+      <header class="root">
+        <div class="header-title">
+          <h1><a href="/">Rufflewind's Scratchpad</a></h1>
+        </div>
+        <div class="header-banner">
+          <nav>
+            <ul>
+              <li><a class="extra" href="/">Home</a></li>
+              <li><a class="extra" href="/archive">Archive</a></li>
+              <li><a class="extra" href="/about">About</a></li>
+            </ul>
+            <form class="search" method="get" action="//google.com/search">
+              <input type="hidden" name="sitesearch" value="rufflewind.com"/>
+              <input id="search-input" type="search" name="q" placeholder="Search"/>
+              <button id="search-button">
+                <svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 100 100">
+                  <circle cx="42" cy="42" r="30" stroke="white" stroke-width="12" fill="none"/>
+                  <path d="m 60 60 35 35" stroke="white" stroke-width="12" fill="none"/>
+                </svg>
+                <span>Search</span>
+              </button>
+            </form>
+          </nav>
+        </div>
+      </header>
+      <div class="content">
+        
+
+
+
+<nav class="pagination">
+ 
+  <a class="prev" href="/page3">&lArr; Prev</a>
+ 
+
+ 
+  
+  
+  <a class="page" href="/">1</a>
+  
+ 
+  
+  
+  <a class="page" href="/page2">2</a>
+  
+ 
+  
+  
+  <a class="page" href="/page3">3</a>
+  
+ 
+  
+  
+  <strong class="page">4</strong>
+  
+ 
+  
+  
+  <a class="page" href="/page5">5</a>
+  
+ 
+  
+  
+  <a class="page" href="/page6">6</a>
+  
+ 
+  
+  
+  <a class="page" href="/page7">7</a>
+  
+ 
+  
+  
+  <a class="page" href="/page8">8</a>
+  
+ 
+  
+  
+  <a class="page" href="/page9">9</a>
+  
+ 
+
+ 
+  <a class="next" href="/page5">Next &rArr;</a>
+ 
+</nav>
+
+
+
+
+<article class="h-entry post" property="schema:blogPost" typeof="schema:BlogPosting">
+  <header>
+    <h1 property="schema:headline schema:name"><a class="p-name u-url" href="/2016-09-16/random-comparator-sort">Sorting with a random comparator</a></h1>
+    <div class="meta">
+      <time class="dt-published date" property="schema:datePublished">2016-09-16</time>
+      <ul class="tags">
+        
+        <li property="schema:keywords"><a class="p-category tag" href="/archive/tag#tag-algorithm">algorithm</a></li>
+        
+        <li property="schema:keywords"><a class="p-category tag" href="/archive/tag#tag-math">math</a></li>
+        
+      </ul>
+    </div>
+  </header>
+  <div class="e-content post-content" property="schema:articleBody">
+    <p>Most sorting algorithms rely on the correct implementation of a comparison function that returns the ordering between two elements – that is, a function that takes two elements and returns whether the first is less than, equal to, or greater than the second:</p>
+<pre><code>function compare(x, y) {
+    if (x &lt; y) {
+        return LESS_THAN;
+    } else if (x &gt; y) {
+        return GREATER_THAN;
+    } else {
+        return EQUAL;
+    }
+}</code></pre>
+<p>The comparison function is required to define a valid <a href="https://en.wikipedia.org/wiki/Total_order">total ordering</a> on the elements in the sequence in order for the sorting algorithm to make any sense.</p>
+<p>It is tempting to ask whether using a random comparison function would offer a clever way to shuffle a sequence. The short answer is no, generally speaking. It’s really not a good idea to do that even if it does somehow magically work. The correct solution is to use the <a href="https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle">Fisher-Yates shuffling algorithm</a>.</p>
+<p>From an engineering perspective, sorting functions are <em>designed to sort things</em>. Abusing it to shuffle an array is kind of just asking for trouble, because you never know if a change in the sorting algorithm down the road might break the “shuffling” algorithm. Worse, the breakage could be subtle, creating biases in the output that might be hard to detect unless the tests rigorously verify the statistics. Moreover, some sorting algorithms can run unusually slow with a random comparator, or take a very long time if the randomness was not in their favor.</p>
+<p>From a mathematical perspective, bounded-time deterministic comparison sorts just can’t give you a high quality distribution of random permutations! In fact, if you use a random comparator with an equal probability of returning <code>LESS_THAN</code> or <code>GREATER_THAN</code> (a “uniformly random comparator”), it’s <em>provably</em> impossible for a such an algorithm to shuffle correctly.</p>
+<p>Suppose you have an array of size <code>N</code>. The probability of any element (say, the first element) ending up at any position (say, the last position) is always <code>1/N</code> in a perfect shuffle.</p>
+<p>At every step of a deterministic comparison sort algorithm, it must make some sort of binary decision based on the ordering between two selected elements, leading to a binary <a href="https://en.wikipedia.org/wiki/Decision_tree">decision tree</a>. The outcome of these decisions determine the final sorted output.</p>
+<p>Now if you feed it a uniformly random comparator, the decisions made are always random. This means every decision has a <code>1/2</code> probability of going one way or another. This leads to a path <code>p</code> down the decision tree that eventually terminates after <code>n[p]</code> rounds, since we are assuming bounded time. Certain paths in this decision tree will lead to the scenario where the first element ends up at the last position. Thus, the overall probability of this scenario is the sum of the probability of every path <code>p</code> that leads to the desired scenario:</p>
+<pre><code>∑[p ∈ all_desired_paths] (1/2)^(n[p])</code></pre>
+<p>Adding up powers of <code>1/2</code> will always yield a fraction where the denominator is some power of <code>2</code>. Since the correct probability is <code>1/N</code>, unless <code>N</code> is also a power of two, there is simply no way for the result to be correct! Hence, there’s no way to get the exact probability <code>1/N</code> in general.</p>
+<p>Edit: Chris P. pointed out that the algorithm must have bounded time for this proof to work. Thanks!</p>
+
+  </div>
+  <p><a class="link-button" href="/2016-09-16/random-comparator-sort#comments">Comments</a></p>
+</article>
+
+<article class="h-entry post" property="schema:blogPost" typeof="schema:BlogPosting">
+  <header>
+    <h1 property="schema:headline schema:name"><a class="p-name u-url" href="/2016-04-19/directory-tarball-mixup">Tarball mix-up in the Haskell directory library</a></h1>
+    <div class="meta">
+      <time class="dt-published date" property="schema:datePublished">2016-04-19</time>
+      <ul class="tags">
+        
+        <li property="schema:keywords"><a class="p-category tag" href="/archive/tag#tag-haskell">haskell</a></li>
+        
+      </ul>
+    </div>
+  </header>
+  <div class="e-content post-content" property="schema:articleBody">
+    <p>Release management can be a real pain.</p>
+<p>I normally do all of these steps in a single pass with the aid of a script:</p>
+<ul>
+<li>Tag the commit using <code>git-tag</code></li>
+<li>Create a GitHub Release on this tag.</li>
+<li>Upload the tarball generated by <code>cabal sdist</code> to Hackage.</li>
+</ul>
+<p>However, this one instance I decided to do the Hackage release later out of caution. But this “cautionary measure” ended up causing more problems than it solved, because I <em>went off-script and disrupted my usual tried-and-tested workflow</em>.</p>
+<p>Normally a GitHub Release includes:</p>
+<ul>
+<li>A tarball automatically generated by GitHub from the Git tree</li>
+<li>A tarball generated by running <code>cabal sdist</code>, attached as a “binary”</li>
+</ul>
+<p>But somehow for version 1.2.6.1 my upload script <em>failed</em> to attach the <code>sdist</code>-generated tarball.</p>
+<p>Later when I wanted to upload to Hackage, I thought it’d be a good idea to use the original <code>sdist</code>-generated tarball that contained the original timestamps on the files. So, I habitually downloaded the first tarball link I saw on the GitHub Release page for 1.2.6.1. Obviously that was not the <code>sdist</code>-generated tarball, it was the one auto-generated by GitHub.</p>
+<p>At first, Hackage complained that the tar format was not ustar. That itself should’ve aroused suspicion, since <code>cabal sdist</code> always generates them in ustar format, but I didn’t pay attention.* Instead, I extracted the tarball and re-made the archive in ustar format.</p>
+<p>The end result was that I accidentally uploaded a GitHub-generated tarball instead of an <code>sdist</code>-generated tarball, which didn’t work because the Autoconf-generated <code>configure</code> script was missing.</p>
+<p>* I thought maybe GitHub was altering (“improving”) tarballs behind our backs. In retrospect that was a very silly idea.</p>
+
+  </div>
+  <p><a class="link-button" href="/2016-04-19/directory-tarball-mixup#comments">Comments</a></p>
+</article>
+
+<article class="h-entry post" property="schema:blogPost" typeof="schema:BlogPosting">
+  <header>
+    <h1 property="schema:headline schema:name"><a class="p-name u-url" href="/2016-03-05/unique-ptr">A basic introduction to unique_ptr</a></h1>
+    <div class="meta">
+      <time class="dt-published date" property="schema:datePublished">2016-03-05</time>
+      <ul class="tags">
+        
+        <li property="schema:keywords"><a class="p-category tag" href="/archive/tag#tag-c++">c++</a></li>
+        
+      </ul>
+    </div>
+  </header>
+  <div class="e-content post-content" property="schema:articleBody">
+    <p>C++11 introduced the <a href="http://en.cppreference.com/w/cpp/memory/unique_ptr"><code>unique_ptr</code></a> template in the <code>&lt;memory&gt;</code> header. It provides a convenient way of managing memory (and more generally, lifetimes of arbitrary objects). It’s a bit odd to use, so this article provides a very basic introduction to its semantics.</p>
+<p>The article will not attempt explain its features in detail. You can find <a href="http://en.cppreference.com/w/cpp/memory/unique_ptr">more info in the API documentation</a>.</p>
+<p>(The astute reader will notice that I’m using the same ownership terminology as <a href="https://www.rust-lang.org">Rust</a>.)</p>
+<h2 id="scalar-vs-array">Scalar vs array</h2>
+<p>There are two kinds of <code>unique_ptr</code>, one for scalars (i.e. non-arrays) and one for arrays:</p>
+<ul>
+<li><code>unique_ptr&lt;double&gt;</code> can hold a scalar of type <code>double</code>;</li>
+<li><code>unique_ptr&lt;double[]&gt;</code> can hold an array of <code>double</code> values with an unknown number of elements.</li>
+</ul>
+<p>Of course, one may substitute <code>double</code> with any arbitrary type.</p>
+<h2 id="construction">Construction</h2>
+<p>A <code>std::unique_ptr</code> variable can constructed using <a href="http://en.cppreference.com/w/cpp/memory/unique_ptr/make_unique"><code>make_unique</code></a>:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1-1" data-line-number="1"><span class="kw">auto</span> p1 = <span class="bu">std::</span>make_unique&lt;<span class="dt">double</span>&gt;(<span class="fl">3.14</span>);</a>
+<a class="sourceLine" id="cb1-2" data-line-number="2"><span class="kw">auto</span> p2 = <span class="bu">std::</span>make_unique&lt;<span class="dt">double</span>[]&gt;(n);</a></code></pre></div>
+<ul>
+<li>The first line creates a <code>unique_ptr</code> to a <code>double</code> value <code>3.14</code> and saves it in the <code>p1</code> variable.</li>
+<li>The second line creates a <code>unique_ptr</code> to a <code>double</code> array of <code>n</code> elements and saves it to in the <code>p2</code> variable.</li>
+</ul>
+<p>Note that <code>make_unique</code> requires C++14. If you want to stick to plain C++11 you can substitute those with:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb2-1" data-line-number="1"><span class="bu">std::</span>unique_ptr&lt;<span class="dt">double</span>&gt;   p1(<span class="kw">new</span> <span class="dt">double</span>(<span class="fl">3.14</span>));</a>
+<a class="sourceLine" id="cb2-2" data-line-number="2"><span class="bu">std::</span>unique_ptr&lt;<span class="dt">double</span>[]&gt; p2(<span class="kw">new</span> <span class="dt">double</span>[n]());</a></code></pre></div>
+<h2 id="ownership-and-uniqueness">Ownership and uniqueness</h2>
+<p>A <code>unique_ptr</code> variable is said to be the <strong>owner</strong> of the object it points to: if the owner dies without passing its ownership to another variable, the object is deleted (and hence the memory is deallocated), thereby invalidating all pointers and references to it.</p>
+<p>There can only be one owner at any one time: one does not simply <strong>copy</strong> a <code>unique_ptr</code>. For example:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb3-1" data-line-number="1"><span class="co">// compile with: c++ -std=c++14</span></a>
+<a class="sourceLine" id="cb3-2" data-line-number="2"><span class="pp">#include </span><span class="im">&lt;memory&gt;</span></a>
+<a class="sourceLine" id="cb3-3" data-line-number="3"></a>
+<a class="sourceLine" id="cb3-4" data-line-number="4"><span class="dt">void</span> taker(<span class="bu">std::</span>unique_ptr&lt;<span class="dt">double</span>[]&gt;);</a>
+<a class="sourceLine" id="cb3-5" data-line-number="5"></a>
+<a class="sourceLine" id="cb3-6" data-line-number="6"><span class="dt">void</span> uniqueness1()</a>
+<a class="sourceLine" id="cb3-7" data-line-number="7">{</a>
+<a class="sourceLine" id="cb3-8" data-line-number="8">    <span class="co">// p is created and owns a section of memory containing 42 numbers</span></a>
+<a class="sourceLine" id="cb3-9" data-line-number="9">    <span class="bu">std::</span>unique_ptr&lt;<span class="dt">double</span>[]&gt; p = <span class="bu">std::</span>make_unique&lt;<span class="dt">double</span>[]&gt;(<span class="dv">42</span>);</a>
+<a class="sourceLine" id="cb3-10" data-line-number="10"></a>
+<a class="sourceLine" id="cb3-11" data-line-number="11">    <span class="co">// compile error! (attempted to copy p to q)</span></a>
+<a class="sourceLine" id="cb3-12" data-line-number="12">    <span class="bu">std::</span>unique_ptr&lt;<span class="dt">double</span>[]&gt; q = p;</a>
+<a class="sourceLine" id="cb3-13" data-line-number="13"></a>
+<a class="sourceLine" id="cb3-14" data-line-number="14">    <span class="co">// compile error! (attempted to copy p to the argument of taker)</span></a>
+<a class="sourceLine" id="cb3-15" data-line-number="15">    taker(p);</a>
+<a class="sourceLine" id="cb3-16" data-line-number="16">}</a></code></pre></div>
+<p>Typical errors when this happens:</p>
+<pre><code>(g++)
+error: use of deleted function ‘std::unique_ptr&lt;…&gt;::unique_ptr(const std::unique_ptr&lt;…&gt;&amp;)
+error: use of deleted function ‘… std::unique_ptr&lt;…&gt;::operator=(const std::unique_ptr&lt;…&gt;&amp;)
+
+(clang++)
+error: call to deleted constructor of &#39;std::unique_ptr&lt;…&gt;&#39;
+error: overload resolution selected deleted operator &#39;=&#39;</code></pre>
+<p>If an owner wants to <strong>lend</strong> the contents of <code>unique_ptr</code> to another function without relinquishing its ownership, it can give a pointer/reference to it:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb5-1" data-line-number="1"><span class="co">// compile with: c++ -std=c++14</span></a>
+<a class="sourceLine" id="cb5-2" data-line-number="2"><span class="pp">#include </span><span class="im">&lt;memory&gt;</span></a>
+<a class="sourceLine" id="cb5-3" data-line-number="3"></a>
+<a class="sourceLine" id="cb5-4" data-line-number="4"><span class="dt">void</span> borrower1(<span class="dt">double</span>*);</a>
+<a class="sourceLine" id="cb5-5" data-line-number="5"></a>
+<a class="sourceLine" id="cb5-6" data-line-number="6"><span class="dt">void</span> borrower2(<span class="bu">std::</span>unique_ptr&lt;<span class="dt">double</span>[]&gt;*);</a>
+<a class="sourceLine" id="cb5-7" data-line-number="7"></a>
+<a class="sourceLine" id="cb5-8" data-line-number="8"><span class="dt">void</span> borrower3(<span class="bu">std::</span>unique_ptr&lt;<span class="dt">double</span>[]&gt;&amp;);</a>
+<a class="sourceLine" id="cb5-9" data-line-number="9"></a>
+<a class="sourceLine" id="cb5-10" data-line-number="10"><span class="dt">void</span> uniqueness2()</a>
+<a class="sourceLine" id="cb5-11" data-line-number="11">{</a>
+<a class="sourceLine" id="cb5-12" data-line-number="12">    <span class="co">// p is created and owns a section of memory containing 42 numbers</span></a>
+<a class="sourceLine" id="cb5-13" data-line-number="13">    <span class="bu">std::</span>unique_ptr&lt;<span class="dt">double</span>[]&gt; p = <span class="bu">std::</span>make_unique&lt;<span class="dt">double</span>[]&gt;(<span class="dv">42</span>);</a>
+<a class="sourceLine" id="cb5-14" data-line-number="14"></a>
+<a class="sourceLine" id="cb5-15" data-line-number="15">    <span class="co">// these are all okay but the first method is the most general</span></a>
+<a class="sourceLine" id="cb5-16" data-line-number="16">    <span class="co">// as it accepts any kind of pointer, not just unique_ptr</span></a>
+<a class="sourceLine" id="cb5-17" data-line-number="17">    borrower1(p.get());</a>
+<a class="sourceLine" id="cb5-18" data-line-number="18">    borrower2(&amp;p);</a>
+<a class="sourceLine" id="cb5-19" data-line-number="19">    borrower3(p);</a>
+<a class="sourceLine" id="cb5-20" data-line-number="20"></a>
+<a class="sourceLine" id="cb5-21" data-line-number="21">    <span class="co">// p dies, so the array is deleted automatically</span></a>
+<a class="sourceLine" id="cb5-22" data-line-number="22">}</a></code></pre></div>
+<p>If an owner wants to yield its ownership of a <code>unique_ptr</code> to another function or variable, it can perform a <a href="http://en.cppreference.com/w/cpp/utility/move"><strong><code>move</code></strong></a>:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb6-1" data-line-number="1"><span class="co">// compile with: c++ -std=c++14</span></a>
+<a class="sourceLine" id="cb6-2" data-line-number="2"><span class="pp">#include </span><span class="im">&lt;memory&gt;</span></a>
+<a class="sourceLine" id="cb6-3" data-line-number="3"><span class="pp">#include </span><span class="im">&lt;utility&gt;</span><span class="pp"> </span><span class="co">// required for std::move</span></a>
+<a class="sourceLine" id="cb6-4" data-line-number="4"></a>
+<a class="sourceLine" id="cb6-5" data-line-number="5"><span class="dt">void</span> taker(<span class="bu">std::</span>unique_ptr&lt;<span class="dt">double</span>[]&gt;);</a>
+<a class="sourceLine" id="cb6-6" data-line-number="6"></a>
+<a class="sourceLine" id="cb6-7" data-line-number="7"><span class="dt">void</span> uniqueness3()</a>
+<a class="sourceLine" id="cb6-8" data-line-number="8">{</a>
+<a class="sourceLine" id="cb6-9" data-line-number="9">    <span class="co">// p is created and owns a section of memory containing 42 numbers</span></a>
+<a class="sourceLine" id="cb6-10" data-line-number="10">    <span class="bu">std::</span>unique_ptr&lt;<span class="dt">double</span>[]&gt; p = <span class="bu">std::</span>make_unique&lt;<span class="dt">double</span>[]&gt;(<span class="dv">42</span>);</a>
+<a class="sourceLine" id="cb6-11" data-line-number="11"></a>
+<a class="sourceLine" id="cb6-12" data-line-number="12">    <span class="co">// move p to q</span></a>
+<a class="sourceLine" id="cb6-13" data-line-number="13">    <span class="bu">std::</span>unique_ptr&lt;<span class="dt">double</span>[]&gt; q = <span class="bu">std::</span>move(p);</a>
+<a class="sourceLine" id="cb6-14" data-line-number="14"></a>
+<a class="sourceLine" id="cb6-15" data-line-number="15">    <span class="co">// moved q into the argument of taker</span></a>
+<a class="sourceLine" id="cb6-16" data-line-number="16">    taker(<span class="bu">std::</span>move(q));</a>
+<a class="sourceLine" id="cb6-17" data-line-number="17"></a>
+<a class="sourceLine" id="cb6-18" data-line-number="18">    <span class="co">// p and q both die, but they no longer own anything so nothing happens here</span></a>
+<a class="sourceLine" id="cb6-19" data-line-number="19">}</a></code></pre></div>
+<h2 id="resetting">Resetting</h2>
+<p>Although normally a <code>unique_ptr</code> will automatically delete its object once it dies (or when it gains ownership of something else), one can hasten the process by manually calling <a href="http://en.cppreference.com/w/cpp/memory/unique_ptr/reset"><code>.reset()</code></a>:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb7-1" data-line-number="1">p.reset();</a></code></pre></div>
+<p>This will immediately delete the object pointed to by <code>p</code> and cause the <code>p</code> to become <strong>empty</strong>.</p>
+<h2 id="emptiness">Emptiness</h2>
+<p>A <code>unique_ptr</code> can be empty, in which case it owns nothing – the analog of a <code>nullptr</code>. This is the default state if is not explicitly initialized with something. It is also the state after it loses its ownership of something, or is forcifully emptied via <code>.reset()</code>.</p>
+<h2 id="releasing">Releasing</h2>
+<p>Normally, a <code>unique_ptr</code> automatically loses its ownership when it is <em>moved</em> to another <code>unique_ptr</code>. Alternatively, one can force it give up its ownership in the form of a raw pointer via <a href="http://en.cppreference.com/w/cpp/memory/unique_ptr/release"><code>.release()</code></a>:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb8-1" data-line-number="1"><span class="dt">double</span>* raw_ptr = p.release();</a></code></pre></div>
+<p>After releasing, the pointer will not be freed automatically by the <code>unique_ptr</code> as it is now empty. The programmer is then responsible for deleting the pointer manually.</p>
+<h2 id="example">Example</h2>
+<p>Here’s a more complete example demonstrating the use of <code>unique_ptr</code>:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb9-1" data-line-number="1"><span class="co">// compile with: c++ -std=c++14 -lopenblas</span></a>
+<a class="sourceLine" id="cb9-2" data-line-number="2"><span class="pp">#include </span><span class="im">&lt;cmath&gt;</span></a>
+<a class="sourceLine" id="cb9-3" data-line-number="3"><span class="pp">#include </span><span class="im">&lt;cstdlib&gt;</span></a>
+<a class="sourceLine" id="cb9-4" data-line-number="4"><span class="pp">#include </span><span class="im">&lt;iostream&gt;</span></a>
+<a class="sourceLine" id="cb9-5" data-line-number="5"><span class="pp">#include </span><span class="im">&lt;memory&gt;</span><span class="pp"> </span><span class="co">// required for std::unique_ptr, std::make_unique, std::size_t</span></a>
+<a class="sourceLine" id="cb9-6" data-line-number="6"><span class="pp">#include </span><span class="im">&lt;utility&gt;</span><span class="pp"> </span><span class="co">// required for std::move</span></a>
+<a class="sourceLine" id="cb9-7" data-line-number="7"><span class="pp">#include </span><span class="im">&lt;cblas.h&gt;</span><span class="pp"> </span><span class="co">// required for cblas_daxpy</span></a>
+<a class="sourceLine" id="cb9-8" data-line-number="8"></a>
+<a class="sourceLine" id="cb9-9" data-line-number="9"><span class="co">// create an owned vector initialized to zero</span></a>
+<a class="sourceLine" id="cb9-10" data-line-number="10"><span class="bu">std::</span>unique_ptr&lt;<span class="dt">double</span>[]&gt; new_vector(<span class="bu">std::</span>size_t n)</a>
+<a class="sourceLine" id="cb9-11" data-line-number="11">{</a>
+<a class="sourceLine" id="cb9-12" data-line-number="12">    <span class="cf">return</span> <span class="bu">std::</span>make_unique&lt;<span class="dt">double</span>[]&gt;(n);</a>
+<a class="sourceLine" id="cb9-13" data-line-number="13">}</a>
+<a class="sourceLine" id="cb9-14" data-line-number="14"></a>
+<a class="sourceLine" id="cb9-15" data-line-number="15"><span class="co">// borrow one vector (v1), seize another (v2), and return an owned vector</span></a>
+<a class="sourceLine" id="cb9-16" data-line-number="16"><span class="co">// equal to their sum</span></a>
+<a class="sourceLine" id="cb9-17" data-line-number="17"><span class="bu">std::</span>unique_ptr&lt;<span class="dt">double</span>[]&gt; destructively_add_vectors(</a>
+<a class="sourceLine" id="cb9-18" data-line-number="18">    <span class="bu">std::</span>size_t n,</a>
+<a class="sourceLine" id="cb9-19" data-line-number="19">    <span class="at">const</span> <span class="dt">double</span>* v1,</a>
+<a class="sourceLine" id="cb9-20" data-line-number="20">    <span class="bu">std::</span>unique_ptr&lt;<span class="dt">double</span>[]&gt; v2)</a>
+<a class="sourceLine" id="cb9-21" data-line-number="21">{</a>
+<a class="sourceLine" id="cb9-22" data-line-number="22">    <span class="co">// sum &lt;- v2</span></a>
+<a class="sourceLine" id="cb9-23" data-line-number="23">    <span class="bu">std::</span>unique_ptr&lt;<span class="dt">double</span>[]&gt; sum = <span class="bu">std::</span>move(v2);</a>
+<a class="sourceLine" id="cb9-24" data-line-number="24"></a>
+<a class="sourceLine" id="cb9-25" data-line-number="25">    <span class="co">// sum &lt;- v1 + sum</span></a>
+<a class="sourceLine" id="cb9-26" data-line-number="26">    cblas_daxpy(n, <span class="fl">1.</span>, v1, <span class="dv">1</span>, sum.get(), <span class="dv">1</span>);</a>
+<a class="sourceLine" id="cb9-27" data-line-number="27"></a>
+<a class="sourceLine" id="cb9-28" data-line-number="28">    <span class="co">// for obscure reasons (C++11 §12.8/32), using an explicit std::move here</span></a>
+<a class="sourceLine" id="cb9-29" data-line-number="29">    <span class="co">// is actually optional, but we use it anyway for consistency and clarity;</span></a>
+<a class="sourceLine" id="cb9-30" data-line-number="30">    <span class="co">// see also: https://stackoverflow.com/a/14856553</span></a>
+<a class="sourceLine" id="cb9-31" data-line-number="31">    <span class="cf">return</span> <span class="bu">std::</span>move(sum);</a>
+<a class="sourceLine" id="cb9-32" data-line-number="32">}</a>
+<a class="sourceLine" id="cb9-33" data-line-number="33"></a>
+<a class="sourceLine" id="cb9-34" data-line-number="34"><span class="co">// borrow two vectors and return an owned vector equal to their sum</span></a>
+<a class="sourceLine" id="cb9-35" data-line-number="35"><span class="bu">std::</span>unique_ptr&lt;<span class="dt">double</span>[]&gt; add_vectors(</a>
+<a class="sourceLine" id="cb9-36" data-line-number="36">    <span class="bu">std::</span>size_t n,</a>
+<a class="sourceLine" id="cb9-37" data-line-number="37">    <span class="at">const</span> <span class="dt">double</span>* v1,</a>
+<a class="sourceLine" id="cb9-38" data-line-number="38">    <span class="at">const</span> <span class="dt">double</span>* v2)</a>
+<a class="sourceLine" id="cb9-39" data-line-number="39">{</a>
+<a class="sourceLine" id="cb9-40" data-line-number="40">    <span class="co">// v2_copy &lt;- 0</span></a>
+<a class="sourceLine" id="cb9-41" data-line-number="41">    <span class="bu">std::</span>unique_ptr&lt;<span class="dt">double</span>[]&gt; v2_copy = new_vector(n);</a>
+<a class="sourceLine" id="cb9-42" data-line-number="42"></a>
+<a class="sourceLine" id="cb9-43" data-line-number="43">    <span class="co">// v2_copy &lt;- v2</span></a>
+<a class="sourceLine" id="cb9-44" data-line-number="44">    cblas_dcopy(n, v2, <span class="dv">1</span>, v2_copy.get(), <span class="dv">1</span>);</a>
+<a class="sourceLine" id="cb9-45" data-line-number="45"></a>
+<a class="sourceLine" id="cb9-46" data-line-number="46">    <span class="cf">return</span> destructively_add_vectors(n, v1, <span class="bu">std::</span>move(v2_copy));</a>
+<a class="sourceLine" id="cb9-47" data-line-number="47">}</a>
+<a class="sourceLine" id="cb9-48" data-line-number="48"></a>
+<a class="sourceLine" id="cb9-49" data-line-number="49"><span class="dt">double</span> fibby(<span class="dt">double</span> i)</a>
+<a class="sourceLine" id="cb9-50" data-line-number="50">{</a>
+<a class="sourceLine" id="cb9-51" data-line-number="51">    <span class="kw">using</span> <span class="bu">std::</span>pow;</a>
+<a class="sourceLine" id="cb9-52" data-line-number="52">    <span class="kw">using</span> <span class="bu">std::</span>sqrt;</a>
+<a class="sourceLine" id="cb9-53" data-line-number="53">    <span class="at">const</span> <span class="dt">double</span> a = (<span class="fl">1.</span> + sqrt(<span class="fl">5.</span>)) / <span class="fl">2.</span>;</a>
+<a class="sourceLine" id="cb9-54" data-line-number="54">    <span class="at">const</span> <span class="dt">double</span> b = (<span class="fl">1.</span> - sqrt(<span class="fl">5.</span>)) / <span class="fl">2.</span>;</a>
+<a class="sourceLine" id="cb9-55" data-line-number="55">    <span class="cf">return</span> (pow(a, i) - pow(b, i)) / sqrt(<span class="dv">5</span>);</a>
+<a class="sourceLine" id="cb9-56" data-line-number="56">}</a>
+<a class="sourceLine" id="cb9-57" data-line-number="57"></a>
+<a class="sourceLine" id="cb9-58" data-line-number="58"><span class="co">// create an owned vector initialized to something fun</span></a>
+<a class="sourceLine" id="cb9-59" data-line-number="59"><span class="bu">std::</span>unique_ptr&lt;<span class="dt">double</span>[]&gt; example_vector(<span class="bu">std::</span>size_t n)</a>
+<a class="sourceLine" id="cb9-60" data-line-number="60">{</a>
+<a class="sourceLine" id="cb9-61" data-line-number="61">    <span class="bu">std::</span>unique_ptr&lt;<span class="dt">double</span>[]&gt; v = new_vector(n);</a>
+<a class="sourceLine" id="cb9-62" data-line-number="62">    <span class="cf">for</span> (<span class="bu">std::</span>size_t i = <span class="dv">0</span>; i != n; ++i) {</a>
+<a class="sourceLine" id="cb9-63" data-line-number="63">        v[i] = fibby(i);</a>
+<a class="sourceLine" id="cb9-64" data-line-number="64">    }</a>
+<a class="sourceLine" id="cb9-65" data-line-number="65">    <span class="cf">return</span> v;</a>
+<a class="sourceLine" id="cb9-66" data-line-number="66">}</a>
+<a class="sourceLine" id="cb9-67" data-line-number="67"></a>
+<a class="sourceLine" id="cb9-68" data-line-number="68"><span class="co">// borrow a vector and check that the result is correct</span></a>
+<a class="sourceLine" id="cb9-69" data-line-number="69"><span class="dt">void</span> check_result(<span class="bu">std::</span>size_t n, <span class="at">const</span> <span class="dt">double</span>* v)</a>
+<a class="sourceLine" id="cb9-70" data-line-number="70">{</a>
+<a class="sourceLine" id="cb9-71" data-line-number="71">    <span class="cf">for</span> (<span class="bu">std::</span>size_t i = <span class="dv">0</span>; i != n; ++i) {</a>
+<a class="sourceLine" id="cb9-72" data-line-number="72">        <span class="co">// always use !(difference &lt; epsilon)</span></a>
+<a class="sourceLine" id="cb9-73" data-line-number="73">        <span class="co">// rather than (difference &gt;= epsilon)</span></a>
+<a class="sourceLine" id="cb9-74" data-line-number="74">        <span class="co">// so NaN can&#39;t sneak past the check</span></a>
+<a class="sourceLine" id="cb9-75" data-line-number="75">        <span class="cf">if</span> (!(<span class="bu">std::</span>abs(v[i] - fibby(i) * <span class="fl">2.</span>) &lt; <span class="fl">1e-8</span>)) {</a>
+<a class="sourceLine" id="cb9-76" data-line-number="76">            <span class="bu">std::</span>cerr &lt;&lt; <span class="st">&quot;what a cruel, cruel world&quot;</span> &lt;&lt; <span class="bu">std::</span>endl;</a>
+<a class="sourceLine" id="cb9-77" data-line-number="77">            <span class="bu">std::</span>abort();</a>
+<a class="sourceLine" id="cb9-78" data-line-number="78">        }</a>
+<a class="sourceLine" id="cb9-79" data-line-number="79">    }</a>
+<a class="sourceLine" id="cb9-80" data-line-number="80">}</a>
+<a class="sourceLine" id="cb9-81" data-line-number="81"></a>
+<a class="sourceLine" id="cb9-82" data-line-number="82"><span class="dt">int</span> main()</a>
+<a class="sourceLine" id="cb9-83" data-line-number="83">{</a>
+<a class="sourceLine" id="cb9-84" data-line-number="84">    <span class="at">const</span> <span class="bu">std::</span>size_t n = <span class="dv">1024</span>;</a>
+<a class="sourceLine" id="cb9-85" data-line-number="85"></a>
+<a class="sourceLine" id="cb9-86" data-line-number="86">    <span class="bu">std::</span>unique_ptr&lt;<span class="dt">double</span>[]&gt; v1 = example_vector(n);</a>
+<a class="sourceLine" id="cb9-87" data-line-number="87">    <span class="bu">std::</span>unique_ptr&lt;<span class="dt">double</span>[]&gt; v2 = example_vector(n);</a>
+<a class="sourceLine" id="cb9-88" data-line-number="88"></a>
+<a class="sourceLine" id="cb9-89" data-line-number="89">    <span class="co">// lend v1 and v2 to add_vectors</span></a>
+<a class="sourceLine" id="cb9-90" data-line-number="90">    <span class="bu">std::</span>unique_ptr&lt;<span class="dt">double</span>[]&gt; sum = add_vectors(n, v1.get(), v2.get());</a>
+<a class="sourceLine" id="cb9-91" data-line-number="91"></a>
+<a class="sourceLine" id="cb9-92" data-line-number="92">    <span class="co">// lend sum to check_result</span></a>
+<a class="sourceLine" id="cb9-93" data-line-number="93">    check_result(n, sum.get());</a>
+<a class="sourceLine" id="cb9-94" data-line-number="94"></a>
+<a class="sourceLine" id="cb9-95" data-line-number="95">    <span class="co">// reset sum (actually optional, since the following line will</span></a>
+<a class="sourceLine" id="cb9-96" data-line-number="96">    <span class="co">// automatically cause this to happen anyway)</span></a>
+<a class="sourceLine" id="cb9-97" data-line-number="97">    sum.reset();</a>
+<a class="sourceLine" id="cb9-98" data-line-number="98"></a>
+<a class="sourceLine" id="cb9-99" data-line-number="99">    <span class="co">// lend v1 and relinquish v2 to destructively_add_vectors</span></a>
+<a class="sourceLine" id="cb9-100" data-line-number="100">    sum = destructively_add_vectors(n, v1.get(), <span class="bu">std::</span>move(v2));</a>
+<a class="sourceLine" id="cb9-101" data-line-number="101"></a>
+<a class="sourceLine" id="cb9-102" data-line-number="102">    <span class="co">// lend sum to check_result</span></a>
+<a class="sourceLine" id="cb9-103" data-line-number="103">    check_result(n, sum.get());</a>
+<a class="sourceLine" id="cb9-104" data-line-number="104"></a>
+<a class="sourceLine" id="cb9-105" data-line-number="105">    <span class="co">// v1 and sum are deleted automatically;</span></a>
+<a class="sourceLine" id="cb9-106" data-line-number="106">    <span class="co">// yay no memory leaks \o/</span></a>
+<a class="sourceLine" id="cb9-107" data-line-number="107">}</a></code></pre></div>
+
+  </div>
+  <p><a class="link-button" href="/2016-03-05/unique-ptr#comments">Comments</a></p>
+</article>
+
+
+      </div>
+    </div>
+    <div class="lower">
+      <footer class="root">
+        <small>
+          Hosted on <a href="https://pages.github.com">GitHub Pages</a>.
+          Built with <a href="http://jekyllrb.com">Jekyll</a>.
+          Some rights reserved
+          (<a rel="license" href="https://creativecommons.org/licenses/by/4.0" property="schema:license">CC BY 4.0</a>).
+          <a href="/feed.xml">
+            <svg xmlns="http://www.w3.org/2000/svg"
+                 version="1.1" width="1em" height="1em" viewBox="0 0 256 256">
+              <defs>
+                <linearGradient id="RSSg" x1="0.085" y1="0.085" x2="0.915" y2="0.915">
+                  <stop offset="0.0" stop-color="#e3702d"/>
+                  <stop offset="0.1071" stop-color="#ea7d31"/>
+                  <stop offset="0.3503" stop-color="#f69537"/>
+                  <stop offset="0.5" stop-color="#fb9e3a"/>
+                  <stop offset="0.7016" stop-color="#ea7c31"/>
+                  <stop offset="0.8866" stop-color="#de642b"/>
+                  <stop offset="1.0" stop-color="#d95b29"/>
+                </linearGradient>
+              </defs>
+              <rect width="256" height="256" rx="55" ry="55" x="0" y="0" fill="#cc5d15"/>
+              <rect width="246" height="246" rx="50" ry="50" x="5" y="5" fill="#f49c52"/>
+              <rect width="236" height="236" rx="47" ry="47" x="10" y="10" fill="url(#RSSg)"/>
+              <circle cx="68" cy="189" r="24" fill="#fff"/>
+              <path d="M160 213h-34a82 82 0 0 0 -82 -82v-34a116 116 0 0 1 116 116z" fill="#fff"/>
+              <path d="M184 213A140 140 0 0 0 44 73 V 38a175 175 0 0 1 175 175z" fill="#fff"/>
+            </svg>
+          </a>
+        </small>
+      </footer>
+    </div>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <script>
+      window.jQuery ||
+      document.write('<script src="/js/vendor/jquery-1.11.3.min.js"><\/script>')
+    </script>
+    <script src="/js/plugins.js"></script>
+    <script src="/js/main.js"></script>
+  </body>
+</html>

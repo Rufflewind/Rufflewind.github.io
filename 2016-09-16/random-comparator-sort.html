@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html class="no-js">
+  <head>
+    <meta charset="utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>Sorting with a random comparator - Rufflewind's Scratchpad</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Fira+Mono|Fira+Sans|Oxygen"/>
+    <link rel="stylesheet" href="/css/normalize.css"/>
+    <link rel="stylesheet" href="/css/syntax.css"/>
+    <link rel="stylesheet" href="/css/main.css"/>
+    <link rel="icon" href="/favicon.ico"/>
+    <link rel="alternate" type="application/rss+xml" href="/feed"/>
+    <script src="/js/vendor/modernizr.custom.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+      ga('create', 'UA-48515395-1', 'rufflewind.com');
+      ga('send', 'pageview');
+    </script>
+  </head>
+  <body prefix="schema: http://schema.org/" typeof="schema:Blog">
+    <div class="upper">
+      <header class="root">
+        <div class="header-title">
+          <h1><a href="/">Rufflewind's Scratchpad</a></h1>
+        </div>
+        <div class="header-banner">
+          <nav>
+            <ul>
+              <li><a class="extra" href="/">Home</a></li>
+              <li><a class="extra" href="/archive">Archive</a></li>
+              <li><a class="extra" href="/about">About</a></li>
+            </ul>
+            <form class="search" method="get" action="//google.com/search">
+              <input type="hidden" name="sitesearch" value="rufflewind.com"/>
+              <input id="search-input" type="search" name="q" placeholder="Search"/>
+              <button id="search-button">
+                <svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 100 100">
+                  <circle cx="42" cy="42" r="30" stroke="white" stroke-width="12" fill="none"/>
+                  <path d="m 60 60 35 35" stroke="white" stroke-width="12" fill="none"/>
+                </svg>
+                <span>Search</span>
+              </button>
+            </form>
+          </nav>
+        </div>
+      </header>
+      <div class="content">
+        <article class="h-entry post" property="schema:blogPost" typeof="schema:BlogPosting">
+  <header>
+    <h1><a class="p-name u-url" href="" property="schema:headline schema:name">Sorting with a random comparator</a></h1>
+    <div class="meta">
+      <time class="dt-published date" property="schema:datePublished">2016-09-16</time>
+      <ul class="tags">
+        
+        <li property="schema:keywords"><a class="p-category tag" href="/archive/tag#tag-algorithm">algorithm</a></li>
+        
+        <li property="schema:keywords"><a class="p-category tag" href="/archive/tag#tag-math">math</a></li>
+        
+      </ul>
+    </div>
+  </header>
+  <div class="e-content post-content" property="schema:articleBody">
+    <p>Most sorting algorithms rely on the correct implementation of a comparison function that returns the ordering between two elements – that is, a function that takes two elements and returns whether the first is less than, equal to, or greater than the second:</p>
+<pre><code>function compare(x, y) {
+    if (x &lt; y) {
+        return LESS_THAN;
+    } else if (x &gt; y) {
+        return GREATER_THAN;
+    } else {
+        return EQUAL;
+    }
+}</code></pre>
+<p>The comparison function is required to define a valid <a href="https://en.wikipedia.org/wiki/Total_order">total ordering</a> on the elements in the sequence in order for the sorting algorithm to make any sense.</p>
+<p>It is tempting to ask whether using a random comparison function would offer a clever way to shuffle a sequence. The short answer is no, generally speaking. It’s really not a good idea to do that even if it does somehow magically work. The correct solution is to use the <a href="https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle">Fisher-Yates shuffling algorithm</a>.</p>
+<p>From an engineering perspective, sorting functions are <em>designed to sort things</em>. Abusing it to shuffle an array is kind of just asking for trouble, because you never know if a change in the sorting algorithm down the road might break the “shuffling” algorithm. Worse, the breakage could be subtle, creating biases in the output that might be hard to detect unless the tests rigorously verify the statistics. Moreover, some sorting algorithms can run unusually slow with a random comparator, or take a very long time if the randomness was not in their favor.</p>
+<p>From a mathematical perspective, bounded-time deterministic comparison sorts just can’t give you a high quality distribution of random permutations! In fact, if you use a random comparator with an equal probability of returning <code>LESS_THAN</code> or <code>GREATER_THAN</code> (a “uniformly random comparator”), it’s <em>provably</em> impossible for a such an algorithm to shuffle correctly.</p>
+<p>Suppose you have an array of size <code>N</code>. The probability of any element (say, the first element) ending up at any position (say, the last position) is always <code>1/N</code> in a perfect shuffle.</p>
+<p>At every step of a deterministic comparison sort algorithm, it must make some sort of binary decision based on the ordering between two selected elements, leading to a binary <a href="https://en.wikipedia.org/wiki/Decision_tree">decision tree</a>. The outcome of these decisions determine the final sorted output.</p>
+<p>Now if you feed it a uniformly random comparator, the decisions made are always random. This means every decision has a <code>1/2</code> probability of going one way or another. This leads to a path <code>p</code> down the decision tree that eventually terminates after <code>n[p]</code> rounds, since we are assuming bounded time. Certain paths in this decision tree will lead to the scenario where the first element ends up at the last position. Thus, the overall probability of this scenario is the sum of the probability of every path <code>p</code> that leads to the desired scenario:</p>
+<pre><code>∑[p ∈ all_desired_paths] (1/2)^(n[p])</code></pre>
+<p>Adding up powers of <code>1/2</code> will always yield a fraction where the denominator is some power of <code>2</code>. Since the correct probability is <code>1/N</code>, unless <code>N</code> is also a power of two, there is simply no way for the result to be correct! Hence, there’s no way to get the exact probability <code>1/N</code> in general.</p>
+<p>Edit: Chris P. pointed out that the algorithm must have bounded time for this proof to work. Thanks!</p>
+
+  </div>
+  <div id="comments" property="schema:comment">
+    <p><a class="link-button" id="show-disqus-button" href="#comments">Show Disqus comments</a></p>
+    <div id="disqus_thread"></div>
+    <a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+    <script type="text/javascript">
+      var button = document.getElementById('show-disqus-button');
+      var brlink = document.getElementsByClassName('dsq-brlink')[0];
+      brlink.style.display = 'none';
+      button.onclick = function() {
+        button.style.display = 'none';
+        brlink.style.display = 'block';
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//rufflewind.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+      };
+    </script>
+  </div>
+</article>
+
+      </div>
+    </div>
+    <div class="lower">
+      <footer class="root">
+        <small>
+          Hosted on <a href="https://pages.github.com">GitHub Pages</a>.
+          Built with <a href="http://jekyllrb.com">Jekyll</a>.
+          Some rights reserved
+          (<a rel="license" href="https://creativecommons.org/licenses/by/4.0" property="schema:license">CC BY 4.0</a>).
+          <a href="/feed.xml">
+            <svg xmlns="http://www.w3.org/2000/svg"
+                 version="1.1" width="1em" height="1em" viewBox="0 0 256 256">
+              <defs>
+                <linearGradient id="RSSg" x1="0.085" y1="0.085" x2="0.915" y2="0.915">
+                  <stop offset="0.0" stop-color="#e3702d"/>
+                  <stop offset="0.1071" stop-color="#ea7d31"/>
+                  <stop offset="0.3503" stop-color="#f69537"/>
+                  <stop offset="0.5" stop-color="#fb9e3a"/>
+                  <stop offset="0.7016" stop-color="#ea7c31"/>
+                  <stop offset="0.8866" stop-color="#de642b"/>
+                  <stop offset="1.0" stop-color="#d95b29"/>
+                </linearGradient>
+              </defs>
+              <rect width="256" height="256" rx="55" ry="55" x="0" y="0" fill="#cc5d15"/>
+              <rect width="246" height="246" rx="50" ry="50" x="5" y="5" fill="#f49c52"/>
+              <rect width="236" height="236" rx="47" ry="47" x="10" y="10" fill="url(#RSSg)"/>
+              <circle cx="68" cy="189" r="24" fill="#fff"/>
+              <path d="M160 213h-34a82 82 0 0 0 -82 -82v-34a116 116 0 0 1 116 116z" fill="#fff"/>
+              <path d="M184 213A140 140 0 0 0 44 73 V 38a175 175 0 0 1 175 175z" fill="#fff"/>
+            </svg>
+          </a>
+        </small>
+      </footer>
+    </div>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <script>
+      window.jQuery ||
+      document.write('<script src="/js/vendor/jquery-1.11.3.min.js"><\/script>')
+    </script>
+    <script src="/js/plugins.js"></script>
+    <script src="/js/main.js"></script>
+  </body>
+</html>

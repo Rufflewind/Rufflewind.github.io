@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html class="no-js">
+  <head>
+    <meta charset="utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>Rufflewind's Scratchpad</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Fira+Mono|Fira+Sans|Oxygen"/>
+    <link rel="stylesheet" href="/css/normalize.css"/>
+    <link rel="stylesheet" href="/css/syntax.css"/>
+    <link rel="stylesheet" href="/css/main.css"/>
+    <link rel="icon" href="/favicon.ico"/>
+    <link rel="alternate" type="application/rss+xml" href="/feed"/>
+    <script src="/js/vendor/modernizr.custom.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+      ga('create', 'UA-48515395-1', 'rufflewind.com');
+      ga('send', 'pageview');
+    </script>
+  </head>
+  <body prefix="schema: http://schema.org/" typeof="schema:Blog">
+    <div class="upper">
+      <header class="root">
+        <div class="header-title">
+          <h1><a href="/">Rufflewind's Scratchpad</a></h1>
+        </div>
+        <div class="header-banner">
+          <nav>
+            <ul>
+              <li><a class="extra" href="/">Home</a></li>
+              <li><a class="extra" href="/archive">Archive</a></li>
+              <li><a class="extra" href="/about">About</a></li>
+            </ul>
+            <form class="search" method="get" action="//google.com/search">
+              <input type="hidden" name="sitesearch" value="rufflewind.com"/>
+              <input id="search-input" type="search" name="q" placeholder="Search"/>
+              <button id="search-button">
+                <svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 100 100">
+                  <circle cx="42" cy="42" r="30" stroke="white" stroke-width="12" fill="none"/>
+                  <path d="m 60 60 35 35" stroke="white" stroke-width="12" fill="none"/>
+                </svg>
+                <span>Search</span>
+              </button>
+            </form>
+          </nav>
+        </div>
+      </header>
+      <div class="content">
+        
+
+
+
+<nav class="pagination">
+ 
+  <a class="prev" href="/page2">&lArr; Prev</a>
+ 
+
+ 
+  
+  
+  <a class="page" href="/">1</a>
+  
+ 
+  
+  
+  <a class="page" href="/page2">2</a>
+  
+ 
+  
+  
+  <strong class="page">3</strong>
+  
+ 
+  
+  
+  <a class="page" href="/page4">4</a>
+  
+ 
+  
+  
+  <a class="page" href="/page5">5</a>
+  
+ 
+  
+  
+  <a class="page" href="/page6">6</a>
+  
+ 
+  
+  
+  <a class="page" href="/page7">7</a>
+  
+ 
+  
+  
+  <a class="page" href="/page8">8</a>
+  
+ 
+  
+  
+  <a class="page" href="/page9">9</a>
+  
+ 
+
+ 
+  <a class="next" href="/page4">Next &rArr;</a>
+ 
+</nav>
+
+
+
+
+<article class="h-entry post" property="schema:blogPost" typeof="schema:BlogPosting">
+  <header>
+    <h1 property="schema:headline schema:name"><a class="p-name u-url" href="/2016-12-14/from-redcarpet-to-pandoc">Making Jekyll play nice with MathJax: switching from Redcarpet to Pandoc</a></h1>
+    <div class="meta">
+      <time class="dt-published date" property="schema:datePublished">2016-12-14</time>
+      <ul class="tags">
+        
+        <li property="schema:keywords"><a class="p-category tag" href="/archive/tag#tag-math">math</a></li>
+        
+        <li property="schema:keywords"><a class="p-category tag" href="/archive/tag#tag-markup">markup</a></li>
+        
+        <li property="schema:keywords"><a class="p-category tag" href="/archive/tag#tag-website">website</a></li>
+        
+      </ul>
+    </div>
+  </header>
+  <div class="e-content post-content" property="schema:articleBody">
+    <p>In the process of writing a math-heavy blog post, I ran into several problems with the existing <a href="https://jekyllrb.com">Jekyll</a> configuration. I had set up Jekyll to use Redcarpet as the Markdown renderer, but it simply does not play well with MathJax: it will screw up <code>\</code> and <code>&amp;</code> inside the MathJax code.</p>
+<p>It is said that Kramdown does better with MathJax, but it doesn’t support syntax highlighting on fenced code blocks and its MathJax syntax is very non-standard: <code>$$</code> for inline math is just weird.</p>
+<p>As a last resort, I decided to integrate Jekyll with <a href="https://pandoc.org">Pandoc</a>, which is arguably <em>the</em> Swiss army knife of markup formats. It is unopinionated and has a lot of flexibility in what it can do.</p>
+<p>Fortunately, there is already a <a href="https://github.com/mfenner/jekyll-pandoc">jekyll-pandoc</a> plugin to do this. It was as simple as running <code>gem install jekyll-pandoc</code> and then tweaking the configuration file:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode yaml"><code class="sourceCode yaml"><a class="sourceLine" id="cb1-1" data-line-number="1"><span class="fu">markdown:</span><span class="at"> Pandoc</span></a>
+<a class="sourceLine" id="cb1-2" data-line-number="2"><span class="fu">gems:</span></a>
+<a class="sourceLine" id="cb1-3" data-line-number="3"><span class="kw">-</span> …</a>
+<a class="sourceLine" id="cb1-4" data-line-number="4"><span class="kw">-</span> jekyll-pandoc</a>
+<a class="sourceLine" id="cb1-5" data-line-number="5"><span class="fu">pandoc:</span></a>
+<a class="sourceLine" id="cb1-6" data-line-number="6">  <span class="fu">extensions:</span></a>
+<a class="sourceLine" id="cb1-7" data-line-number="7">  <span class="kw">-</span> mathjax</a></code></pre></div>
+<p>I had wanted to integrate with Pygments as well, but Pandoc’s <a href="https://github.com/jgm/highlighting-kate">highlight-kate</a> isn’t too bad and I didn’t feel like adding another complication to the process, so I will just stick with it unless I run into something I don’t like.</p>
+<p>To make the colors show up, I just needed to write some CSS akin to the <a href="https://github.com/jgm/highlighting-kate/tree/master/css">default themes</a> (see <a href="https://docs.kde.org/stable5/en/applications/katepart/highlight.html">Kate docs</a> for details on the categories):</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode css"><code class="sourceCode css"><a class="sourceLine" id="cb2-1" data-line-number="1">code<span class="fu">.sourceCode</span> span<span class="fu">.co</span> { <span class="kw">color</span>: …; } <span class="co">/* comment */</span></a>
+<a class="sourceLine" id="cb2-2" data-line-number="2">code<span class="fu">.sourceCode</span> span<span class="fu">.al</span> { <span class="kw">color</span>: …; } <span class="co">/* alert (warning) */</span></a>
+<a class="sourceLine" id="cb2-3" data-line-number="3">code<span class="fu">.sourceCode</span> span<span class="fu">.er</span> { <span class="kw">color</span>: …; } <span class="co">/* error (wrong_syntax) */</span></a>
+<a class="sourceLine" id="cb2-4" data-line-number="4">code<span class="fu">.sourceCode</span> span<span class="fu">.bn</span> { <span class="kw">color</span>: …; } <span class="co">/* base_n (nondecimal) */</span></a>
+<a class="sourceLine" id="cb2-5" data-line-number="5">code<span class="fu">.sourceCode</span> span<span class="fu">.dv</span> { <span class="kw">color</span>: …; } <span class="co">/* decimal_value */</span></a>
+<a class="sourceLine" id="cb2-6" data-line-number="6">code<span class="fu">.sourceCode</span> span<span class="fu">.fl</span> { <span class="kw">color</span>: …; } <span class="co">/* float */</span></a>
+<a class="sourceLine" id="cb2-7" data-line-number="7">code<span class="fu">.sourceCode</span> span<span class="fu">.ch</span> { <span class="kw">color</span>: …; } <span class="co">/* character */</span></a>
+<a class="sourceLine" id="cb2-8" data-line-number="8">code<span class="fu">.sourceCode</span> span<span class="fu">.st</span> { <span class="kw">color</span>: …; } <span class="co">/* string */</span></a>
+<a class="sourceLine" id="cb2-9" data-line-number="9">code<span class="fu">.sourceCode</span> span<span class="fu">.dt</span> { <span class="kw">color</span>: …; } <span class="co">/* data_type */</span></a>
+<a class="sourceLine" id="cb2-10" data-line-number="10">code<span class="fu">.sourceCode</span> span<span class="fu">.fu</span> { <span class="kw">color</span>: …; } <span class="co">/* function */</span></a>
+<a class="sourceLine" id="cb2-11" data-line-number="11">code<span class="fu">.sourceCode</span> span<span class="fu">.im</span> { <span class="kw">color</span>: …; } <span class="co">/* import */</span></a>
+<a class="sourceLine" id="cb2-12" data-line-number="12">code<span class="fu">.sourceCode</span> span<span class="fu">.cf</span> { <span class="kw">color</span>: …; } <span class="co">/* control_flow */</span></a>
+<a class="sourceLine" id="cb2-13" data-line-number="13">code<span class="fu">.sourceCode</span> span<span class="fu">.kw</span> { <span class="kw">color</span>: …; } <span class="co">/* keyword */</span></a>
+<a class="sourceLine" id="cb2-14" data-line-number="14">code<span class="fu">.sourceCode</span> span<span class="fu">.pp</span> { <span class="kw">color</span>: …; } <span class="co">/* preprocessor */</span></a>
+<a class="sourceLine" id="cb2-15" data-line-number="15">code<span class="fu">.sourceCode</span> span<span class="fu">.re</span> { <span class="kw">color</span>: …; } <span class="co">/* region_marker */</span></a>
+<a class="sourceLine" id="cb2-16" data-line-number="16">code<span class="fu">.sourceCode</span> span<span class="fu">.ot</span> { <span class="kw">color</span>: …; } <span class="co">/* other */</span></a></code></pre></div>
+<p>Hopefully none of the older posts broke. If so, <a href="/about#contact-me">let me know</a>!</p>
+
+  </div>
+  <p><a class="link-button" href="/2016-12-14/from-redcarpet-to-pandoc#comments">Comments</a></p>
+</article>
+
+<article class="h-entry post" property="schema:blogPost" typeof="schema:BlogPosting">
+  <header>
+    <h1 property="schema:headline schema:name"><a class="p-name u-url" href="/2016-12-11/double-negation-elimination">Computational interpretation of double negation elimination</a></h1>
+    <div class="meta">
+      <time class="dt-published date" property="schema:datePublished">2016-12-11</time>
+      <ul class="tags">
+        
+        <li property="schema:keywords"><a class="p-category tag" href="/archive/tag#tag-haskell">haskell</a></li>
+        
+        <li property="schema:keywords"><a class="p-category tag" href="/archive/tag#tag-logic">logic</a></li>
+        
+        <li property="schema:keywords"><a class="p-category tag" href="/archive/tag#tag-math">math</a></li>
+        
+      </ul>
+    </div>
+  </header>
+  <div class="e-content post-content" property="schema:articleBody">
+    <p>Today’s shower thought is: Is there a way to interpret <a href="https://en.wikipedia.org/wiki/Double_negation#Double_negative_elimination">double negation elimination</a> as a program?</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode hs"><code class="sourceCode haskell"><a class="sourceLine" id="cb1-1" data-line-number="1">((a <span class="ot">-&gt;</span> <span class="dt">Void</span>) <span class="ot">-&gt;</span> <span class="dt">Void</span>) <span class="ot">-&gt;</span> a</a></code></pre></div>
+<p>(Here, <a href="https://hackage.haskell.org/package/base-4.9.0.0/docs/Data-Void.html#t:Void"><code>Void</code></a> denotes the empty type.)</p>
+<p>At first glance, it seems preposterous: how does one expect to produce a return value of a completely arbitrary type <code>a</code> merely from a function of type <code>(a -&gt; Void) -&gt; Void</code>, which doesn’t even return a value of type <code>a</code>?</p>
+<p>A hint comes from <a href="https://en.wikipedia.org/wiki/Peirce&#39;s_law">Peirce’s law</a>, also known as <a href="https://en.wikipedia.org/wiki/Call-with-current-continuation">call-with-current-continuation</a>, which has a similar form:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode hs"><code class="sourceCode haskell"><a class="sourceLine" id="cb2-1" data-line-number="1"><span class="ot">callCC ::</span> ((a <span class="ot">-&gt;</span> <span class="dt">Cont</span> r) <span class="ot">-&gt;</span> <span class="dt">Cont</span> a) <span class="ot">-&gt;</span> <span class="dt">Cont</span> a</a></code></pre></div>
+<p>(We use <a href="https://hackage.haskell.org/package/mtl-2.2.1/docs/Control-Monad-Cont.html#t:Cont"><code>Cont</code></a> to allow the code to be tested in a Haskell program.)</p>
+<p>Peirce’s law gives the program full control over its own state (i.e. stack frame). The application of <a href="https://hackage.haskell.org/package/mtl-2.2.1/docs/Control-Monad-Cont.html#v:callCC"><code>callCC</code></a> to a callee <code>g :: (a -&gt; Cont r) -&gt; Cont a</code> bestows upon it the power of a nonlocal jump:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode hs"><code class="sourceCode haskell"><a class="sourceLine" id="cb3-1" data-line-number="1"><span class="ot">example ::</span> <span class="dt">Cont</span> <span class="dt">String</span></a>
+<a class="sourceLine" id="cb3-2" data-line-number="2">example <span class="fu">=</span></a>
+<a class="sourceLine" id="cb3-3" data-line-number="3">  callCC <span class="fu">$</span> \ yield <span class="ot">-&gt;</span> <span class="kw">do</span></a>
+<a class="sourceLine" id="cb3-4" data-line-number="4">    yield <span class="st">&quot;escaped&quot;</span></a>
+<a class="sourceLine" id="cb3-5" data-line-number="5">    pure <span class="st">&quot;stayed&quot;</span></a></code></pre></div>
+<p>This would return <code>&quot;escaped&quot;</code> rather than <code>&quot;stayed&quot;</code>. It’s as if the inner function performed a <code>goto</code>/<code>return</code>/<code>break</code>/<code>longjmp</code> to the outer scope, passing the result along the way.</p>
+<p>Turns out <code>doubleNegationElimination</code> can be expressed in terms of <code>callCC</code>:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode hs"><code class="sourceCode haskell"><a class="sourceLine" id="cb4-1" data-line-number="1"><span class="ot">doubleNegationElimination ::</span> ((a <span class="ot">-&gt;</span> <span class="dt">Cont</span> <span class="dt">Void</span>) <span class="ot">-&gt;</span> <span class="dt">Cont</span> <span class="dt">Void</span>) <span class="ot">-&gt;</span> <span class="dt">Cont</span> a</a>
+<a class="sourceLine" id="cb4-2" data-line-number="2">doubleNegationElimination doubleNegation <span class="fu">=</span></a>
+<a class="sourceLine" id="cb4-3" data-line-number="3">  callCC <span class="fu">$</span> \ yield <span class="ot">-&gt;</span> <span class="kw">do</span></a>
+<a class="sourceLine" id="cb4-4" data-line-number="4">    void <span class="ot">&lt;-</span> doubleNegation <span class="fu">$</span> \ x <span class="ot">-&gt;</span></a>
+<a class="sourceLine" id="cb4-5" data-line-number="5">      yield x <span class="co">-- goodbye!</span></a>
+<a class="sourceLine" id="cb4-6" data-line-number="6">    absurd void</a></code></pre></div>
+<p>From this, we can see the loophole: by passing in a <em>continuation</em> <code>a -&gt; Cont Void</code> into the <code>doubleNegation :: (a -&gt; Cont Void) -&gt; Cont Void</code>, the program can capture and send the result to the caller through a non-local jump. The remaining part involving <a href="https://hackage.haskell.org/package/base-4.9.0.0/docs/Data-Void.html#v:absurd"><code>absurd</code></a> is just to satisfy the type checker.</p>
+<p>For example, if the <code>doubleNegation</code> was constructed like this:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode hs"><code class="sourceCode haskell"><a class="sourceLine" id="cb5-1" data-line-number="1"><span class="ot">doubleNegation ::</span> (<span class="dt">String</span> <span class="ot">-&gt;</span> <span class="dt">Cont</span> <span class="dt">Void</span>) <span class="ot">-&gt;</span> <span class="dt">Cont</span> <span class="dt">Void</span></a>
+<a class="sourceLine" id="cb5-2" data-line-number="2">doubleNegation negation <span class="fu">=</span> negation <span class="st">&quot;strings do exist&quot;</span></a></code></pre></div>
+<p>then <code>doubleNegationElimination</code> would be able to manifest the evidence <code>&quot;strings do exist&quot;</code> by capturing the value and then immediately jumping to the outer scope, avoiding the crash that would have arisen from evaluating a <code>Void</code>.</p>
+<hr />
+<p>On a sidenote, <code>callCC</code> is <em>crazy powerful</em>. You can implement Python-style generators with them!</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode hs"><code class="sourceCode haskell"><a class="sourceLine" id="cb6-1" data-line-number="1"><span class="kw">import</span> <span class="dt">Control.Monad.Cont</span> (<span class="dt">MonadCont</span>, <span class="dt">MonadIO</span>, (&lt;=&lt;),</a>
+<a class="sourceLine" id="cb6-2" data-line-number="2">                           callCC, forever, liftIO, runContT)</a>
+<a class="sourceLine" id="cb6-3" data-line-number="3"><span class="kw">import</span> <span class="dt">Data.Foldable</span> (for_)</a>
+<a class="sourceLine" id="cb6-4" data-line-number="4"><span class="kw">import</span> <span class="dt">Data.IORef</span> (<span class="dt">IORef</span>)</a>
+<a class="sourceLine" id="cb6-5" data-line-number="5"><span class="kw">import</span> <span class="dt">Data.Void</span> (<span class="dt">Void</span>, absurd)</a>
+<a class="sourceLine" id="cb6-6" data-line-number="6"><span class="kw">import</span> <span class="kw">qualified</span> <span class="dt">Data.IORef</span> <span class="kw">as</span> <span class="dt">IO</span></a>
+<a class="sourceLine" id="cb6-7" data-line-number="7"></a>
+<a class="sourceLine" id="cb6-8" data-line-number="8"><span class="ot">main ::</span> <span class="dt">IO</span> ()</a>
+<a class="sourceLine" id="cb6-9" data-line-number="9">main <span class="fu">=</span> runContT generatorExample pure</a>
+<a class="sourceLine" id="cb6-10" data-line-number="10"></a>
+<a class="sourceLine" id="cb6-11" data-line-number="11"><span class="ot">generatorExample ::</span> (<span class="dt">MonadCont</span> m, <span class="dt">MonadIO</span> m) <span class="ot">=&gt;</span> m ()</a>
+<a class="sourceLine" id="cb6-12" data-line-number="12">generatorExample <span class="fu">=</span> callCC <span class="fu">$</span> \ stop <span class="ot">-&gt;</span> <span class="kw">do</span></a>
+<a class="sourceLine" id="cb6-13" data-line-number="13">  g <span class="ot">&lt;-</span> newGenerator [<span class="dv">0</span> <span class="fu">..</span> <span class="dv">9</span><span class="ot"> ::</span> <span class="dt">Integer</span>]</a>
+<a class="sourceLine" id="cb6-14" data-line-number="14">  forever <span class="fu">$</span> <span class="kw">do</span></a>
+<a class="sourceLine" id="cb6-15" data-line-number="15">    result <span class="ot">&lt;-</span> g</a>
+<a class="sourceLine" id="cb6-16" data-line-number="16">    <span class="kw">case</span> result <span class="kw">of</span></a>
+<a class="sourceLine" id="cb6-17" data-line-number="17">      <span class="dt">Nothing</span> <span class="ot">-&gt;</span> stop ()</a>
+<a class="sourceLine" id="cb6-18" data-line-number="18">      <span class="dt">Just</span> x  <span class="ot">-&gt;</span> liftIO (print x)</a>
+<a class="sourceLine" id="cb6-19" data-line-number="19"></a>
+<a class="sourceLine" id="cb6-20" data-line-number="20"><span class="ot">newGenerator ::</span> (<span class="dt">MonadCont</span> m, <span class="dt">MonadIO</span> m) <span class="ot">=&gt;</span> [a] <span class="ot">-&gt;</span> m (m (<span class="dt">Maybe</span> a))</a>
+<a class="sourceLine" id="cb6-21" data-line-number="21">newGenerator xs <span class="fu">=</span> callCC&#39; <span class="fu">$</span> \ ret <span class="ot">-&gt;</span> <span class="kw">do</span></a>
+<a class="sourceLine" id="cb6-22" data-line-number="22">  <span class="co">-- rNext stores the function used to jump back into the generator</span></a>
+<a class="sourceLine" id="cb6-23" data-line-number="23">  rNext <span class="ot">&lt;-</span> newIORef (<span class="fu">$</span> <span class="dt">Nothing</span>)</a>
+<a class="sourceLine" id="cb6-24" data-line-number="24">  <span class="co">-- rYield stores the function used to jump out of the generator</span></a>
+<a class="sourceLine" id="cb6-25" data-line-number="25">  rYield <span class="ot">&lt;-</span> newIORef <span class="fu">&lt;=&lt;</span> callCC&#39; <span class="fu">$</span> \ next <span class="ot">-&gt;</span> <span class="kw">do</span></a>
+<a class="sourceLine" id="cb6-26" data-line-number="26">    writeIORef rNext next</a>
+<a class="sourceLine" id="cb6-27" data-line-number="27">    ret <span class="fu">$</span> <span class="kw">do</span></a>
+<a class="sourceLine" id="cb6-28" data-line-number="28">      <span class="co">-- the generator itself is just a function that saves the current</span></a>
+<a class="sourceLine" id="cb6-29" data-line-number="29">      <span class="co">-- continuation and jumps back into the generator via rNext</span></a>
+<a class="sourceLine" id="cb6-30" data-line-number="30">      callCC&#39; <span class="fu">$</span> \ yield <span class="ot">-&gt;</span> <span class="kw">do</span></a>
+<a class="sourceLine" id="cb6-31" data-line-number="31">        readIORef rNext <span class="fu">&gt;&gt;=</span> (<span class="fu">$</span> yield)</a>
+<a class="sourceLine" id="cb6-32" data-line-number="32">  for_ xs <span class="fu">$</span> \ i <span class="ot">-&gt;</span> <span class="kw">do</span></a>
+<a class="sourceLine" id="cb6-33" data-line-number="33">    <span class="co">-- save the current continuation then jump out of the generator</span></a>
+<a class="sourceLine" id="cb6-34" data-line-number="34">    writeIORef rYield <span class="fu">&lt;=&lt;</span> callCC&#39; <span class="fu">$</span> \ next <span class="ot">-&gt;</span> <span class="kw">do</span></a>
+<a class="sourceLine" id="cb6-35" data-line-number="35">      writeIORef rNext next</a>
+<a class="sourceLine" id="cb6-36" data-line-number="36">      readIORef rYield <span class="fu">&gt;&gt;=</span> (<span class="fu">$</span> <span class="dt">Just</span> i)</a>
+<a class="sourceLine" id="cb6-37" data-line-number="37">  readIORef rYield <span class="fu">&gt;&gt;=</span> (<span class="fu">$</span> <span class="dt">Nothing</span>)</a>
+<a class="sourceLine" id="cb6-38" data-line-number="38"></a>
+<a class="sourceLine" id="cb6-39" data-line-number="39"><span class="co">-- | This is just double negation elimination under a different name, which</span></a>
+<a class="sourceLine" id="cb6-40" data-line-number="40"><span class="co">-- turns out to be a little more convenient than &#39;callCC&#39; here.</span></a>
+<a class="sourceLine" id="cb6-41" data-line-number="41"><span class="ot">callCC&#39; ::</span> <span class="dt">MonadCont</span> m <span class="ot">=&gt;</span> ((a <span class="ot">-&gt;</span> m <span class="dt">Void</span>) <span class="ot">-&gt;</span> m <span class="dt">Void</span>) <span class="ot">-&gt;</span> m a</a>
+<a class="sourceLine" id="cb6-42" data-line-number="42">callCC&#39; action <span class="fu">=</span> callCC ((absurd <span class="fu">&lt;$&gt;</span>) <span class="fu">.</span> action)</a>
+<a class="sourceLine" id="cb6-43" data-line-number="43"></a>
+<a class="sourceLine" id="cb6-44" data-line-number="44"><span class="ot">newIORef ::</span> <span class="dt">MonadIO</span> m <span class="ot">=&gt;</span> a <span class="ot">-&gt;</span> m (<span class="dt">IORef</span> a)</a>
+<a class="sourceLine" id="cb6-45" data-line-number="45">newIORef value <span class="fu">=</span> liftIO (<span class="dt">IO</span><span class="fu">.</span>newIORef value)</a>
+<a class="sourceLine" id="cb6-46" data-line-number="46"></a>
+<a class="sourceLine" id="cb6-47" data-line-number="47"><span class="ot">readIORef ::</span> <span class="dt">MonadIO</span> m <span class="ot">=&gt;</span> <span class="dt">IORef</span> a <span class="ot">-&gt;</span> m a</a>
+<a class="sourceLine" id="cb6-48" data-line-number="48">readIORef ref <span class="fu">=</span> liftIO (<span class="dt">IO</span><span class="fu">.</span>readIORef ref)</a>
+<a class="sourceLine" id="cb6-49" data-line-number="49"></a>
+<a class="sourceLine" id="cb6-50" data-line-number="50"><span class="ot">writeIORef ::</span> <span class="dt">MonadIO</span> m <span class="ot">=&gt;</span> <span class="dt">IORef</span> a <span class="ot">-&gt;</span> a <span class="ot">-&gt;</span> m ()</a>
+<a class="sourceLine" id="cb6-51" data-line-number="51">writeIORef ref value <span class="fu">=</span> liftIO (<span class="dt">IO</span><span class="fu">.</span>writeIORef ref value)</a></code></pre></div>
+
+  </div>
+  <p><a class="link-button" href="/2016-12-11/double-negation-elimination#comments">Comments</a></p>
+</article>
+
+<article class="h-entry post" property="schema:blogPost" typeof="schema:BlogPosting">
+  <header>
+    <h1 property="schema:headline schema:name"><a class="p-name u-url" href="/2016-09-21/function-pointer-context">The need to associate function pointers with environments</a></h1>
+    <div class="meta">
+      <time class="dt-published date" property="schema:datePublished">2016-09-21</time>
+      <ul class="tags">
+        
+        <li property="schema:keywords"><a class="p-category tag" href="/archive/tag#tag-c">c</a></li>
+        
+        <li property="schema:keywords"><a class="p-category tag" href="/archive/tag#tag-data-structure">data-structure</a></li>
+        
+        <li property="schema:keywords"><a class="p-category tag" href="/archive/tag#tag-math">math</a></li>
+        
+      </ul>
+    </div>
+  </header>
+  <div class="e-content post-content" property="schema:articleBody">
+    <p>A friend once asked me a question like this:</p>
+<blockquote>
+<div class="sourceCode" id="cb1"><pre class="sourceCode c"><code class="sourceCode c"><a class="sourceLine" id="cb1-1" data-line-number="1"><span class="dt">void</span> register_event_handler(<span class="dt">void</span> *f_ctx, <span class="dt">void</span> (*f)(<span class="dt">void</span> *ctx));</a></code></pre></div>
+<p>I’m a little confused about the purpose of <code>f_ctx</code>. Here, <code>f</code> is a handler function that gets called when the event is triggered, and <code>f_ctx</code> is − according to the documentation – some pointer argument that gets passed to <code>f</code> whenever it gets called. Why do we need <code>f_ctx</code>? Wouldn’t <code>f</code> alone suffice?</p>
+</blockquote>
+<p>This is a trick for low-level languages like C where functions are represented using a raw function pointer, which does not store an <em>enclosing environment</em> (sometimes called a <em>context</em>). It is not needed in higher-level languages with support for <a href="https://en.wikipedia.org/wiki/First-class_function"><em>first-class functions</em></a>, such as Python, as these languages allow functions to be nested inside other functions and will automatically store the enclosing environment within the function objects in a combination called a <a href="https://en.wikipedia.org/wiki/Closure_(computer_programming)">closure</a>.</p>
+<p>The need for an environment pointer <code>f_ctx</code> arises when you want to write a function that depends on external parameters not known at compile time. The <code>f_ctx</code> parameter allows you to smuggle these external parameters into <code>f</code> however you like.</p>
+<p>It might be best to illustrate this with an example. Consider a 1-dimensional numerical integrator like this:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode c"><code class="sourceCode c"><a class="sourceLine" id="cb2-1" data-line-number="1"><span class="dt">double</span> integrate_1(</a>
+<a class="sourceLine" id="cb2-2" data-line-number="2">    <span class="dt">double</span> (*f)(<span class="dt">double</span> x), <span class="co">/* function to be integrated */</span></a>
+<a class="sourceLine" id="cb2-3" data-line-number="3">    <span class="dt">double</span> x1,</a>
+<a class="sourceLine" id="cb2-4" data-line-number="4">    <span class="dt">double</span> x2</a>
+<a class="sourceLine" id="cb2-5" data-line-number="5">);</a></code></pre></div>
+<p>This works fine if you know the complete form of the function <code>f</code> ahead of time. But what if this is not the case – what if the function requires parameters? Say we want to calculate the <a href="https://en.wikipedia.org/wiki/Gamma_function">gamma function</a> using an integral:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode c"><code class="sourceCode c"><a class="sourceLine" id="cb3-1" data-line-number="1"><span class="dt">double</span> integrand(<span class="dt">double</span> x)</a>
+<a class="sourceLine" id="cb3-2" data-line-number="2">{</a>
+<a class="sourceLine" id="cb3-3" data-line-number="3">    <span class="dt">double</span> t = <span class="co">/* where do we get &quot;t&quot; from?? */</span>;</a>
+<a class="sourceLine" id="cb3-4" data-line-number="4">    <span class="cf">return</span> pow(x, t - <span class="fl">1.0</span>) * exp(-x);</a>
+<a class="sourceLine" id="cb3-5" data-line-number="5">}</a>
+<a class="sourceLine" id="cb3-6" data-line-number="6"></a>
+<a class="sourceLine" id="cb3-7" data-line-number="7"><span class="dt">double</span> gamma_function(<span class="dt">double</span> t)</a>
+<a class="sourceLine" id="cb3-8" data-line-number="8">{</a>
+<a class="sourceLine" id="cb3-9" data-line-number="9">    <span class="co">/* how do we send the value of &quot;t&quot; into &quot;integrand&quot;? */</span></a>
+<a class="sourceLine" id="cb3-10" data-line-number="10">    <span class="cf">return</span> integrate_1(&amp;integrand, <span class="fl">0.0</span>, INFINITY) / M_PI;</a>
+<a class="sourceLine" id="cb3-11" data-line-number="11">}</a></code></pre></div>
+<p>Using <code>integrand_1</code> there are only three ways to do this:</p>
+<ol type="1">
+<li><p>Store <code>t</code> into a global variable, sacrificing <a href="https://en.wikipedia.org/wiki/Thread_safety">thread safety</a>. It would be bad to simultaneously call <code>gamma_function</code> from different threads as they will both attempt to use the same global variable.</p></li>
+<li><p>Use a thread-local variable, a feature not available until <a href="https://en.wikipedia.org/wiki/C11_(C_standard_revision)">C11</a>. At least it is thread-safe now, but it is still not <a href="https://en.wikipedia.org/wiki/Reentrancy_(computing)">reentrant</a>.</p></li>
+<li><p>Write raw machine code to create an integrand on the fly. This can be implemented in a thread-safe and reentrant manner, but it is both inefficient, <a href="https://en.wikipedia.org/wiki/Software_portability">unportable</a>, and inhibits compiler optimizations.</p></li>
+</ol>
+<p>However, if the numerical integrator were to be re-designed like this:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode c"><code class="sourceCode c"><a class="sourceLine" id="cb4-1" data-line-number="1"><span class="dt">double</span> integrate_2(</a>
+<a class="sourceLine" id="cb4-2" data-line-number="2">    <span class="dt">double</span> (*f)(<span class="dt">void</span> *f_ctx, <span class="dt">double</span> x),</a>
+<a class="sourceLine" id="cb4-3" data-line-number="3">    <span class="dt">void</span> *f_ctx, <span class="co">/* passed into every invocation of &quot;f&quot; */</span></a>
+<a class="sourceLine" id="cb4-4" data-line-number="4">    <span class="dt">double</span> x1,</a>
+<a class="sourceLine" id="cb4-5" data-line-number="5">    <span class="dt">double</span> x2</a>
+<a class="sourceLine" id="cb4-6" data-line-number="6">);</a></code></pre></div>
+<p>Then there is a much simpler solution that avoids all of these problems:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode c"><code class="sourceCode c"><a class="sourceLine" id="cb5-1" data-line-number="1"><span class="dt">double</span> integrand(<span class="dt">void</span> *ctx, <span class="dt">double</span> x)</a>
+<a class="sourceLine" id="cb5-2" data-line-number="2">{</a>
+<a class="sourceLine" id="cb5-3" data-line-number="3">    <span class="dt">double</span> t = *(<span class="dt">double</span> *)ctx;</a>
+<a class="sourceLine" id="cb5-4" data-line-number="4">    <span class="cf">return</span> pow(x, t - <span class="fl">1.0</span>) * exp(-x);</a>
+<a class="sourceLine" id="cb5-5" data-line-number="5">}</a>
+<a class="sourceLine" id="cb5-6" data-line-number="6"></a>
+<a class="sourceLine" id="cb5-7" data-line-number="7"><span class="dt">double</span> gamma_function(<span class="dt">double</span> t)</a>
+<a class="sourceLine" id="cb5-8" data-line-number="8">{</a>
+<a class="sourceLine" id="cb5-9" data-line-number="9">    <span class="cf">return</span> integrate_2(&amp;integrand, &amp;t, <span class="fl">0.0</span>, INFINITY) / M_PI;</a>
+<a class="sourceLine" id="cb5-10" data-line-number="10">}</a></code></pre></div>
+<p>This is thread-safe, reentrant, efficient, and portable.</p>
+<p>As mentioned earlier, this problem does not exist in languages like Python where functions can be nested inside other functions (or rather, it is automatically taken care of by the language itself):</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode py"><code class="sourceCode python"><a class="sourceLine" id="cb6-1" data-line-number="1"><span class="kw">def</span> gamma_function(t):</a>
+<a class="sourceLine" id="cb6-2" data-line-number="2">    <span class="kw">def</span> integrand(x):</a>
+<a class="sourceLine" id="cb6-3" data-line-number="3">        <span class="cf">return</span> x <span class="op">**</span> (t <span class="op">-</span> <span class="fl">1.0</span>) <span class="op">*</span> math.exp(<span class="op">-</span>x)</a>
+<a class="sourceLine" id="cb6-4" data-line-number="4">    <span class="cf">return</span> integrate(integrand, <span class="fl">0.0</span>, math.inf) <span class="op">/</span> math.pi</a></code></pre></div>
+
+  </div>
+  <p><a class="link-button" href="/2016-09-21/function-pointer-context#comments">Comments</a></p>
+</article>
+
+
+      </div>
+    </div>
+    <div class="lower">
+      <footer class="root">
+        <small>
+          Hosted on <a href="https://pages.github.com">GitHub Pages</a>.
+          Built with <a href="http://jekyllrb.com">Jekyll</a>.
+          Some rights reserved
+          (<a rel="license" href="https://creativecommons.org/licenses/by/4.0" property="schema:license">CC BY 4.0</a>).
+          <a href="/feed.xml">
+            <svg xmlns="http://www.w3.org/2000/svg"
+                 version="1.1" width="1em" height="1em" viewBox="0 0 256 256">
+              <defs>
+                <linearGradient id="RSSg" x1="0.085" y1="0.085" x2="0.915" y2="0.915">
+                  <stop offset="0.0" stop-color="#e3702d"/>
+                  <stop offset="0.1071" stop-color="#ea7d31"/>
+                  <stop offset="0.3503" stop-color="#f69537"/>
+                  <stop offset="0.5" stop-color="#fb9e3a"/>
+                  <stop offset="0.7016" stop-color="#ea7c31"/>
+                  <stop offset="0.8866" stop-color="#de642b"/>
+                  <stop offset="1.0" stop-color="#d95b29"/>
+                </linearGradient>
+              </defs>
+              <rect width="256" height="256" rx="55" ry="55" x="0" y="0" fill="#cc5d15"/>
+              <rect width="246" height="246" rx="50" ry="50" x="5" y="5" fill="#f49c52"/>
+              <rect width="236" height="236" rx="47" ry="47" x="10" y="10" fill="url(#RSSg)"/>
+              <circle cx="68" cy="189" r="24" fill="#fff"/>
+              <path d="M160 213h-34a82 82 0 0 0 -82 -82v-34a116 116 0 0 1 116 116z" fill="#fff"/>
+              <path d="M184 213A140 140 0 0 0 44 73 V 38a175 175 0 0 1 175 175z" fill="#fff"/>
+            </svg>
+          </a>
+        </small>
+      </footer>
+    </div>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <script>
+      window.jQuery ||
+      document.write('<script src="/js/vendor/jquery-1.11.3.min.js"><\/script>')
+    </script>
+    <script src="/js/plugins.js"></script>
+    <script src="/js/main.js"></script>
+  </body>
+</html>

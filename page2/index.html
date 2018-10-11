@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html class="no-js">
+  <head>
+    <meta charset="utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>Rufflewind's Scratchpad</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Fira+Mono|Fira+Sans|Oxygen"/>
+    <link rel="stylesheet" href="/css/normalize.css"/>
+    <link rel="stylesheet" href="/css/syntax.css"/>
+    <link rel="stylesheet" href="/css/main.css"/>
+    <link rel="icon" href="/favicon.ico"/>
+    <link rel="alternate" type="application/rss+xml" href="/feed"/>
+    <script src="/js/vendor/modernizr.custom.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+      ga('create', 'UA-48515395-1', 'rufflewind.com');
+      ga('send', 'pageview');
+    </script>
+  </head>
+  <body prefix="schema: http://schema.org/" typeof="schema:Blog">
+    <div class="upper">
+      <header class="root">
+        <div class="header-title">
+          <h1><a href="/">Rufflewind's Scratchpad</a></h1>
+        </div>
+        <div class="header-banner">
+          <nav>
+            <ul>
+              <li><a class="extra" href="/">Home</a></li>
+              <li><a class="extra" href="/archive">Archive</a></li>
+              <li><a class="extra" href="/about">About</a></li>
+            </ul>
+            <form class="search" method="get" action="//google.com/search">
+              <input type="hidden" name="sitesearch" value="rufflewind.com"/>
+              <input id="search-input" type="search" name="q" placeholder="Search"/>
+              <button id="search-button">
+                <svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 100 100">
+                  <circle cx="42" cy="42" r="30" stroke="white" stroke-width="12" fill="none"/>
+                  <path d="m 60 60 35 35" stroke="white" stroke-width="12" fill="none"/>
+                </svg>
+                <span>Search</span>
+              </button>
+            </form>
+          </nav>
+        </div>
+      </header>
+      <div class="content">
+        
+
+
+
+<nav class="pagination">
+ 
+  
+  <a class="prev" href="/">&lArr; Prev</a>
+ 
+
+ 
+  
+  
+  <a class="page" href="/">1</a>
+  
+ 
+  
+  
+  <strong class="page">2</strong>
+  
+ 
+  
+  
+  <a class="page" href="/page3">3</a>
+  
+ 
+  
+  
+  <a class="page" href="/page4">4</a>
+  
+ 
+  
+  
+  <a class="page" href="/page5">5</a>
+  
+ 
+  
+  
+  <a class="page" href="/page6">6</a>
+  
+ 
+  
+  
+  <a class="page" href="/page7">7</a>
+  
+ 
+  
+  
+  <a class="page" href="/page8">8</a>
+  
+ 
+  
+  
+  <a class="page" href="/page9">9</a>
+  
+ 
+
+ 
+  <a class="next" href="/page3">Next &rArr;</a>
+ 
+</nav>
+
+
+
+
+<article class="h-entry post" property="schema:blogPost" typeof="schema:BlogPosting">
+  <header>
+    <h1 property="schema:headline schema:name"><a class="p-name u-url" href="/2017-02-21/quirks-with-submodules">Two common problems with Git submodules</a></h1>
+    <div class="meta">
+      <time class="dt-published date" property="schema:datePublished">2017-02-21</time>
+      <ul class="tags">
+        
+        <li property="schema:keywords"><a class="p-category tag" href="/archive/tag#tag-git">git</a></li>
+        
+      </ul>
+    </div>
+  </header>
+  <div class="e-content post-content" property="schema:articleBody">
+    <p>Git submodules are useful, but their UX is a bit intrusive for users who aren’t even interacting with the submodules. Here’s a list of the two common ones I often run into. (Let me know if there’s anything else that folks often run into!)</p>
+<h2 id="i-cloned-a-repo-containing-submodules-but-theres-nothing-in-them">I cloned a repo containing submodules, but there’s nothing in them!</h2>
+<p>This happens if you clone a submodule without the <code>--recursive</code> flag. The solution is to run</p>
+<pre><code>git submodule update --init --recursive</code></pre>
+<p>which will initialize everything.</p>
+<p>I figure the main reason this is not the default is that cloning submodules can waste a lot of time, disk space, and/or bandwidth if you don’t actually need the submodules.</p>
+<h2 id="why-are-submodules-showing-up-in-git-status-even-though-i-never-touched-them">Why are submodules showing up in <code>git status</code> even though I never touched them?</h2>
+<p>This can happen after <code>git pull</code>, <code>git checkout</code>, or <code>git reset</code>, which change the working tree but do not update the submodules, causing them to lag behind. In <code>git status</code>, the problem manifests as:</p>
+<pre><code>modified:   mysubmodule (new commits)</code></pre>
+<p>If you are sure you didn’t change any file within the submodules, you can update them using</p>
+<pre><code>git submodule update --recursive</code></pre>
+<p>I’m not sure why this isn’t the default. Perhaps it’s to avoid accidentally losing changes within the submodules?</p>
+
+  </div>
+  <p><a class="link-button" href="/2017-02-21/quirks-with-submodules#comments">Comments</a></p>
+</article>
+
+<article class="h-entry post" property="schema:blogPost" typeof="schema:BlogPosting">
+  <header>
+    <h1 property="schema:headline schema:name"><a class="p-name u-url" href="/2017-02-15/rust-move-copy-borrow">Graphical depiction of ownership and borrowing in Rust</a></h1>
+    <div class="meta">
+      <time class="dt-published date" property="schema:datePublished">2017-02-15</time>
+      <ul class="tags">
+        
+        <li property="schema:keywords"><a class="p-category tag" href="/archive/tag#tag-rust">rust</a></li>
+        
+      </ul>
+    </div>
+  </header>
+  <div class="e-content post-content" property="schema:articleBody">
+    <p>Below is a graphical depiction of moving, copying, and borrowing in the <a href="https://www.rust-lang.org">Rust language</a>. Most of these concepts are fairly specific to Rust and are therefore a common stumbling block for many learners.</p>
+<p>To avoid clutter in the graphics, I have tried to keep the text to a minimum. It isn’t meant to be a replacement for the various tutorials out there but more of a different perspective for programmers who prefer to grok concepts visually. If you are learning Rust and find these graphics helpful, I would recommend annotating your own code with such diagrams to help solidify the concepts :)</p>
+<p><a href="/img/rust-move-copy-borrow.png"><img src="/img/rust-move-copy-borrow.png" alt="Ownership and borrowing in Rust" /></a></p>
+<p>You can zoom in by clicking the image. You can also get it as an <a href="/img/rust-move-copy-borrow.svg">SVG</a> or <a href="/img/rust-move-copy-borrow.pdf">PDF</a>.</p>
+<p>The upper two figures depict the two main kinds of semantics for data that you own: either move semantics or copy semantics.</p>
+<ul>
+<li>The picture on <strong>move semantics</strong> (⤳) looks almost too simple. There is no deception here: move semantics are strange only because most languages allow variables to be used as many times as the programmers please. This stands in contrast to much of the real world: I can’t just give someone my pen and still use it for writing! In Rust, any variable whose type does not implement the <code>Copy</code> trait has move semantics and would behave as shown.</li>
+<li><strong>Copy semantics</strong> (⎘) are reserved for types that do implement the <code>Copy</code> trait. In this case, <em>every</em> use of the object would result in a copy, as shown by the bifurcation.</li>
+</ul>
+<p>The central two figures depict the two ways in which you can borrow an object you own, and what each one offers.</p>
+<ul>
+<li>For <strong>mutable borrowing</strong>, I used a lock symbol (🔒) to signify that the original object is effectively locked for the duration of the borrow, rendering it unusable.</li>
+<li>In contrast, for <strong>non-mutable borrowing</strong> I used a snowflake symbol (❄) to indicate that the original object is only <em>frozen</em>: you can still take more non-mutable references, but you cannot move or take mutable references of it.</li>
+</ul>
+<p>In both figures, <code>’<var>ρ</var></code> is a name I have chosen for the lifetime of the references. I used a Greek letter on purpose because there is no syntax for <em>concrete</em> lifetimes in Rust, currently.</p>
+<p>The last two figures summarize the key differences and similarities between the two kinds of references, both pictorally and in text form. The “<a href="https://doc.rust-lang.org/beta/book/mutability.html#interior-vs-exterior-mutability">exteriorly</a>” qualifier is important, since you can still have interior mutability through <a href="https://doc.rust-lang.org/std/cell/"><code>Cell</code></a>-like things.</p>
+
+  </div>
+  <p><a class="link-button" href="/2017-02-15/rust-move-copy-borrow#comments">Comments</a></p>
+</article>
+
+<article class="h-entry post" property="schema:blogPost" typeof="schema:BlogPosting">
+  <header>
+    <h1 property="schema:headline schema:name"><a class="p-name u-url" href="/2016-12-30/reverse-mode-automatic-differentiation">Reverse-mode automatic differentiation: a tutorial</a></h1>
+    <div class="meta">
+      <time class="dt-published date" property="schema:datePublished">2016-12-30</time>
+      <ul class="tags">
+        
+        <li property="schema:keywords"><a class="p-category tag" href="/archive/tag#tag-calculus">calculus</a></li>
+        
+        <li property="schema:keywords"><a class="p-category tag" href="/archive/tag#tag-math">math</a></li>
+        
+        <li property="schema:keywords"><a class="p-category tag" href="/archive/tag#tag-numerical">numerical</a></li>
+        
+        <li property="schema:keywords"><a class="p-category tag" href="/archive/tag#tag-python">python</a></li>
+        
+        <li property="schema:keywords"><a class="p-category tag" href="/archive/tag#tag-rust">rust</a></li>
+        
+      </ul>
+    </div>
+  </header>
+  <div class="e-content post-content" property="schema:articleBody">
+    <p><em>In this post, I’ll walk through the mathematical formalism of reverse-mode <a href="https://en.wikipedia.org/wiki/Automatic_differentiation">automatic differentiation</a> (AD) and try to explain some simple implementation strategies for reverse-mode AD. Demo programs in Python and Rust are included.</em></p>
+<h2 id="a-simple-example">A simple example</h2>
+<p>Suppose we want to calculate the <a href="https://en.wikipedia.org/wiki/Automatic_differentiation#Forward_accumulation">expression</a>:</p>
+<p><span class="math display">\[z = x \cdot y + \sin(x)\]</span></p>
+<p>To do this using a program, we’d just translate it directly to code:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode py"><code class="sourceCode python"><a class="sourceLine" id="cb1-1" data-line-number="1">z <span class="op">=</span> x <span class="op">*</span> y <span class="op">+</span> sin(x)</a></code></pre></div>
+<p>What if we’re also interested in the derivatives of <span class="math inline">\(z\)</span>? The “obvious” approach is to just find the expression by hand (or using a computer algebra system) and then punch it into the computer as we did before. But that assumes we have an explicit form for <span class="math inline">\(z\)</span>. What if all we had was a program?</p>
+<p>The important realization that leads to automatic differentiation is the fact that <em>even biggest, most complicated program must be built from a small set of primitive operations</em> such as addition, multiplication, or trigonometric functions. The <a href="https://en.wikipedia.org/wiki/Chain_rule">chain rule</a> allows us to take full advantage of this property.</p>
+<h2 id="forward-mode-automatic-differentiation">Forward-mode automatic differentiation</h2>
+<p>First, we need to think about how a <em>computer</em> would evaluate <span class="math inline">\(z\)</span> via a sequence of primitive operations (multiplication, sine, and addition):</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode py"><code class="sourceCode python"><a class="sourceLine" id="cb2-1" data-line-number="1"><span class="co"># Program A</span></a>
+<a class="sourceLine" id="cb2-2" data-line-number="2">x <span class="op">=</span> ?</a>
+<a class="sourceLine" id="cb2-3" data-line-number="3">y <span class="op">=</span> ?</a>
+<a class="sourceLine" id="cb2-4" data-line-number="4">a <span class="op">=</span> x <span class="op">*</span> y</a>
+<a class="sourceLine" id="cb2-5" data-line-number="5">b <span class="op">=</span> sin(x)</a>
+<a class="sourceLine" id="cb2-6" data-line-number="6">z <span class="op">=</span> a <span class="op">+</span> b</a></code></pre></div>
+<p>The question marks indicate that <code>x</code> and <code>y</code> are to be supplied by the user.</p>
+<p>I was careful to avoid <a href="https://en.wikipedia.org/wiki/Static_single_assignment_form">reassigning to the same variable</a>: this way we can treat each assignment as a plain old <a href="http://www.haskellforall.com/2013/12/equational-reasoning.html">math equation</a>:</p>
+<p><span class="math display">\[\begin{align}
+x &amp;= {?} \\
+y &amp;= {?} \\
+a &amp;= x \cdot y \tag{A} \\
+b &amp;= \sin(x) \\
+z &amp;= a + b
+\end{align}\]</span></p>
+<p>Let’s try to differentiate each equation with respect to some yet-to-be-given variable <span class="math inline">\(t\)</span>:</p>
+<p><span class="math display">\[\begin{align}
+\frac{\partial x}{\partial t} &amp;= {?} \tag{F1} \\
+\frac{\partial y}{\partial t} &amp;= {?} \\
+\frac{\partial a}{\partial t} &amp;= y \cdot \frac{\partial x}{\partial t} + x \cdot \frac{\partial y}{\partial t} \\
+\frac{\partial b}{\partial t} &amp;= \cos(x) \cdot \frac{\partial x}{\partial t} \\
+\frac{\partial z}{\partial t} &amp;= \frac{\partial a}{\partial t} + \frac{\partial b}{\partial t}
+\end{align}\]</span></p>
+<p>To obtain this, I have made liberal use of the chain rule:</p>
+<p><span class="math display">\[\begin{align}
+\frac{\partial w}{\partial t}
+&amp;= \sum_i \left(\frac{\partial w}{\partial u_i} \cdot \frac{\partial u_i}{\partial t}\right) \tag{C1} \\
+&amp;= \frac{\partial w}{\partial u_1} \cdot \frac{\partial u_1}{\partial t} + \frac{\partial w}{\partial u_2} \cdot \frac{\partial u_2}{\partial t} + \cdots
+\end{align}\]</span></p>
+<p>where <span class="math inline">\(w\)</span> denotes some output variable and <span class="math inline">\(u_i\)</span> denotes each of the input variables that <span class="math inline">\(w\)</span> depends on.</p>
+<p>If we substitute <span class="math inline">\(t = x\)</span> into equations (F1), we’d have an algorithm for calculating <span class="math inline">\(\partial z / \partial x\)</span>. Alternatively, to get <span class="math inline">\(\partial z / \partial y\)</span>, we could just plug in <span class="math inline">\(t = y\)</span> instead.</p>
+<p>Now, let’s translate the equations (F1) back into an ordinary program involving the <em>differential</em> variables <code>{dx, dy, …}</code>, which stand for <span class="math inline">\(\{\partial x / \partial t, \partial y / \partial t, \ldots\}\)</span> respectively:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode py"><code class="sourceCode python"><a class="sourceLine" id="cb3-1" data-line-number="1"><span class="co"># Program B</span></a>
+<a class="sourceLine" id="cb3-2" data-line-number="2">dx <span class="op">=</span> ?</a>
+<a class="sourceLine" id="cb3-3" data-line-number="3">dy <span class="op">=</span> ?</a>
+<a class="sourceLine" id="cb3-4" data-line-number="4">da <span class="op">=</span> y <span class="op">*</span> dx <span class="op">+</span> x <span class="op">*</span> dy</a>
+<a class="sourceLine" id="cb3-5" data-line-number="5">db <span class="op">=</span> cos(x) <span class="op">*</span> dx</a>
+<a class="sourceLine" id="cb3-6" data-line-number="6">dz <span class="op">=</span> da <span class="op">+</span> db</a></code></pre></div>
+<p>If we substitute <span class="math inline">\(t = x\)</span> into the mathematical equations, what happens to this program? The effect is remarkably simple: we just need to initialize <code>dx = 1</code> and <code>dy = 0</code> as the <em>seed values</em> for the algorithm. Hence, by choosing the seeds <code>dx = 1</code> and <code>dy = 0</code>, the variable <code>dz</code> will contain the value of the derivative <span class="math inline">\(\partial z / \partial x\)</span> upon completion of the program. Similarly, if we want <span class="math inline">\(\partial z / \partial y\)</span>, we would use the seed <code>dx = 0</code> and <code>dy = 1</code> and the variable <code>dz</code> would contain the value of <span class="math inline">\(\partial z / \partial y\)</span>.</p>
+<p>So far we have shown how the derivative can be calculated for a specific function like our example. To make the process fully automatic, we prescribe a set of rules for translating a program that evaluates an expression (like Program A) into a program that evaluates its derivatives (like Program B). We have already discovered 3 of these rules, in fact:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode py"><code class="sourceCode python"><a class="sourceLine" id="cb4-1" data-line-number="1">c <span class="op">=</span> a <span class="op">+</span> b     <span class="op">=&gt;</span>    dc <span class="op">=</span> da <span class="op">+</span> db</a>
+<a class="sourceLine" id="cb4-2" data-line-number="2">c <span class="op">=</span> a <span class="op">*</span> b     <span class="op">=&gt;</span>    dc <span class="op">=</span> b <span class="op">*</span> da <span class="op">+</span> a <span class="op">*</span> db</a>
+<a class="sourceLine" id="cb4-3" data-line-number="3">c <span class="op">=</span> sin(a)    <span class="op">=&gt;</span>    dc <span class="op">=</span> cos(a) <span class="op">*</span> da</a></code></pre></div>
+<p>This can be extended further for subtraction, division, powers, other trigonometric functions, etc using multivariable calculus:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode py"><code class="sourceCode python"><a class="sourceLine" id="cb5-1" data-line-number="1">c <span class="op">=</span> a <span class="op">-</span> b     <span class="op">=&gt;</span>    dc <span class="op">=</span> da <span class="op">-</span> db</a>
+<a class="sourceLine" id="cb5-2" data-line-number="2">c <span class="op">=</span> a <span class="op">/</span> b     <span class="op">=&gt;</span>    dc <span class="op">=</span> da <span class="op">/</span> b <span class="op">-</span> a <span class="op">*</span> db <span class="op">/</span> b <span class="op">**</span> <span class="dv">2</span></a>
+<a class="sourceLine" id="cb5-3" data-line-number="3">c <span class="op">=</span> a <span class="op">**</span> b    <span class="op">=&gt;</span>    dc <span class="op">=</span> b <span class="op">*</span> a <span class="op">**</span> (b <span class="op">-</span> <span class="dv">1</span>) <span class="op">*</span> da <span class="op">+</span> log(a) <span class="op">*</span> a <span class="op">**</span> b <span class="op">*</span> db</a>
+<a class="sourceLine" id="cb5-4" data-line-number="4">c <span class="op">=</span> cos(a)    <span class="op">=&gt;</span>    dc <span class="op">=</span> <span class="op">-</span>sin(a) <span class="op">*</span> da</a>
+<a class="sourceLine" id="cb5-5" data-line-number="5">c <span class="op">=</span> tan(a)    <span class="op">=&gt;</span>    dc <span class="op">=</span> da <span class="op">/</span> cos(a) <span class="op">**</span> <span class="dv">2</span></a></code></pre></div>
+<p>To translate using the rules, we simply replace each primitive operation in the original program by its differential analog. The order of the program remains unchanged: if a statement <var>K</var> is evaluated before another statement <var>L</var>, then the differential analog of statement <var>K</var> is still evaluated before the differential analog of statement <var>L</var>. This is <strong>forward-mode automatic differentiation</strong>.</p>
+<p>A careful inspection of Program A and Program B reveals that it is actually possible to interleave the differential calculations with the original calculations:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode py"><code class="sourceCode python"><a class="sourceLine" id="cb6-1" data-line-number="1">x  <span class="op">=</span> ?</a>
+<a class="sourceLine" id="cb6-2" data-line-number="2">dx <span class="op">=</span> ?</a>
+<a class="sourceLine" id="cb6-3" data-line-number="3"></a>
+<a class="sourceLine" id="cb6-4" data-line-number="4">y  <span class="op">=</span> ?</a>
+<a class="sourceLine" id="cb6-5" data-line-number="5">dy <span class="op">=</span> ?</a>
+<a class="sourceLine" id="cb6-6" data-line-number="6"></a>
+<a class="sourceLine" id="cb6-7" data-line-number="7">a  <span class="op">=</span> x <span class="op">*</span> y</a>
+<a class="sourceLine" id="cb6-8" data-line-number="8">da <span class="op">=</span> y <span class="op">*</span> dx <span class="op">+</span> x <span class="op">*</span> dy</a>
+<a class="sourceLine" id="cb6-9" data-line-number="9"></a>
+<a class="sourceLine" id="cb6-10" data-line-number="10">b  <span class="op">=</span> sin(x)</a>
+<a class="sourceLine" id="cb6-11" data-line-number="11">db <span class="op">=</span> cos(x) <span class="op">*</span> dx</a>
+<a class="sourceLine" id="cb6-12" data-line-number="12"></a>
+<a class="sourceLine" id="cb6-13" data-line-number="13">z  <span class="op">=</span> a <span class="op">+</span> b</a>
+<a class="sourceLine" id="cb6-14" data-line-number="14">dz <span class="op">=</span> da <span class="op">+</span> db</a></code></pre></div>
+<p>This demonstrates the two main advantages of forward-mode AD:</p>
+<ul>
+<li>The differential variables usually depend on the intermediate variables, so if we do them together there’s no need to hold on to the the intermediate variables until later, saving memory.</li>
+<li>This enables an implementation using <a href="https://en.wikipedia.org/wiki/Automatic_differentiation#Automatic_differentiation_using_dual_numbers">dual numbers</a>. In languages with operator overloading, this translates to a very simple, direct implementation of forward-mode AD.</li>
+</ul>
+<p>For an example in <a href="https://www.rust-lang.org">Rust</a>, see the <a href="https://github.com/ibab/rust-ad">rust-ad</a> library.</p>
+<h2 id="reverse-mode-automatic-differentiation">Reverse-mode automatic differentiation</h2>
+<p>The implementation simplicity of forward-mode AD comes with a big disadvantage, which becomes evident when we want to calculate <em>both</em> <span class="math inline">\(\partial z/\partial x\)</span> and <span class="math inline">\(\partial z/\partial y\)</span>. In forward-mode AD, doing so requires seeding with <code>dx = 1</code> and <code>dy = 0</code>, running the program, then seeding with <code>dx = 0</code> and <code>dy = 1</code> and running the program <em>again</em>. In effect, the cost of the method scales linearly as <code>O(n)</code> where <code>n</code> is the number of input variables. This would be very costly if we wanted to calculate the <a href="https://en.wikipedia.org/wiki/Gradient">gradient</a> of a large complicated function of many variables, which happens <a href="https://en.wikipedia.org/wiki/Mathematical_optimization">surprisingly often in practice</a>.</p>
+<p>Let’s take a second look at the chain rule (C1) we used to derive forward-mode AD:</p>
+<p><span class="math display">\[\begin{align}
+\frac{\partial w}{\partial t}
+&amp;= \sum_i \left(\frac{\partial w}{\partial u_i} \cdot \frac{\partial u_i}{\partial t}\right) \tag{C1} \\
+&amp;= \frac{\partial w}{\partial u_1} \cdot \frac{\partial u_1}{\partial t} + \frac{\partial w}{\partial u_2} \cdot \frac{\partial u_2}{\partial t} + \cdots
+\end{align}\]</span></p>
+<p>To calculate the gradient using forward-mode AD, we had to perform two substitutions: one with <span class="math inline">\(t = x\)</span> and another with <span class="math inline">\(t = y\)</span>. This meant we had to run the entire program twice.</p>
+<p>However, the chain rule is symmetric: it doesn’t care what’s in the “numerator” or the “denominator”. So let’s rewrite the chain rule but turn the derivatives upside down:</p>
+<p><span class="math display">\[\begin{align}
+\frac{\partial s}{\partial u}
+&amp;= \sum_i \left(\frac{\partial w_i}{\partial u} \cdot \frac{\partial s}{\partial w_i}\right) \tag{C2} \\
+&amp;= \frac{\partial w_1}{\partial u} \cdot \frac{\partial s}{\partial w_1} + \frac{\partial w_2}{\partial u} \cdot \frac{\partial s}{\partial w_2} + \cdots
+\end{align}\]</span></p>
+<p>In doing so, we have inverted the input-output roles of the variables. The same naming convention is used here: <span class="math inline">\(u\)</span> for some input variable and <span class="math inline">\(w_i\)</span> for each of the output variables that depend on <span class="math inline">\(u\)</span>. The yet-to-given variable is now called <span class="math inline">\(s\)</span> to highlight the change in position.</p>
+<p>In this form, the chain rule could be applied repeatedly to every input variable <span class="math inline">\(u\)</span>, akin to how in forward-mode AD we applied the chain rule repeatedly to every output variable <span class="math inline">\(w\)</span> to get equation (F1). Therefore, given some <span class="math inline">\(t\)</span>, we expect a program that uses chain rule (C2) to be able to compute both <span class="math inline">\(\partial s / \partial x\)</span> and <span class="math inline">\(\partial s / \partial y\)</span> in one go!</p>
+<p>So far, this is just a hunch. Let’s try it on the example problem (A).</p>
+<p><span class="math display">\[\begin{align}
+\frac{\partial s}{\partial z} &amp;= {?} \tag{R1} \\
+\frac{\partial s}{\partial b} &amp;= \frac{\partial s}{\partial z} \\
+\frac{\partial s}{\partial a} &amp;= \frac{\partial s}{\partial z} \\
+\frac{\partial s}{\partial y} &amp;= x \cdot \frac{\partial s}{\partial a} \\
+\frac{\partial s}{\partial x} &amp;= y \cdot \frac{\partial s}{\partial a} + \cos(x) \cdot \frac{\partial s}{\partial b}
+\end{align}\]</span></p>
+<p>If you haven’t done this before, I suggest taking the time to actually derive these equations using (C2). It can be quite mind-bending because everything seems “backwards”: instead of asking what input variables a given output variable depends on, we have to ask what output variables a given input variable can affect. The easiest way to see this visually is by drawing a dependency graph of the expression:</p>
+<figure>
+<img src="/img/reverse-mode-automatic-differentiation-graph.png" alt="Graph of the expression" /><figcaption>Graph of the expression</figcaption>
+</figure>
+<p>The graph shows that</p>
+<ul>
+<li>the variable <code>a</code> directly depends on <code>x</code> and <code>y</code>,</li>
+<li>the variable <code>b</code> directly depends on <code>x</code>, and</li>
+<li>the variable <code>z</code> directly depends on <code>a</code> and <code>b</code>.</li>
+</ul>
+<p>Or, equivalently:</p>
+<ul>
+<li>the variable <code>b</code> can directly affect <code>z</code>,</li>
+<li>the variable <code>a</code> can directly affect <code>z</code>,</li>
+<li>the variable <code>y</code> can directly affect <code>a</code>, and</li>
+<li>the variable <code>x</code> can directly affect <code>a</code> and <code>b</code>.</li>
+</ul>
+<p>Let’s now translate the equations (R1) into code. As before, we replace the derivatives <span class="math inline">\(\{\partial s / \partial z, \partial s / \partial b, \ldots\}\)</span> by variables <code>{gz, gb, …}</code>, which we call the <em>adjoint</em> variables. This results in:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode py"><code class="sourceCode python"><a class="sourceLine" id="cb7-1" data-line-number="1">gz <span class="op">=</span> ?</a>
+<a class="sourceLine" id="cb7-2" data-line-number="2">gb <span class="op">=</span> gz</a>
+<a class="sourceLine" id="cb7-3" data-line-number="3">ga <span class="op">=</span> gz</a>
+<a class="sourceLine" id="cb7-4" data-line-number="4">gy <span class="op">=</span> x <span class="op">*</span> ga</a>
+<a class="sourceLine" id="cb7-5" data-line-number="5">gx <span class="op">=</span> y <span class="op">*</span> ga <span class="op">+</span> cos(x) <span class="op">*</span> gb</a></code></pre></div>
+<p>Going back to the equations (R1), we see that if we substitute <span class="math inline">\(s = z\)</span>, we would obtain the gradient in the last two equations. In the program, this is equivalent to setting <code>gz = 1</code> since <code>gz</code> is just <span class="math inline">\(\partial s / \partial z\)</span>. We no longer need to run the program twice! This is <strong>reverse-mode automatic differentiation</strong>.</p>
+<p>There is a trade-off, of course. If we want to calculate the derivative of a different <em>output</em> variable, then we would have to re-run the program again with different seeds, so the cost of reverse-mode AD is <code>O(m)</code> where <code>m</code> is the number of output variables. If we had a different example such as:</p>
+<p><span class="math display">\[\begin{cases}
+z = 2 x + \sin(x) \\
+v = 4 x + \cos(x)
+\end{cases}\]</span></p>
+<p>in reverse-mode AD we would have to run the program with <code>gz = 1</code> and <code>gv = 0</code> (i.e. <span class="math inline">\(s = z\)</span>) to get <span class="math inline">\(\partial z / \partial x\)</span>, and then rerun the program with <code>gz = 0</code> and <code>gv = 1</code> (i.e. <span class="math inline">\(s = v\)</span>) to get <span class="math inline">\(\partial v / \partial x\)</span>. In contrast, in forward-mode AD, we’d just set <code>dx = 1</code> and get both <span class="math inline">\(\partial z / \partial x\)</span> and <span class="math inline">\(\partial v / \partial x\)</span> in one run.</p>
+<p>There is a more subtle problem with reverse-mode AD, however: we can’t just interleave the derivative calculations with the evaluations of the original expression anymore, since all the derivative calculations appear to be going in <em>reverse</em> to the original program. Moreover, it’s not obvious how one would even arrive at this point in using a simple rule-based algorithm – is operator overloading even a valid strategy here? How do we put the “automatic” back into reverse-mode AD?</p>
+<h3 id="a-simple-implementation-in-python">A simple implementation in Python</h3>
+<p>One way is to parse the original program and then generate an <em>adjoint</em> program that calculates the derivatives. This is usually quite complicated to implement, and its difficulty varies significantly depending on the complexity of the host language. Nonetheless, this may be worthwhile if efficient is critical, as there are more opportunities to perform optimizations in this <em>static</em> approach.</p>
+<p>A simpler way is to do this <em>dynamically</em>: construct a full graph that represents our original expression as as the program runs. The goal is to get something akin to the dependency graph we drew earlier:</p>
+<figure>
+<img src="/img/reverse-mode-automatic-differentiation-graph.png" alt="Graph of the expression" /><figcaption>Graph of the expression</figcaption>
+</figure>
+<p>The “roots” of the graph are the independent variables <code>x</code> and <code>y</code>, which could also be thought of as <a href="https://en.wikipedia.org/wiki/Arity#Nullary">nullary</a> operations. Constructing these nodes is a simple matter of creating an object on the heap:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode py"><code class="sourceCode python"><a class="sourceLine" id="cb8-1" data-line-number="1"><span class="kw">class</span> Var:</a>
+<a class="sourceLine" id="cb8-2" data-line-number="2">    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, value):</a>
+<a class="sourceLine" id="cb8-3" data-line-number="3">        <span class="va">self</span>.value <span class="op">=</span> value</a>
+<a class="sourceLine" id="cb8-4" data-line-number="4">        <span class="va">self</span>.children <span class="op">=</span> []</a>
+<a class="sourceLine" id="cb8-5" data-line-number="5">        …</a>
+<a class="sourceLine" id="cb8-6" data-line-number="6">    …</a>
+<a class="sourceLine" id="cb8-7" data-line-number="7"></a>
+<a class="sourceLine" id="cb8-8" data-line-number="8"><span class="co"># define the Vars for the example problem</span></a>
+<a class="sourceLine" id="cb8-9" data-line-number="9"><span class="co"># initialize x = 0.5 and y = 4.2</span></a>
+<a class="sourceLine" id="cb8-10" data-line-number="10">x <span class="op">=</span> Var(<span class="fl">0.5</span>)</a>
+<a class="sourceLine" id="cb8-11" data-line-number="11">y <span class="op">=</span> Var(<span class="fl">4.2</span>)</a></code></pre></div>
+<p>What does each <code>Var</code> node store? Each node can have several <em>children</em>, which are the other nodes that directly depend on that node. In the example, <code>x</code> has both <code>a</code> and <code>b</code> as its children. Cycles are not allowed in this graph.</p>
+<p>By default, a node is created without any children. However, whenever a new expression <span class="math inline">\(u\)</span> is built out of existing nodes <span class="math inline">\(w_i\)</span>, the new expression <span class="math inline">\(u\)</span> <em>registers</em> itself as a child of each of its dependencies <span class="math inline">\(w_i\)</span>. During the child registration, it will also save its contributing <em>weight</em></p>
+<p><span class="math display">\[\frac{\partial w_i}{\partial u}\]</span></p>
+<p>which will be used later to compute the gradients. As an example, here is how we would do this for multiplication:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode py"><code class="sourceCode python"><a class="sourceLine" id="cb9-1" data-line-number="1"><span class="kw">class</span> Var:</a>
+<a class="sourceLine" id="cb9-2" data-line-number="2">    …</a>
+<a class="sourceLine" id="cb9-3" data-line-number="3">    <span class="kw">def</span> <span class="fu">__mul__</span>(<span class="va">self</span>, other):</a>
+<a class="sourceLine" id="cb9-4" data-line-number="4">        z <span class="op">=</span> Var(<span class="va">self</span>.value <span class="op">*</span> other.value)</a>
+<a class="sourceLine" id="cb9-5" data-line-number="5">        <span class="va">self</span>.children.append((other.value, z)) <span class="co"># weight = ∂z/∂self = other.value</span></a>
+<a class="sourceLine" id="cb9-6" data-line-number="6">        other.children.append((<span class="va">self</span>.value, z)) <span class="co"># weight = ∂z/∂other = self.value</span></a>
+<a class="sourceLine" id="cb9-7" data-line-number="7">        <span class="cf">return</span> z</a>
+<a class="sourceLine" id="cb9-8" data-line-number="8">    …</a>
+<a class="sourceLine" id="cb9-9" data-line-number="9"></a>
+<a class="sourceLine" id="cb9-10" data-line-number="10">…</a>
+<a class="sourceLine" id="cb9-11" data-line-number="11"><span class="co"># “a” is a new Var that is a child of both x and y</span></a>
+<a class="sourceLine" id="cb9-12" data-line-number="12">a <span class="op">=</span> x <span class="op">*</span> y</a></code></pre></div>
+<p>As you can see, this method, like most dynamic approaches for reverse-mode AD, requires doing a bunch of mutation under the hood.</p>
+<p>Finally, to get the derivatives, we need to propagate the derivatives. This can be done using recursion, starting at the roots <code>x</code> and <code>y</code>. To avoid unnecessarily traversing the tree multiple times, we <em>cache</em> the value of in an attribute called <code>grad_value</code>.</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode py"><code class="sourceCode python"><a class="sourceLine" id="cb10-1" data-line-number="1"><span class="kw">class</span> Var:</a>
+<a class="sourceLine" id="cb10-2" data-line-number="2">    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>):</a>
+<a class="sourceLine" id="cb10-3" data-line-number="3">        …</a>
+<a class="sourceLine" id="cb10-4" data-line-number="4">        <span class="co"># initialize to None, which means it’s not yet evaluated</span></a>
+<a class="sourceLine" id="cb10-5" data-line-number="5">        <span class="va">self</span>.grad_value <span class="op">=</span> <span class="va">None</span></a>
+<a class="sourceLine" id="cb10-6" data-line-number="6"></a>
+<a class="sourceLine" id="cb10-7" data-line-number="7">    <span class="kw">def</span> grad(<span class="va">self</span>):</a>
+<a class="sourceLine" id="cb10-8" data-line-number="8">        <span class="co"># recurse only if the value is not yet cached</span></a>
+<a class="sourceLine" id="cb10-9" data-line-number="9">        <span class="cf">if</span> <span class="va">self</span>.grad_value <span class="kw">is</span> <span class="va">None</span>:</a>
+<a class="sourceLine" id="cb10-10" data-line-number="10">            <span class="co"># calculate derivative using chain rule</span></a>
+<a class="sourceLine" id="cb10-11" data-line-number="11">            <span class="va">self</span>.grad_value <span class="op">=</span> <span class="bu">sum</span>(weight <span class="op">*</span> var.grad()</a>
+<a class="sourceLine" id="cb10-12" data-line-number="12">                                  <span class="cf">for</span> weight, var <span class="kw">in</span> <span class="va">self</span>.children)</a>
+<a class="sourceLine" id="cb10-13" data-line-number="13">        <span class="cf">return</span> <span class="va">self</span>.grad_value</a>
+<a class="sourceLine" id="cb10-14" data-line-number="14">    …</a>
+<a class="sourceLine" id="cb10-15" data-line-number="15"></a>
+<a class="sourceLine" id="cb10-16" data-line-number="16">…</a>
+<a class="sourceLine" id="cb10-17" data-line-number="17">a.grad_value <span class="op">=</span> <span class="fl">1.0</span></a>
+<a class="sourceLine" id="cb10-18" data-line-number="18"><span class="bu">print</span>(<span class="st">&quot;∂a/∂x = </span><span class="sc">{}</span><span class="st">&quot;</span>.<span class="bu">format</span>(x.grad())) <span class="co"># ∂a/∂x = 4.2</span></a></code></pre></div>
+<p>Here is the complete <a href="https://github.com/Rufflewind/revad/blob/eb3978b3ccdfa8189f3ff59d1ecee71f51c33fd7/revad.py">demonstration of this approach in Python</a>.</p>
+<p>Note that because we are mutating the <code>grad_value</code> attribute of the nodes, we can’t reuse the tree to calculate the derivative of a different output variable without traversing the entire tree and resetting every <code>grad_value</code> attribute to <code>None</code>.</p>
+<h3 id="a-tape-based-implementation-in-rust">A tape-based implementation in Rust</h3>
+<p>The approach described is not very efficient: a complicated expression can contain lots of primitive operations, leading to lots of nodes being allocated on the heap.</p>
+<p>A more space-efficient way to do this is to create nodes by appending them to an existing, growable array. Then, we could just refer to each node by its <em>index</em> in this growable array. Note that we do <em>not</em> use pointers here! If the vector’s capacity changes, pointers to its elements would become invalid.</p>
+<p>Using a vector to store nodes does a great job at reducing the number of allocations, but, like any <a href="https://en.wikipedia.org/wiki/Region-based_memory_management">arena allocation method</a>, we won’t be able to deallocate portions of the graph. It’s all or nothing.</p>
+<p>Also, we need to somehow fit each node into a fixed amount of space. But then how would we store its list of children?</p>
+<p>Turns out, we don’t actually <em>need</em> to store the children. Instead, each node could just store indices to their parent nodes. Conceptually, it would look like this for our example problem:</p>
+<figure>
+<img src="/img/reverse-mode-automatic-differentiation-links.png" alt="Concrete representation of the graph" /><figcaption>Concrete representation of the graph</figcaption>
+</figure>
+<p>Note the similarity with the graph earlier.</p>
+<p>In Rust, we can describe each node using a structure containing two weights and two parent indices:</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode rs"><code class="sourceCode rust"><a class="sourceLine" id="cb11-1" data-line-number="1"><span class="kw">struct</span> Node <span class="op">{</span></a>
+<a class="sourceLine" id="cb11-2" data-line-number="2">    weights: <span class="op">[</span><span class="dt">f64</span>; <span class="dv">2</span><span class="op">]</span>,</a>
+<a class="sourceLine" id="cb11-3" data-line-number="3">    deps: <span class="op">[</span><span class="dt">usize</span>; <span class="dv">2</span><span class="op">]</span>, <span class="co">// parent (“dependency”) indices</span></a>
+<a class="sourceLine" id="cb11-4" data-line-number="4"><span class="op">}</span></a></code></pre></div>
+<p>You might wonder why we picked <em>two</em>. This is because we are assuming all primitive operations are binary. For example, the node for the variable <code>a = x * y</code> would look like:</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode rs"><code class="sourceCode rust"><a class="sourceLine" id="cb12-1" data-line-number="1">Node <span class="op">{</span></a>
+<a class="sourceLine" id="cb12-2" data-line-number="2">    weights: <span class="op">[</span></a>
+<a class="sourceLine" id="cb12-3" data-line-number="3">        y.value, <span class="co">// ∂a/∂x</span></a>
+<a class="sourceLine" id="cb12-4" data-line-number="4">        x.value, <span class="co">// ∂a/∂y</span></a>
+<a class="sourceLine" id="cb12-5" data-line-number="5">    <span class="op">]</span>,</a>
+<a class="sourceLine" id="cb12-6" data-line-number="6">    deps: <span class="op">[</span>x.index, y.index<span class="op">]</span>,</a>
+<a class="sourceLine" id="cb12-7" data-line-number="7"><span class="op">}</span></a></code></pre></div>
+<p>But there’s unary and nullary operations too − how will we deal with those? Quite easy actually, we just set the weights to zero. For example, the node for the variable <code>b = sin(x)</code> would look like:</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode rs"><code class="sourceCode rust"><a class="sourceLine" id="cb13-1" data-line-number="1">Node <span class="op">{</span></a>
+<a class="sourceLine" id="cb13-2" data-line-number="2">    weights: <span class="op">[</span></a>
+<a class="sourceLine" id="cb13-3" data-line-number="3">        x.value.cos(), <span class="co">// ∂b/∂x</span></a>
+<a class="sourceLine" id="cb13-4" data-line-number="4">        <span class="dv">0.0</span>,</a>
+<a class="sourceLine" id="cb13-5" data-line-number="5">    <span class="op">]</span></a>
+<a class="sourceLine" id="cb13-6" data-line-number="6">    deps: <span class="op">[</span>x.index, <span class="co">/* whatever */</span><span class="op">]</span>,</a>
+<a class="sourceLine" id="cb13-7" data-line-number="7"><span class="op">}</span></a></code></pre></div>
+<p>As a convention, we will put the index of the node itself into <code>/* whatever */</code>. It really doesn’t matter what we put in there as long as the index is not out of bounds.</p>
+<p>The nodes themselves are stored in a common array (<code>Vec&lt;Node&gt;</code>) that is shared by the entire expression graph, which also acts as the allocation arena. In AD literature, this shared array is often called a <em>tape</em> (or <em>Wengert list</em>). The tape can be thought of as a record of all the operations performed during the evaluation of the expression, which in turn contains all the information required to compute its gradient when read in reverse.</p>
+<p>In the Python implementation, the nodes were <em>identified</em> with expressions: nodes can be directly combined via arithmetic operations to form new nodes. In Rust, we treat the nodes and expressions as separate entities. Nodes exist solely on the tape, while expressions are just thin wrappers over <em>node indices</em>. Here is what the expression type looks like:</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode rs"><code class="sourceCode rust"><a class="sourceLine" id="cb14-1" data-line-number="1"><span class="at">#[</span>derive<span class="at">(</span><span class="bu">Clone</span><span class="at">,</span> <span class="bu">Copy</span><span class="at">)]</span></a>
+<a class="sourceLine" id="cb14-2" data-line-number="2"><span class="kw">pub</span> <span class="kw">struct</span> Var&lt;<span class="ot">&#39;t</span>&gt; <span class="op">{</span></a>
+<a class="sourceLine" id="cb14-3" data-line-number="3">    tape: &amp;<span class="ot">&#39;t</span> Tape,</a>
+<a class="sourceLine" id="cb14-4" data-line-number="4">    index: <span class="dt">usize</span>,</a>
+<a class="sourceLine" id="cb14-5" data-line-number="5">    value: <span class="dt">f64</span>,</a>
+<a class="sourceLine" id="cb14-6" data-line-number="6"><span class="op">}</span></a></code></pre></div>
+<p>The expression type contains a pointer to the tape, an index to the node, and an associated value. Note that the expression satisfies <code>Copy</code>, which allows it to be duplicated freely without regard. This is necessary to maintain the illusion that the expression acts like an ordinary floating-point number.</p>
+<p>Also, note that the tape is an <em>immutable</em> pointer. We need to modify the tape as we build the expression, but we are going to have lots of expressions holding a pointer to the same tape. This won’t work with a mutable pointer, since they are <em>exclusive</em>, so we must “cheat” Rust’s read-write-lock system using a <code>RefCell</code>:</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode rs"><code class="sourceCode rust"><a class="sourceLine" id="cb15-1" data-line-number="1"><span class="kw">pub</span> <span class="kw">struct</span> Tape <span class="op">{</span> nodes: RefCell&lt;<span class="dt">Vec</span>&lt;Node&gt;&gt; <span class="op">}</span></a></code></pre></div>
+<p>The bulk of the implementation work lies in coding up the primitive operations. Here’s what the unary <code>sin</code> function looks like:</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode rs"><code class="sourceCode rust"><a class="sourceLine" id="cb16-1" data-line-number="1"><span class="kw">impl</span>&lt;<span class="ot">&#39;t</span>&gt; Var&lt;<span class="ot">&#39;t</span>&gt; <span class="op">{</span></a>
+<a class="sourceLine" id="cb16-2" data-line-number="2">    <span class="kw">pub</span> <span class="kw">fn</span> sin(<span class="kw">self</span>) -&gt; <span class="kw">Self</span> <span class="op">{</span></a>
+<a class="sourceLine" id="cb16-3" data-line-number="3">        Var <span class="op">{</span></a>
+<a class="sourceLine" id="cb16-4" data-line-number="4">            tape: <span class="kw">self</span>.tape,</a>
+<a class="sourceLine" id="cb16-5" data-line-number="5">            value: <span class="kw">self</span>.value.sin(),</a>
+<a class="sourceLine" id="cb16-6" data-line-number="6">            index: <span class="kw">self</span>.tape.push1(</a>
+<a class="sourceLine" id="cb16-7" data-line-number="7">                <span class="kw">self</span>.index, <span class="kw">self</span>.value.cos(),</a>
+<a class="sourceLine" id="cb16-8" data-line-number="8">            ),</a>
+<a class="sourceLine" id="cb16-9" data-line-number="9">        <span class="op">}</span></a>
+<a class="sourceLine" id="cb16-10" data-line-number="10">    <span class="op">}</span></a>
+<a class="sourceLine" id="cb16-11" data-line-number="11"><span class="op">}</span></a></code></pre></div>
+<p>Any unary function can be implemented just like this. Here, <code>push1</code> is a helper function that constructs the node, pushes it onto the tape, and then returns the index of this new node:</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode rs"><code class="sourceCode rust"><a class="sourceLine" id="cb17-1" data-line-number="1"><span class="kw">impl</span> Tape <span class="op">{</span></a>
+<a class="sourceLine" id="cb17-2" data-line-number="2">    <span class="kw">fn</span> push1(&amp;<span class="kw">self</span>, dep0: <span class="dt">usize</span>, weight0: <span class="dt">f64</span>) -&gt; <span class="dt">usize</span> <span class="op">{</span></a>
+<a class="sourceLine" id="cb17-3" data-line-number="3">        <span class="kw">let</span> <span class="kw">mut</span> nodes = <span class="kw">self</span>.nodes.borrow_mut();</a>
+<a class="sourceLine" id="cb17-4" data-line-number="4">        <span class="kw">let</span> len = nodes.len();</a>
+<a class="sourceLine" id="cb17-5" data-line-number="5">        nodes.push(Node <span class="op">{</span></a>
+<a class="sourceLine" id="cb17-6" data-line-number="6">            weights: <span class="op">[</span>weight0, <span class="dv">0.0</span><span class="op">]</span>,</a>
+<a class="sourceLine" id="cb17-7" data-line-number="7">            deps: <span class="op">[</span>dep0, len<span class="op">]</span>,</a>
+<a class="sourceLine" id="cb17-8" data-line-number="8">        <span class="op">}</span>);</a>
+<a class="sourceLine" id="cb17-9" data-line-number="9">        len</a>
+<a class="sourceLine" id="cb17-10" data-line-number="10">    <span class="op">}</span></a>
+<a class="sourceLine" id="cb17-11" data-line-number="11"><span class="op">}</span></a></code></pre></div>
+<p>Finally, when it’s time to do the derivative calculation, we need to traverse the entire tape in reverse and accumulate the derivatives using the chain rule. This is done by the <code>grad</code> function associated with the <code>Var</code> object:</p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode rs"><code class="sourceCode rust"><a class="sourceLine" id="cb18-1" data-line-number="1"><span class="kw">impl</span>&lt;<span class="ot">&#39;t</span>&gt; Var&lt;<span class="ot">&#39;t</span>&gt; <span class="op">{</span></a>
+<a class="sourceLine" id="cb18-2" data-line-number="2">    <span class="kw">pub</span> <span class="kw">fn</span> grad(&amp;<span class="kw">self</span>) -&gt; Grad <span class="op">{</span></a>
+<a class="sourceLine" id="cb18-3" data-line-number="3">        <span class="kw">let</span> len = <span class="kw">self</span>.tape.len();</a>
+<a class="sourceLine" id="cb18-4" data-line-number="4">        <span class="kw">let</span> nodes = <span class="kw">self</span>.tape.nodes.borrow();</a>
+<a class="sourceLine" id="cb18-5" data-line-number="5"></a>
+<a class="sourceLine" id="cb18-6" data-line-number="6">        <span class="co">// allocate the array of derivatives (specifically: adjoints)</span></a>
+<a class="sourceLine" id="cb18-7" data-line-number="7">        <span class="kw">let</span> <span class="kw">mut</span> derivs = <span class="pp">vec!</span><span class="op">[</span><span class="dv">0.0</span>; len<span class="op">]</span>;</a>
+<a class="sourceLine" id="cb18-8" data-line-number="8"></a>
+<a class="sourceLine" id="cb18-9" data-line-number="9">        <span class="co">// seed</span></a>
+<a class="sourceLine" id="cb18-10" data-line-number="10">        derivs<span class="op">[</span><span class="kw">self</span>.index<span class="op">]</span> = <span class="dv">1.0</span>;</a>
+<a class="sourceLine" id="cb18-11" data-line-number="11"></a>
+<a class="sourceLine" id="cb18-12" data-line-number="12">        <span class="co">// traverse the tape in reverse</span></a>
+<a class="sourceLine" id="cb18-13" data-line-number="13">        <span class="kw">for</span> i <span class="kw">in</span> (<span class="dv">0</span> .. len).rev() <span class="op">{</span></a>
+<a class="sourceLine" id="cb18-14" data-line-number="14">            <span class="kw">let</span> node = nodes<span class="op">[</span>i<span class="op">]</span>;</a>
+<a class="sourceLine" id="cb18-15" data-line-number="15">            <span class="kw">let</span> deriv = derivs<span class="op">[</span>i<span class="op">]</span>;</a>
+<a class="sourceLine" id="cb18-16" data-line-number="16"></a>
+<a class="sourceLine" id="cb18-17" data-line-number="17">            <span class="co">// update the adjoints for its parent nodes</span></a>
+<a class="sourceLine" id="cb18-18" data-line-number="18">            <span class="kw">for</span> j <span class="kw">in</span> <span class="dv">0</span> .. <span class="dv">2</span> <span class="op">{</span></a>
+<a class="sourceLine" id="cb18-19" data-line-number="19">                derivs<span class="op">[</span>node.deps<span class="op">[</span>j<span class="op">]]</span> += node.weights<span class="op">[</span>j<span class="op">]</span> * deriv;</a>
+<a class="sourceLine" id="cb18-20" data-line-number="20">            <span class="op">}</span></a>
+<a class="sourceLine" id="cb18-21" data-line-number="21">        <span class="op">}</span></a>
+<a class="sourceLine" id="cb18-22" data-line-number="22"></a>
+<a class="sourceLine" id="cb18-23" data-line-number="23">        Grad <span class="op">{</span> derivs: derivs <span class="op">}</span></a>
+<a class="sourceLine" id="cb18-24" data-line-number="24">    <span class="op">}</span></a>
+<a class="sourceLine" id="cb18-25" data-line-number="25"><span class="op">}</span></a></code></pre></div>
+<p>The crucial part lies in the loop. Here, we do <em>not</em> sum over all the derivatives at the same time like in chain rule (C2) or like in the Python program. Rather, we break chain rule up into a sequence of addition-assignments:</p>
+<p><span class="math display">\[\frac{\partial s}{\partial u} \leftarrow \frac{\partial s}{\partial u} + \frac{\partial w_i}{\partial u} \frac{\partial s}{\partial w_i}\]</span></p>
+<p>The reason we’re doing this is because we don’t keep track of children anymore. So rather than accumulating all the derivatives contributed by each child all at once, we let each node make its contributions to their parents at their own pace.</p>
+<p>Another major difference from the Python program is that the derivatives are now stored on a separate array <code>derivs</code>, which is then disguised as a <code>Grad</code> object:</p>
+<div class="sourceCode" id="cb19"><pre class="sourceCode rs"><code class="sourceCode rust"><a class="sourceLine" id="cb19-1" data-line-number="1"><span class="kw">pub</span> <span class="kw">struct</span> Grad <span class="op">{</span> derivs: <span class="dt">Vec</span>&lt;<span class="dt">f64</span>&gt; <span class="op">}</span></a></code></pre></div>
+<p>This means that, unlike the Python program, where all the derivatives are stored in the <code>grad_value</code> attribute of each node, we have decoupled the tape from the storage of the derivatives, allowing the tape / expression graph to be re-used for multiple reverse-mode AD calculations (in case we have multiple output variables).</p>
+<p>The <code>derivs</code> array contains all the adjoints / derivatives at the same index as its associated node. Hence, to get the adjoint of a variable whose node is located at index <code>3</code>, we just need to grab the element the <code>derivs</code> array at index <code>3</code>. This is implemented by the <code>wrt</code> (“with respect to”) function of the <code>Grad</code> object:</p>
+<div class="sourceCode" id="cb20"><pre class="sourceCode rs"><code class="sourceCode rust"><a class="sourceLine" id="cb20-1" data-line-number="1"><span class="kw">impl</span> Grad <span class="op">{</span></a>
+<a class="sourceLine" id="cb20-2" data-line-number="2">    <span class="kw">pub</span> <span class="kw">fn</span> wrt&lt;<span class="ot">&#39;t</span>&gt;(&amp;<span class="kw">self</span>, var: Var&lt;<span class="ot">&#39;t</span>&gt;) -&gt; <span class="dt">f64</span> <span class="op">{</span></a>
+<a class="sourceLine" id="cb20-3" data-line-number="3">        <span class="kw">self</span>.derivs<span class="op">[</span>var.index<span class="op">]</span></a>
+<a class="sourceLine" id="cb20-4" data-line-number="4">    <span class="op">}</span></a>
+<a class="sourceLine" id="cb20-5" data-line-number="5"><span class="op">}</span></a></code></pre></div>
+<p>Here’s the full <a href="https://github.com/Rufflewind/revad/blob/83a86f458e7d72d45253ef805675f80e3700eab0/src/tape.rs">demonstration of reverse-mode AD in Rust</a>. To use this rudimentary AD library, you would write:</p>
+<div class="sourceCode" id="cb21"><pre class="sourceCode rs"><code class="sourceCode rust"><a class="sourceLine" id="cb21-1" data-line-number="1"><span class="kw">let</span> t = Tape::new();</a>
+<a class="sourceLine" id="cb21-2" data-line-number="2"></a>
+<a class="sourceLine" id="cb21-3" data-line-number="3"><span class="kw">let</span> x = t.var(<span class="dv">0.5</span>);</a>
+<a class="sourceLine" id="cb21-4" data-line-number="4"><span class="kw">let</span> y = t.var(<span class="dv">4.2</span>);</a>
+<a class="sourceLine" id="cb21-5" data-line-number="5"></a>
+<a class="sourceLine" id="cb21-6" data-line-number="6"><span class="kw">let</span> z = x * y + x.sin();</a>
+<a class="sourceLine" id="cb21-7" data-line-number="7"></a>
+<a class="sourceLine" id="cb21-8" data-line-number="8"><span class="kw">let</span> grad = z.grad();</a>
+<a class="sourceLine" id="cb21-9" data-line-number="9"></a>
+<a class="sourceLine" id="cb21-10" data-line-number="10"><span class="pp">println!</span>(<span class="st">&quot;z = {}&quot;</span>, z.value);         <span class="co">// z = 2.579425538604203</span></a>
+<a class="sourceLine" id="cb21-11" data-line-number="11"><span class="pp">println!</span>(<span class="st">&quot;∂z/∂x = {}&quot;</span>, grad.wrt(x)); <span class="co">// ∂z/∂x = 5.077582561890373</span></a>
+<a class="sourceLine" id="cb21-12" data-line-number="12"><span class="pp">println!</span>(<span class="st">&quot;∂z/∂y = {}&quot;</span>, grad.wrt(y)); <span class="co">// ∂z/∂y = 0.5</span></a></code></pre></div>
+<h3 id="total-differentials-and-differential-operators">Total differentials and differential operators</h3>
+<p>Notice that if we throw away the <span class="math inline">\(\partial t\)</span> from the denominators of equation (F1), we end up with a set of equations relating the <a href="https://en.wikipedia.org/wiki/Differential_of_a_function#Differentials_in_several_variables">total differentials</a> of each variable:</p>
+<p><span class="math display">\[\begin{align}
+\mathrm{d} x &amp;= {?} \\
+\mathrm{d} y &amp;= {?} \\
+\mathrm{d} a &amp;= y \cdot \mathrm{d} x + x \cdot \mathrm{d} y \\
+\mathrm{d} b &amp;= \cos(x) \cdot \mathrm{d} x \\
+\mathrm{d} z &amp;= \mathrm{d} a + \mathrm{d} b
+\end{align}\]</span></p>
+<p>This is why variables such as <code>dx</code> are called “differentials”. We can also write chain rule (C1) in a similar form:</p>
+<p><span class="math display">\[\mathrm{d} w = \sum_i \left(\frac{\partial w}{\partial u_i} \cdot \mathrm{d} u_i\right)\]</span></p>
+<p>Similarly, we can throw away the <span class="math inline">\(s\)</span> in equation (R1), which then becomes an equation of <a href="https://en.wikipedia.org/wiki/Differential_operator">differential operators</a>:</p>
+<p><span class="math display">\[\begin{align}
+\frac{\partial}{\partial z} &amp;= {?} \\
+\frac{\partial}{\partial b} &amp;= \frac{\partial}{\partial z} \\
+\frac{\partial}{\partial a} &amp;= \frac{\partial}{\partial z} \\
+\frac{\partial}{\partial y} &amp;= x \cdot \frac{\partial}{\partial a} \\
+\frac{\partial}{\partial x} &amp;= y \cdot \frac{\partial}{\partial a} + \cos(x) \cdot \frac{\partial}{\partial b}
+\end{align}\]</span></p>
+<p>We can do the same for (C2):</p>
+<p><span class="math display">\[\frac{\partial}{\partial u} = \sum_i \left(\frac{\partial w_i}{\partial u} \cdot \frac{\partial}{\partial w_i}\right) \tag{C4}\]</span></p>
+<h3 id="saving-memory-via-a-ctz-based-strategy">Saving memory via a CTZ-based strategy</h3>
+<p>OK, this section is not really part of the tutorial, but more of a discussion regarding a particular optimization strategy that I felt was interesting enough to deserve some elaboration (it was briefly explained on in <a href="https://doi.org/10.1080/10556789208805505">a paper by Griewank</a>).</p>
+<p>So far, we have resigned ourselves to the fact that reverse-mode AD requires storage proportional to the number of intermediate variables.</p>
+<p>However, this is not entirely true. If we’re willing to <em>repeat</em> some intermediate calculations, we can make do with quite a bit less storage.</p>
+<p>Suppose we have an expression graph that is more or less a straight line from input to output, with <code>N</code> intermediate variables lying in between. So this is not so much an expression graph anymore, but a <em>chain</em>. In the naive solution, we would require <code>O(N)</code> storage space for this very long expression chain.</p>
+<p>Now, instead of caching all the intermediate variables, we construct a hierarchy of caches and <em>maintain</em> this hierachy throughout the reverse sweep:</p>
+<ul>
+<li><code>cache_0</code> stores the initial value</li>
+<li><code>cache_1</code> stores the result halfway down the chain</li>
+<li><code>cache_2</code> stores the result 3/4 of the way down the chain</li>
+<li><code>cache_3</code> stores the result 7/8 of the way down the chain</li>
+<li><code>cache_4</code> stores the result 15/16 of the way down the chain</li>
+<li>…</li>
+</ul>
+<p>Notice that the storage requirement is reduced to <code>O(log(N))</code> because we never have more than <code>log2(N) + 1</code> values cached.</p>
+<p>During the forward sweep, maintaining such a hierarchy would require evicting older cache entries at an index determined by a <a href="https://github.com/Rufflewind/revad/blob/de509269fe878bc9d564775abc25c4fa663d8a5e/src/chain.rs#L96-L118">formula that involves the count-trailing-zeros function</a>.</p>
+<p>The easiest way to understand the CTZ-based strategy is to look at an example. Let’s say we have a chain of 16 operations, where <code>0</code> is the initial input and <code>f</code> is the final output:</p>
+<pre><code> 0 1 2 3 4 5 6 7 8 9 a b c d e f</code></pre>
+<p>Suppose we have already finished the forward sweep from <code>0</code> to <code>f</code>. In doing so, we have cached <code>0</code>, <code>8</code>, <code>c</code>, <code>e</code>, and <code>f</code>:</p>
+<pre><code> 0 1 2 3 4 5 6 7 8 9 a b c d e f
+                                ^
+ X---------------X-------X---X-X</code></pre>
+<p>The <code>X</code> symbol indicates that the result is cached, while <code>^</code> indicates the status of our reverse sweep. Now let’s start moving backward. Both <code>e</code> and <code>f</code> are available so we can move past <code>e</code> without issue:</p>
+<pre><code> 0 1 2 3 4 5 6 7 8 9 a b c d e f
+                            ^
+ X---------------X-------X---X-X</code></pre>
+<p>Now we hit the first problem: we are missing <code>d</code>. So we recompute <code>d</code> from <code>c</code>:</p>
+<pre><code> 0 1 2 3 4 5 6 7 8 9 a b c d e f
+                            ^
+ X---------------X-------X---X-X
+                         |
+                         +-X</code></pre>
+<p>We then march on past <code>c</code>.</p>
+<pre><code> 0 1 2 3 4 5 6 7 8 9 a b c d e f
+                        ^
+ X---------------X-------X---X-X
+                         |
+                         +-X</code></pre>
+<p>Now we’re missing <code>b</code>. So we recompute starting at <code>8</code>, but in doing so we <em>also</em> cache <code>a</code>:</p>
+<pre><code> 0 1 2 3 4 5 6 7 8 9 a b c d e f
+                        ^
+ X---------------X-------X---X-X
+                 |       |
+                 +---X-X +-X</code></pre>
+<p>We continue on past <code>a</code>:</p>
+<pre><code> 0 1 2 3 4 5 6 7 8 9 a b c d e f
+                    ^
+ X---------------X-------X---X-X
+                 |       |
+                 +---X-X +-X</code></pre>
+<p>Now <code>9</code> is missing, so recompute it from <code>8</code>:</p>
+<pre><code> 0 1 2 3 4 5 6 7 8 9 a b c d e f
+                    ^
+ X---------------X-------X---X-X
+                 |       |
+                 +---X-X +-X
+                 |
+                 +-X</code></pre>
+<p>Then we move past <code>8</code>:</p>
+<pre><code> 0 1 2 3 4 5 6 7 8 9 a b c d e f
+                ^
+ X---------------X-------X---X-X
+                 |       |
+                 +---X-X +-X
+                 |
+                 +-X</code></pre>
+<p>To get <code>7</code>, we recompute starting from <code>0</code>, but in doing so we also keep <code>4</code> and <code>6</code>:</p>
+<pre><code> 0 1 2 3 4 5 6 7 8 9 a b c d e f
+                ^
+ X---------------X-------X---X-X
+ |               |       |
+ +-------X---X-X +---X-X +-X
+                 |
+                 +-X</code></pre>
+<p>By now you can probably see the pattern. Here are the next couple steps:</p>
+<pre><code> 0 1 2 3 4 5 6 7 8 9 a b c d e f
+            ^
+ X---------------X-------X---X-X
+ |               |       |
+ +-------X---X-X +---X-X +-X
+         |       |
+         +-X     +-X
+
+ 0 1 2 3 4 5 6 7 8 9 a b c d e f
+        ^
+ X---------------X-------X---X-X
+ |               |       |
+ +-------X---X-X +---X-X +-X
+         |       |
+         +-X     +-X
+
+ 0 1 2 3 4 5 6 7 8 9 a b c d e f
+        ^
+ X---------------X-------X---X-X
+ |               |       |
+ +-------X---X-X +---X-X +-X
+ |       |       |
+ +---X-X +-X     +-X
+
+ 0 1 2 3 4 5 6 7 8 9 a b c d e f
+    ^
+ X---------------X-------X---X-X
+ |               |       |
+ +-------X---X-X +---X-X +-X
+ |       |       |
+ +---X-X +-X     +-X
+
+ 0 1 2 3 4 5 6 7 8 9 a b c d e f
+    ^
+ X---------------X-------X---X-X
+ |               |       |
+ +-------X---X-X +---X-X +-X
+ |       |       |
+ +---X-X +-X     +-X
+ |
+ +-X
+
+ 0 1 2 3 4 5 6 7 8 9 a b c d e f
+^
+ X---------------X-------X---X-X
+ |               |       |
+ +-------X---X-X +---X-X +-X
+ |       |       |
+ +---X-X +-X     +-X
+ |
+ +-X</code></pre>
+<p>From here it’s fairly evident that the number of times the calculations get repeated is bounded by <code>O(log(N))</code>, since the diagrams above are just flattened binary trees and their height is bounded logarithmically.</p>
+<p>Here is a <a href="https://github.com/Rufflewind/revad/blob/de509269fe878bc9d564775abc25c4fa663d8a5e/src/chain.rs">demonstration of the CTZ-based chaining strategy</a>.</p>
+<p>As Griewank noted, this strategy is not the most optimal one, but it does have the advantage of being quite simple to implement, especially when the number of calculation steps is not known <em>a priori</em>. There are other strategies that you might find interesting in <a href="https://doi.org/10.1080/10556789208805505">his paper</a>.</p>
+<hr />
+<p>For a more advanced review of automatic differentiation, see <a href="https://doi.org/10.1016/S0377-0427%2800%2900422-2">Bartholomew-Biggs et al “Automatic differentiation of algorithms”</a></p>
+
+  </div>
+  <p><a class="link-button" href="/2016-12-30/reverse-mode-automatic-differentiation#comments">Comments</a></p>
+</article>
+
+
+      </div>
+    </div>
+    <div class="lower">
+      <footer class="root">
+        <small>
+          Hosted on <a href="https://pages.github.com">GitHub Pages</a>.
+          Built with <a href="http://jekyllrb.com">Jekyll</a>.
+          Some rights reserved
+          (<a rel="license" href="https://creativecommons.org/licenses/by/4.0" property="schema:license">CC BY 4.0</a>).
+          <a href="/feed.xml">
+            <svg xmlns="http://www.w3.org/2000/svg"
+                 version="1.1" width="1em" height="1em" viewBox="0 0 256 256">
+              <defs>
+                <linearGradient id="RSSg" x1="0.085" y1="0.085" x2="0.915" y2="0.915">
+                  <stop offset="0.0" stop-color="#e3702d"/>
+                  <stop offset="0.1071" stop-color="#ea7d31"/>
+                  <stop offset="0.3503" stop-color="#f69537"/>
+                  <stop offset="0.5" stop-color="#fb9e3a"/>
+                  <stop offset="0.7016" stop-color="#ea7c31"/>
+                  <stop offset="0.8866" stop-color="#de642b"/>
+                  <stop offset="1.0" stop-color="#d95b29"/>
+                </linearGradient>
+              </defs>
+              <rect width="256" height="256" rx="55" ry="55" x="0" y="0" fill="#cc5d15"/>
+              <rect width="246" height="246" rx="50" ry="50" x="5" y="5" fill="#f49c52"/>
+              <rect width="236" height="236" rx="47" ry="47" x="10" y="10" fill="url(#RSSg)"/>
+              <circle cx="68" cy="189" r="24" fill="#fff"/>
+              <path d="M160 213h-34a82 82 0 0 0 -82 -82v-34a116 116 0 0 1 116 116z" fill="#fff"/>
+              <path d="M184 213A140 140 0 0 0 44 73 V 38a175 175 0 0 1 175 175z" fill="#fff"/>
+            </svg>
+          </a>
+        </small>
+      </footer>
+    </div>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <script>
+      window.jQuery ||
+      document.write('<script src="/js/vendor/jquery-1.11.3.min.js"><\/script>')
+    </script>
+    <script src="/js/plugins.js"></script>
+    <script src="/js/main.js"></script>
+  </body>
+</html>

@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html class="no-js">
+  <head>
+    <meta charset="utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>Introduction to the GNU Build System (Autotools) - Rufflewind's Scratchpad</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Fira+Mono|Fira+Sans|Oxygen"/>
+    <link rel="stylesheet" href="/css/normalize.css"/>
+    <link rel="stylesheet" href="/css/syntax.css"/>
+    <link rel="stylesheet" href="/css/main.css"/>
+    <link rel="icon" href="/favicon.ico"/>
+    <link rel="alternate" type="application/rss+xml" href="/feed"/>
+    <script src="/js/vendor/modernizr.custom.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+      ga('create', 'UA-48515395-1', 'rufflewind.com');
+      ga('send', 'pageview');
+    </script>
+  </head>
+  <body prefix="schema: http://schema.org/" typeof="schema:Blog">
+    <div class="upper">
+      <header class="root">
+        <div class="header-title">
+          <h1><a href="/">Rufflewind's Scratchpad</a></h1>
+        </div>
+        <div class="header-banner">
+          <nav>
+            <ul>
+              <li><a class="extra" href="/">Home</a></li>
+              <li><a class="extra" href="/archive">Archive</a></li>
+              <li><a class="extra" href="/about">About</a></li>
+            </ul>
+            <form class="search" method="get" action="//google.com/search">
+              <input type="hidden" name="sitesearch" value="rufflewind.com"/>
+              <input id="search-input" type="search" name="q" placeholder="Search"/>
+              <button id="search-button">
+                <svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 100 100">
+                  <circle cx="42" cy="42" r="30" stroke="white" stroke-width="12" fill="none"/>
+                  <path d="m 60 60 35 35" stroke="white" stroke-width="12" fill="none"/>
+                </svg>
+                <span>Search</span>
+              </button>
+            </form>
+          </nav>
+        </div>
+      </header>
+      <div class="content">
+        <article class="h-entry post" property="schema:blogPost" typeof="schema:BlogPosting">
+  <header>
+    <h1><a class="p-name u-url" href="" property="schema:headline schema:name">Introduction to the GNU Build System (Autotools)</a></h1>
+    <div class="meta">
+      <time class="dt-published date" property="schema:datePublished">2015-02-15</time>
+      <ul class="tags">
+        
+        <li property="schema:keywords"><a class="p-category tag" href="/archive/tag#tag-build">build</a></li>
+        
+        <li property="schema:keywords"><a class="p-category tag" href="/archive/tag#tag-posix">posix</a></li>
+        
+      </ul>
+    </div>
+  </header>
+  <div class="e-content post-content" property="schema:articleBody">
+    <p><em>This is intended to be a brief introduction to the GNU build system (Autotools) for beginners. The reader is assumed to have a basic understanding of the process of compilation and linking.</em></p>
+<h2 id="duxzmzso-toc">
+Outline
+</h2>
+<ul>
+<li><a href="#duxzmzso-build-system">What is a build system?</a></li>
+<li><a href="#duxzmzso-autotools">What is a Autotools?</a></li>
+<li><a href="#duxzmzso-use">How do I build programs that use Autotools?</a>
+<ul>
+<li><a href="#duxzmzso-configure-fail">What should I do if <code>./configure</code> fails?</a></li>
+<li><a href="#duxzmzso-customize-configure">How do I customize configuration process?</a></li>
+</ul></li>
+</ul>
+<h2 id="duxzmzso-build-system">
+What is a build system? <a href="#duxzmzso-toc" title="back to top">⇡</a>
+</h2>
+<p>Running the compiler and linker by hand can be a tedious chore when there are numerous files, as is typical in large projects. This is where the <strong>build system</strong> comes in – it automates the workflow to aid the developers as well as the the users in the process of <strong>building</strong> software. The process can be roughly divided into three stages:</p>
+<ol type="1">
+<li><strong>configuration</strong>: adapting the build process to the target system;</li>
+<li><strong>compilation and linking</strong>: translating source code into machine code;</li>
+<li><strong>installation</strong>: copying the final product to its final location.</li>
+</ol>
+<p>Build systems assist in some or all of these steps.</p>
+<h2 id="duxzmzso-autotools">
+What is Autotools? <a href="#duxzmzso-toc" title="back to top">⇡</a>
+</h2>
+<p>Build systems come in all shapes and varieties. For this article we focus on the <strong>GNU build system</strong>, also known as <strong>Autotools</strong>, which is one of the oldest build systems and remains quite popular on Unix-like platforms.</p>
+<p>An easy way to tell if the project uses Autotools is to look for the presence for its primary input files:</p>
+<ul>
+<li><code>configure.ac</code>, and</li>
+<li><code>Makefile.am</code>.</li>
+</ul>
+<p>Note that Autotools is not a monolithic build system. Rather, it is more like a collection of different tools that work together to help build a project. Of these tools, the two most critical ones are:</p>
+<ul>
+<li><a href="https://gnu.org/software/autoconf">Autoconf</a>, and</li>
+<li><a href="https://gnu.org/software/automake">Automake</a>.</li>
+</ul>
+<p><strong>Autoconf</strong> is a tool that generates a <code>configure</code> script for the <em>configuration</em> step. The script detects the available features of the target system and adjusts the build process where needed. The script is written in the <a href="http://pubs.opengroup.org/onlinepubs/009695399/utilities/xcu_chap02.html">shell language</a>, but in a somewhat unusual way to maximize portability across different platforms. It is automatically generated from the input file (<code>configure.ac</code>) via the <a href="https://en.wikipedia.org/wiki/M4_(computer_language)">m4 macro language</a>.</p>
+<p><strong>Automake</strong> is a tool that aids in the construction of makefiles. It consumes input files (<code>Makefile.am</code>) to generate <em>makefile precursors</em>, known as <code>Makefile.in</code>. These precursors are later consumed by the <code>configure</code> script to construct the complete makefiles, which may then be used to build and install the program.</p>
+<p>Here is a highly simplified sketch of the typical Autotools workflow:</p>
+<figure>
+<img src="/img/autotools-process.png" alt="diagram of the Autotools workflow" /><figcaption>diagram of the Autotools workflow</figcaption>
+</figure>
+<p>(A more detailed <a href="https://en.wikipedia.org/wiki/File:Autoconf-automake-process.svg">diagram</a> as well as <a href="https://en.wikipedia.org/wiki/GNU_build_system#Components">description</a> be found on Wikipedia.)</p>
+<ol type="1">
+<li><p>Initially, the developer runs <code>autoreconf</code> to generate the <code>configure</code> script from <code>configure.ac</code> and a <code>Makefile.in</code> from every <code>Makefile.am</code> (of which there may be several, hidden in the subdirectories):</p>
+<pre><code class="shell"><p>autoreconf -i</p></code></pre></li>
+<li><p>Afterwards, the user runs <code>./configure</code> to generate a <code>Makefile</code> from every <code>Makefile.in</code>.</p>
+<pre><code class="shell"><p>./configure</p></code></pre></li>
+</ol>
+<p>Generally, when the user downloads a package, step 1 has already been done, hence the user only needs to run the <code>configure</code> script. The user does not need to invoke <code>autoreconf</code> unless the <code>configure</code> script is absent.</p>
+<p>If you are interested in learning how to use Autotools in your own projects, consider reading the <a href="https://gnu.org/software/automake/manual/html_node/Hello-World.html#Hello-World">official docs</a> or one of the many <a href="https://google.com/search?q=autotools%20tutorial">Autotools tutorials</a>.</p>
+<h2 id="duxzmzso-use">
+How do I build programs that use Autotools? <a href="#duxzmzso-toc" title="back to top">⇡</a>
+</h2>
+<p>First, make sure you have changed the working directory to the project directory that contains the <code>configure</code> script.</p>
+<p>Next, skim through the <code>README</code> and/or <code>INSTALL</code> documents to make sure that any required dependencies are installed. Note that if the dependencies are installed in an unusual location you may need to adjust the <em>search paths</em> for</p>
+<ul>
+<li>executables (<a href="https://en.wikipedia.org/wiki/PATH_(variable)"><code>PATH</code></a>),</li>
+<li>headers (<a href="https://gcc.gnu.org/onlinedocs/cpp/Environment-Variables.html#index-CPATH-204"><code>C_INCLUDE_PATH</code></a> and/or <a href="https://gcc.gnu.org/onlinedocs/cpp/Environment-Variables.html#index-CPATH-204"><code>CPLUS_INCLUDE_PATH</code></a>), and/or</li>
+<li>libraries (<a href="https://gcc.gnu.org/onlinedocs/gcc/Environment-Variables.html"><code>LIBRARY_PATH</code></a>).</li>
+</ul>
+<p>This must be done <em>before</em> running <code>configure</code> (the next step), otherwise it may fail or link against the wrong library.</p>
+<p>Finally, you can then build the program by following the traditional 3-step procedure:</p>
+<pre><code class="shell"><p>./configure</p><p>make</p><p class="root">make install</p></code></pre>
+<p>However, sometimes this fails, or perhaps, the default configuration is not what you want.</p>
+<h3 id="duxzmzso-configure-fail">
+What should I do if <code>./configure</code> fails? <a href="#duxzmzso-toc" title="back to top">⇡</a>
+</h3>
+<p>The first thing to do is to look for the same error message in <code>config.log</code>. Just above the error message there will be a record of the last few actions <code>configure</code> tried to do but failed.</p>
+<p>Most of the steps in a <code>configure</code> script are <strong>feature tests</strong>: they typically run a test program to find out if some feature is available and whether it has any specific quirks. If a test fails and there is no fallback plan, then the entire <code>configure</code> script is aborted. There will usually be an error message associated with this (e.g. a compiler error) but it is buried inside <code>config.log</code>.</p>
+<p>Sometimes the reasons are not obvious, or the <code>configure</code> script may even give misleading reasons! Therefore, always dig into the log to uncover the true cause. It could be an improperly set environment variable, a missing library/tool, or a flag that needs to be overriden, etc.</p>
+<p>In the worst case, the <code>configure.ac</code> may have been faulty and as result you may have to debug the <code>configure</code> script itself.</p>
+<h3 id="duxzmzso-customize-configure">
+How do I customize configuration process? <a href="#duxzmzso-toc" title="back to top">⇡</a>
+</h3>
+<p>To see what customizations are available, run</p>
+<pre><code>./configure --help</code></pre>
+<p>The options available will vary from project to project, so read it carefully. In my experience, the two most commonly used flags are:</p>
+<ul>
+<li><p><code>–prefix=<var>/some/path</var></code>: sets the path to which the project will be installed. If not provided, the default is <code>/usr/local</code>, which means</p>
+<ul>
+<li>executables are installed to <code>/usr/local/bin</code>,</li>
+<li>libraries are installed to <code>/usr/local/lib</code>,</li>
+<li>manuals are installed to <code>/usr/local/man</code>, and</li>
+<li>additional files are installed to <code>/usr/local/share</code>.</li>
+</ul>
+<p>A commonly used alternative is the <code>$HOME</code> directory, useful if you don’t have superuser privileges.</p></li>
+<li><p><code>–with-<var>somepackage</var>=<var>someflags</var></code>: overrides the linker flag(s) used for <var>somepackage</var>. This is useful if you want to use a substitute library that the script is not aware of. Be sure to <a href="http://wiki.bash-hackers.org/syntax/quoting">quote the argument</a> if it contains special characters or consists of more than one flag.</p>
+<p>For example, if a project expects the <a href="http://netlib.org/blas">BLAS library</a> and you wish to use <a href="https://software.intel.com/en-us/intel-mkl">Intel MKL</a> instead, you can specify <code>--with-blas=-lmkl_rt</code>.</p></li>
+</ul>
+
+  </div>
+  <div id="comments" property="schema:comment">
+    <p><a class="link-button" id="show-disqus-button" href="#comments">Show Disqus comments</a></p>
+    <div id="disqus_thread"></div>
+    <a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+    <script type="text/javascript">
+      var button = document.getElementById('show-disqus-button');
+      var brlink = document.getElementsByClassName('dsq-brlink')[0];
+      brlink.style.display = 'none';
+      button.onclick = function() {
+        button.style.display = 'none';
+        brlink.style.display = 'block';
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//rufflewind.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+      };
+    </script>
+  </div>
+</article>
+
+      </div>
+    </div>
+    <div class="lower">
+      <footer class="root">
+        <small>
+          Hosted on <a href="https://pages.github.com">GitHub Pages</a>.
+          Built with <a href="http://jekyllrb.com">Jekyll</a>.
+          Some rights reserved
+          (<a rel="license" href="https://creativecommons.org/licenses/by/4.0" property="schema:license">CC BY 4.0</a>).
+          <a href="/feed.xml">
+            <svg xmlns="http://www.w3.org/2000/svg"
+                 version="1.1" width="1em" height="1em" viewBox="0 0 256 256">
+              <defs>
+                <linearGradient id="RSSg" x1="0.085" y1="0.085" x2="0.915" y2="0.915">
+                  <stop offset="0.0" stop-color="#e3702d"/>
+                  <stop offset="0.1071" stop-color="#ea7d31"/>
+                  <stop offset="0.3503" stop-color="#f69537"/>
+                  <stop offset="0.5" stop-color="#fb9e3a"/>
+                  <stop offset="0.7016" stop-color="#ea7c31"/>
+                  <stop offset="0.8866" stop-color="#de642b"/>
+                  <stop offset="1.0" stop-color="#d95b29"/>
+                </linearGradient>
+              </defs>
+              <rect width="256" height="256" rx="55" ry="55" x="0" y="0" fill="#cc5d15"/>
+              <rect width="246" height="246" rx="50" ry="50" x="5" y="5" fill="#f49c52"/>
+              <rect width="236" height="236" rx="47" ry="47" x="10" y="10" fill="url(#RSSg)"/>
+              <circle cx="68" cy="189" r="24" fill="#fff"/>
+              <path d="M160 213h-34a82 82 0 0 0 -82 -82v-34a116 116 0 0 1 116 116z" fill="#fff"/>
+              <path d="M184 213A140 140 0 0 0 44 73 V 38a175 175 0 0 1 175 175z" fill="#fff"/>
+            </svg>
+          </a>
+        </small>
+      </footer>
+    </div>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <script>
+      window.jQuery ||
+      document.write('<script src="/js/vendor/jquery-1.11.3.min.js"><\/script>')
+    </script>
+    <script src="/js/plugins.js"></script>
+    <script src="/js/main.js"></script>
+  </body>
+</html>

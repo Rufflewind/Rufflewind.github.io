@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html class="no-js">
+  <head>
+    <meta charset="utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>Rufflewind's Scratchpad</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Fira+Mono|Fira+Sans|Oxygen"/>
+    <link rel="stylesheet" href="/css/normalize.css"/>
+    <link rel="stylesheet" href="/css/syntax.css"/>
+    <link rel="stylesheet" href="/css/main.css"/>
+    <link rel="icon" href="/favicon.ico"/>
+    <link rel="alternate" type="application/rss+xml" href="/feed"/>
+    <script src="/js/vendor/modernizr.custom.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+      ga('create', 'UA-48515395-1', 'rufflewind.com');
+      ga('send', 'pageview');
+    </script>
+  </head>
+  <body prefix="schema: http://schema.org/" typeof="schema:Blog">
+    <div class="upper">
+      <header class="root">
+        <div class="header-title">
+          <h1><a href="/">Rufflewind's Scratchpad</a></h1>
+        </div>
+        <div class="header-banner">
+          <nav>
+            <ul>
+              <li><a class="extra" href="/">Home</a></li>
+              <li><a class="extra" href="/archive">Archive</a></li>
+              <li><a class="extra" href="/about">About</a></li>
+            </ul>
+            <form class="search" method="get" action="//google.com/search">
+              <input type="hidden" name="sitesearch" value="rufflewind.com"/>
+              <input id="search-input" type="search" name="q" placeholder="Search"/>
+              <button id="search-button">
+                <svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 100 100">
+                  <circle cx="42" cy="42" r="30" stroke="white" stroke-width="12" fill="none"/>
+                  <path d="m 60 60 35 35" stroke="white" stroke-width="12" fill="none"/>
+                </svg>
+                <span>Search</span>
+              </button>
+            </form>
+          </nav>
+        </div>
+      </header>
+      <div class="content">
+        
+
+
+
+<nav class="pagination">
+ 
+  <a class="prev" href="/page4">&lArr; Prev</a>
+ 
+
+ 
+  
+  
+  <a class="page" href="/">1</a>
+  
+ 
+  
+  
+  <a class="page" href="/page2">2</a>
+  
+ 
+  
+  
+  <a class="page" href="/page3">3</a>
+  
+ 
+  
+  
+  <a class="page" href="/page4">4</a>
+  
+ 
+  
+  
+  <strong class="page">5</strong>
+  
+ 
+  
+  
+  <a class="page" href="/page6">6</a>
+  
+ 
+  
+  
+  <a class="page" href="/page7">7</a>
+  
+ 
+  
+  
+  <a class="page" href="/page8">8</a>
+  
+ 
+  
+  
+  <a class="page" href="/page9">9</a>
+  
+ 
+
+ 
+  <a class="next" href="/page6">Next &rArr;</a>
+ 
+</nav>
+
+
+
+
+<article class="h-entry post" property="schema:blogPost" typeof="schema:BlogPosting">
+  <header>
+    <h1 property="schema:headline schema:name"><a class="p-name u-url" href="/2016-02-01/bad-code-elimination">Bad code elimination</a></h1>
+    <div class="meta">
+      <time class="dt-published date" property="schema:datePublished">2016-02-01</time>
+      <ul class="tags">
+        
+        <li property="schema:keywords"><a class="p-category tag" href="/archive/tag#tag-c++">c++</a></li>
+        
+      </ul>
+    </div>
+  </header>
+  <div class="e-content post-content" property="schema:articleBody">
+    <p><em>When did my code break!?</em></p>
+<p>That was my first reaction when I found this bug. Most of the tests failed. The program itself produced wrong results. No crashes though, and valgrind didn’t detect any problems.</p>
+<p><em>Why do I still not have continuous integration for this thing?!</em></p>
+<p>It was strange that such an obvious bug went unnoticed for so long and broke a rather core part of the program. I don’t even remember having touched that part of the code recently!</p>
+<p><em>Where do I even begin to debug this problem?</em></p>
+<p>I suppose there’s always git-bisect. But I was in the middle of implementing something so I didn’t really want to mess up the work tree (yes, I know there’s git-stash, but I’m also lazy). Hence, I ran git-bisect on the laptop instead. I picked a random point in the not-too-distant past and ran the tests … “PASSED”, and then started bisecting from there.</p>
+<p>Alas, bisecting proved futile: all of the commits passed the tests. Strange … is it because of a faulty library? No, this part of the code doesn’t even use any of the external libraries. Moreover, both my desktop and laptop run Arch Linux, so AFAIK the compilers and system libraries are the same too.</p>
+<p>While bisecting, I made a subconscious note of the compiler used on the laptop: it was Clang, as specified in the makefile. I don’t remember why I did that. Does it matter? Well, on the desktop – where I initially found this bug – I used GCC. Could that be the cause?</p>
+<p>The answer turned out to be yes. So this is clearly a bug caused by optimization. But I have used GCC before, so it must be a recent thing.</p>
+<p>“Recent” in a loose sense. The compiler was upgraded 2 months ago, as Pacman’s logs indicate.</p>
+<p>Finding code that worked for a few years suddenly fail because of a compiler upgrade is rather disheartening – who knows what other bugs lurk in the code? Then again, it <em>could</em> be a compiler bug too … but it seems unlikely that no-one noticed this same bug within the past 2 months.</p>
+<p>Still, I thought it might be useful to at least pin down which optimization pass caused the problem. Let’s start with the big hammer: tone down the <code>-O<var>n</var></code> level. The bug disappeared at <code>-O0</code>, so even a mere <code>-O1</code> was enough to trigger the problem.</p>
+<p>Now to figure out what kinds of optimizations <code>-O1</code> turns on. Hopefully there’s some useful info on the <a href="https://gcc.gnu.org/onlinedocs/gcc/Optimize-Options.html">GCC documentation</a>. It does list several optimizations that are enabled by <code>-O1</code>, but there’s a fine print:</p>
+<blockquote>
+<p>Depending on the target and how GCC was configured, a slightly different set of optimizations may be enabled at each -O level than those listed here. You can invoke GCC with <code>-Q --help=optimizers</code> to find out the exact set of optimizations that are enabled at each level.</p>
+</blockquote>
+<p>So the list shown on the docs is actually not exhaustive, and also has a few that don’t apply to my specific platform. Using the <code>-Q --help=optimizers</code> flag, I managed to produce a list of optimizations – there’s apparently quite a <em>lot</em>! With a little of <code>grep -v</code> and some Emacs regexes I reduced the list down to a single, <em>very long</em> line of flags. It looked a little bit like this:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode sh"><code class="sourceCode bash"><a class="sourceLine" id="cb1-1" data-line-number="1"><span class="ex">g++</span> … -faggressive-loop-optimizations -fasynchronous-unwind-tables -fauto-inc-dec -fbranch-count-reg -fcombine-stack-adjustments -fcompare-elim …</a></code></pre></div>
+<p>And that wasn’t even a quarter of the flags!</p>
+<p>But the bug did not appear. Did I miss a flag somewhere?</p>
+<p>Oh, wait:</p>
+<blockquote>
+<p>Most optimizations are only enabled if an <code>-O</code> level is set on the command line. Otherwise they are disabled, even if individual optimization flags are specified.</p>
+</blockquote>
+<p>Well then how am I supposed to specify <em>explicitly</em> which passes to turn on? The only way I could think of is to set <code>-O1</code>, and the explicitly <em>negate</em> all the optimizations that I don’t want. That seems … backwards, but there seemed no other way. So now what I did was to write a long command like this:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode sh"><code class="sourceCode bash"><a class="sourceLine" id="cb2-1" data-line-number="1"><span class="ex">g++</span> … -O1 -fno-aggressive-loop-optimizations -fno-asynchronous-unwind-tables -fno-auto-inc-dec -fno-branch-count-reg -fno-combine-stack-adjustments -fno-compare-elim …</a></code></pre></div>
+<p>and then comment out the optimizations that I want turned <em>on</em>. Mentally, this was kind of confusing and led to several mistakes as I tried to manually bisect the optimization flags to see who is to blame for breaking my code. But eventually I found that <code>-finline</code> and <code>-ftree-dse</code> both have to be turned on for the bug to manifest.</p>
+<p>Oddly enough, the bug manifested in a different way. It caused a segmentation fault. It didn’t used to do that. In retrospect, getting a segfault was <em>much</em> better than getting the wrong result, because it very likely crashes at exactly the location where the program went horribly wrong. Trying to figure out why I got the wrong result would’ve been much harder because it’s hard to tell which part of a mathematical calculation goes wrong. OTOH, narrowing down the precise optimizations that led to this bug did not do much to actually guide me in finding the source of the bug. It was only in retrospect that I was able to explain why those two optimizations caused the code to crash.</p>
+<p>One idea I tried – which did <em>not</em> work – was to compare the assembly with and without optimization. First off, I have no real assembly experience – I can barely remember the order of arguments in Intel vs AT&amp;T syntax! Secondly, the assembly was over 30MiB in size! Even running a diff takes a while, and kdiff3 as usual is hopeless against such a large file. (Graphical diffs are a lot more pleasant to read.)</p>
+<p>What did work was to try and pare down the program until only the buggy part was left. My main concern was to make sure the bug remains reproducible. Optimization bugs could be finnicky: they might disappear if you remove seemingly unrelated parts of the program. But I was lucky that the bug didn’t go away. In fact it seemed very “robust” (in a twisted sense of that word).</p>
+<p>As I tore up the program, I had to make an important decision: I found two independently buggy regions in the code; one of them caused a wrong result, while the other segfaulted. Which one should I keep?</p>
+<p>Segfault seemed like a more obvious bug, so I went with that one instead. It was probably a good choice. The other one would probably’ve left me repeating the calculations on paper.</p>
+<p>After tearing up the program, I tried examining the assembly again, but it was still quite big (~3MB). Kdiff3 took several minutes to run. While it was loading, I ran GDB with the hopes of catching the segfault in action.</p>
+<p>It showed me a specific line of code in the source file where it crashed – that was quite helpful. But when I tried to print out the local variables, they were all optimized out. Trying to decipher the assembly led me nowhere either. All I figured out was that it tried read a <code>double</code> from memory and failed. Here’s an artist’s impression of the code:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb3-1" data-line-number="1"><span class="kw">auto</span>&amp;&amp; x = <span class="bu">std::</span>get&lt;<span class="dv">0</span>&gt;(unmove(get_index_thing(p, a)))</a>
+<a class="sourceLine" id="cb3-2" data-line-number="2">arr1[a * m + b] = arr2[p][x * n + y]; <span class="co">// *CRASH*</span></a></code></pre></div>
+<p>I guess I could just do the old-fashioned approach of <code>printf</code>ing the variables. It’s worth a shot. I hoped that it would not cause the bug to disappear.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb4-1" data-line-number="1"><span class="kw">auto</span>&amp;&amp; x = <span class="bu">std::</span>get&lt;<span class="dv">0</span>&gt;(unmove(get_index_thing(p, a)))</a>
+<a class="sourceLine" id="cb4-2" data-line-number="2">printf(<span class="st">&quot;</span><span class="sc">%lu\n</span><span class="st">&quot;</span>, x);</a>
+<a class="sourceLine" id="cb4-3" data-line-number="3">arr1[a * m + b] = arr2[p][x * n + y]; <span class="co">// *CRASH*</span></a></code></pre></div>
+<p>It did not, thankfully. The array index <code>x</code> was clearly garbage: a number that was over several million. Considering that I’m running an extremely small test case, that is far too high. Where did this garbage originate?</p>
+<p>One thing I tried right away was to print the result (and also arguments) from inside the function <code>get_index_thing</code>. But in haste, I forgot that it’s actually returning an <code>std::tuple</code>, which caused <code>printf</code> to print garbage as well (it was not the same garbage as before though, but I somehow missed that initially). This mistake led me on a wild-goose chase far elsewhere – I thought one of the earlier initialization steps was done incorrectly.</p>
+<p>Eventually I found that that (a) <code>printf</code> with <code>%lu</code> does not work on a <code>std::tuple</code>, even if it has only a single-element, and (b) it’s morning and I desperately need sleep.</p>
+<p><em>But I’m so close, can’t give up now!</em> After correctly printing the value that is being returned in <code>get_index_thing</code>, I find that it is actually sane. So, somewhere between returning that result and printing it in the caller, something went horribly awry.</p>
+<p>The <code>unmove</code> looked suspicious. I distinctly recall telling myself that <code>unmove</code> can be somewhat dangerous to use, but having not worked with this part of the code for so long, I’m a bit foggy on the intricate details of references.</p>
+<p>Wait a second, it’s being stored in an <code>auto&amp;&amp;</code>? Wouldn’t that mean the value’s lifetime ends immediately before the next line?</p>
+<p>Uh-oh.</p>
+<p>All I had to do was to change <code>auto&amp;&amp;</code> to <code>auto</code> and the code magically started working again. (Well, there are a few other places in the code where I committed the same offense, so I had to fix them too.)</p>
+<p>Turns out, <code>unmove</code> is a bit of a red herring in this particular example, as removing it did not fix the problem. However, it definitely makes similar mistakes <em>easier</em>. Take, for example, this simple code which reproduces this bug:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb5-1" data-line-number="1"><span class="kw">template</span>&lt;<span class="kw">class</span> T&gt;</a>
+<a class="sourceLine" id="cb5-2" data-line-number="2">T&amp; unmove(T&amp;&amp; x)</a>
+<a class="sourceLine" id="cb5-3" data-line-number="3">{</a>
+<a class="sourceLine" id="cb5-4" data-line-number="4">    <span class="cf">return</span> <span class="kw">static_cast</span>&lt;T&amp;&gt;(x);</a>
+<a class="sourceLine" id="cb5-5" data-line-number="5">}</a>
+<a class="sourceLine" id="cb5-6" data-line-number="6"></a>
+<a class="sourceLine" id="cb5-7" data-line-number="7"><span class="dt">int</span> main(<span class="dt">void</span>)</a>
+<a class="sourceLine" id="cb5-8" data-line-number="8">{</a>
+<a class="sourceLine" id="cb5-9" data-line-number="9">    <span class="kw">auto</span>&amp;&amp; p = unmove(<span class="dv">42</span>);    <span class="co">// line #1</span></a>
+<a class="sourceLine" id="cb5-10" data-line-number="10">    <span class="cf">return</span> p;                 <span class="co">// line #2</span></a>
+<a class="sourceLine" id="cb5-11" data-line-number="11">}</a></code></pre></div>
+<p>To make this more obvious, we can specialize the types for <code>int</code>. Note that the return type is <code>int&amp;</code> which, combined with <code>auto&amp;&amp;</code>, leads to a deduced type of <code>int&amp;</code>.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb6-1" data-line-number="1"><span class="dt">int</span>&amp; unmove(<span class="dt">int</span>&amp;&amp; x)</a>
+<a class="sourceLine" id="cb6-2" data-line-number="2">{</a>
+<a class="sourceLine" id="cb6-3" data-line-number="3">    <span class="cf">return</span> <span class="kw">static_cast</span>&lt;<span class="dt">int</span>&amp;&gt;(x);</a>
+<a class="sourceLine" id="cb6-4" data-line-number="4">}</a>
+<a class="sourceLine" id="cb6-5" data-line-number="5"></a>
+<a class="sourceLine" id="cb6-6" data-line-number="6"><span class="dt">int</span> main(<span class="dt">void</span>)</a>
+<a class="sourceLine" id="cb6-7" data-line-number="7">{</a>
+<a class="sourceLine" id="cb6-8" data-line-number="8">    <span class="dt">int</span>&amp; p = unmove(<span class="dv">42</span>);      <span class="co">// line #1</span></a>
+<a class="sourceLine" id="cb6-9" data-line-number="9">    <span class="cf">return</span> p;                 <span class="co">// line #2</span></a>
+<a class="sourceLine" id="cb6-10" data-line-number="10">}</a></code></pre></div>
+<p>When <code>unmove</code> is called, <code>42</code> is bound as a temporary that lasts until the end of that particular line. Thus, by the time line #2 is reached, the value <code>42</code> is gone. There are some exceptions to this rule that allow the lifetime of a reference to be extended, but none of those apply here because the value is being passed through an intermediary.</p>
+<p>On the GCC 5.3.0, this causes the program to exit with <code>0</code>, as opposed to <code>42</code>. So it looks that GCC finally tightened the rules around the lifetime of a variable stored by reference. The <code>-ftree-dse</code> (dead store elimination) optimization probably decided that line #1 can be deleted since the variable <code>p</code> expires right way. In other words, it <em>eliminated the buggy line of code entirely</em>, in a literal sense!</p>
+<p>As you know, <a href="/2015-12-27/undefined-behavior">undefined behavior can seriously ruin your day</a>. In this case, it has ruined my night of sleep. It is now morning as I write this postmortem.</p>
+<p>I still wonder though, why this problem go unnoticed for so long?</p>
+
+  </div>
+  <p><a class="link-button" href="/2016-02-01/bad-code-elimination#comments">Comments</a></p>
+</article>
+
+<article class="h-entry post" property="schema:blogPost" typeof="schema:BlogPosting">
+  <header>
+    <h1 property="schema:headline schema:name"><a class="p-name u-url" href="/2015-12-27/undefined-behavior">Undefined behavior</a></h1>
+    <div class="meta">
+      <time class="dt-published date" property="schema:datePublished">2015-12-27</time>
+      <ul class="tags">
+        
+        <li property="schema:keywords"><a class="p-category tag" href="/archive/tag#tag-c">c</a></li>
+        
+        <li property="schema:keywords"><a class="p-category tag" href="/archive/tag#tag-c++">c++</a></li>
+        
+      </ul>
+    </div>
+  </header>
+  <div class="e-content post-content" property="schema:articleBody">
+    <p>When the C (or C++) standard says “doing X is undefined behavior”, they’re not telling you that your program will exit with an error, corrupt your memory, or even crash for that matter. These are only a few of ways in which undefined behavior can manifest.</p>
+<p>There is a reason they are called “nasal demons”. In principle, undefined behavior could wipe your entire hard drive.</p>
+<p>Of course, in the real world, compilers are too <em>lazy</em> to actually make your program erase the disk. Instead, they tend to take simpler route and <em>assume that undefined behavior is “impossible”</em>.</p>
+<p>It doesn’t matter if it’s actually <em>not</em> impossible. The compilers don’t care. They want the most optimal code, and they will <em>get</em> the most optimal code even if it means wreaking havoc on your program.</p>
+<p>Consider the following example:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode c"><code class="sourceCode c"><a class="sourceLine" id="cb1-1" data-line-number="1"><span class="pp">#include </span><span class="im">&lt;stdio.h&gt;</span></a>
+<a class="sourceLine" id="cb1-2" data-line-number="2"></a>
+<a class="sourceLine" id="cb1-3" data-line-number="3"><span class="dt">int</span> *getnumptr(<span class="dt">int</span> condition)</a>
+<a class="sourceLine" id="cb1-4" data-line-number="4">{</a>
+<a class="sourceLine" id="cb1-5" data-line-number="5">    <span class="dt">static</span> <span class="dt">int</span> n = <span class="dv">42</span>;</a>
+<a class="sourceLine" id="cb1-6" data-line-number="6">    <span class="cf">if</span> (condition) {</a>
+<a class="sourceLine" id="cb1-7" data-line-number="7">        <span class="cf">return</span> NULL;</a>
+<a class="sourceLine" id="cb1-8" data-line-number="8">    }</a>
+<a class="sourceLine" id="cb1-9" data-line-number="9">    <span class="cf">return</span> &amp;n;</a>
+<a class="sourceLine" id="cb1-10" data-line-number="10">}</a>
+<a class="sourceLine" id="cb1-11" data-line-number="11"></a>
+<a class="sourceLine" id="cb1-12" data-line-number="12"><span class="dt">int</span> main(<span class="dt">int</span> argc, <span class="dt">char</span> **argv)</a>
+<a class="sourceLine" id="cb1-13" data-line-number="13">{</a>
+<a class="sourceLine" id="cb1-14" data-line-number="14">    <span class="dt">int</span> condition = argc - <span class="dv">1</span>;</a>
+<a class="sourceLine" id="cb1-15" data-line-number="15">    <span class="dt">int</span> num = *getnumptr(condition);</a>
+<a class="sourceLine" id="cb1-16" data-line-number="16">    printf(<span class="st">&quot;%i</span><span class="sc">\n</span><span class="st">&quot;</span>, num);</a>
+<a class="sourceLine" id="cb1-17" data-line-number="17">    <span class="cf">return</span> <span class="dv">0</span>;</a>
+<a class="sourceLine" id="cb1-18" data-line-number="18">}</a></code></pre></div>
+<p>Suppose you <em>don’t</em> pass any arguments to this program (i.e. <code>argc == 1</code>). In this case, the pointer returned by <code>getnumptr</code> points to <code>n</code>, which contains <code>42</code>, so you should expect <code>42</code> to be printed.</p>
+<p>However, if you <em>do</em> pass arguments to the program (i.e. <code>argc &gt; 1</code>), then you’re in the realm of undefined behavior. On some compilers, the program will crash with a segmentation fault, which is probably what most people expect.</p>
+<p>On less forgiving compilers however, the program may simply print <code>42</code>.</p>
+<p><em>How could one get a <code>42</code> by dereferencing a <code>NULL</code> pointer?</em></p>
+<p>Well, the compiler was free to assume that the situation of dereferencing a <code>NULL</code> pointer was “impossible”, and hence didn’t bother to emit the code for that case at all. The <code>if</code> block was entirely elided from the generated assembly. All that remained was:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode asm"><code class="sourceCode fasm"><a class="sourceLine" id="cb2-1" data-line-number="1"># generated by clang <span class="fl">3.7</span> with -O2</a>
+<a class="sourceLine" id="cb2-2" data-line-number="2">    movl    getnumptr.n(%rip), %<span class="kw">esi</span></a></code></pre></div>
+<p>When they say undefined behavior means <em>anything goes</em>, they really mean it.</p>
+<p><em>This article is brought to you by undefined behavior.</em></p>
+
+  </div>
+  <p><a class="link-button" href="/2015-12-27/undefined-behavior#comments">Comments</a></p>
+</article>
+
+<article class="h-entry post" property="schema:blogPost" typeof="schema:BlogPosting">
+  <header>
+    <h1 property="schema:headline schema:name"><a class="p-name u-url" href="/2015-10-10/haskell-bound-library">Haskell library: bound</a></h1>
+    <div class="meta">
+      <time class="dt-published date" property="schema:datePublished">2015-10-10</time>
+      <ul class="tags">
+        
+        <li property="schema:keywords"><a class="p-category tag" href="/archive/tag#tag-haskell">haskell</a></li>
+        
+      </ul>
+    </div>
+  </header>
+  <div class="e-content post-content" property="schema:articleBody">
+    <p>Learning how Edward Kmett’s <a href="https://hackage.haskell.org/package/bound">bound</a> library worked was quite a challenge for me. Even though there is a nice <a href="https://www.fpcomplete.com/user/edwardk/bound">tutorial</a>, I found it rather difficult to penetrate – the puns, while humorous, didn’t help either. Moreover, polymorphic recursion itself is a rather strange concept that takes some getting used to.</p>
+<p>In the end, I had to read through code very carefully in order to understand the inner workings of the library. In the process, I made some sketches to guide myself. Not surprisingly, the pictures themselves explain the concept much more clearly than the code or the text! (At least I found that to be the case, YMMV.)</p>
+<p>Here’s a picture that shows an expression tree in untyped lambda calculus. Click to zoom in! (You can also <a href="/img/haskell-bound-library.svg">get the SVG version</a>.)</p>
+<p><a href="/img/haskell-bound-library.png"><img src="/img/haskell-bound-library.png" alt="A random expression tree represented using the bound library." /></a></p>
+<p>There are a couple interesting things to note:</p>
+<ul>
+<li><p>Important observation: <strong>for a given expression there are multiple distinct representations</strong>! This is how the library manages to be efficient (what Edward refers to as “you can lift whole trees”). However, this is for all intents and purposes an implementation detail: whenever you test for equality using <code>(==)</code>, the representation is automatically canonicalized. Note that the tree show above is not canonical.</p></li>
+<li><p><strong>The <code>F</code> node <em>negates</em> the effect of the enclosing <code>Scope</code> on its children</strong> . Nested <code>F</code> nodes will negate additional nested <code>Scope</code>s, until there are no more <code>Scope</code>s to negate. This is enforced by the type system, so you can’t screw this up by accident.</p>
+<p><code>F</code> nodes can be pushed towards the leaves: in doing so, it replicates itself whenever it encounters a fork in the tree. Pushing every <code>F</code> node to the leaves produces the canonical representation.</p></li>
+<li><p><strong>The <code>B</code> leaf binds to the <em>prevailing</em> <code>Scope</code></strong> − i.e. the innermost scope that isn’t negated. If all <code>Scope</code>s have been negated, then <code>B</code> leaves cannot appear (also enforced by the type system).</p>
+<p>If the type variable <code>b</code> is not <code>()</code>, then one needs to also specify the which <em>subvariable</em> of the prevailing <code>Scope</code> it should bind to. This is used to bind multiple variables simultaneously.</p></li>
+<li><p><strong>Monadic bind (<code>&gt;&gt;=</code>) applies the given function to every variable and <em>grafts</em> the result in its place.</strong> This is used in <em>substitution</em>, a.k.a. <em>instantiation</em>.</p></li>
+<li><p><strong><em>Lifting</em> creates a <code>Scope</code> from an existing expression.</strong> In traditional implementations based on de Bruijn indices, this would require a traversal of the entire expression, but in the bound library this is done simply by wrapping the entire tree inside <code>F</code>, which negates the effect of the enclosing <code>Scope</code>.</p>
+<p>Lifting occurs whenever an expression needs to be substituted into something that is deeper in scope.</p></li>
+</ul>
+
+  </div>
+  <p><a class="link-button" href="/2015-10-10/haskell-bound-library#comments">Comments</a></p>
+</article>
+
+
+      </div>
+    </div>
+    <div class="lower">
+      <footer class="root">
+        <small>
+          Hosted on <a href="https://pages.github.com">GitHub Pages</a>.
+          Built with <a href="http://jekyllrb.com">Jekyll</a>.
+          Some rights reserved
+          (<a rel="license" href="https://creativecommons.org/licenses/by/4.0" property="schema:license">CC BY 4.0</a>).
+          <a href="/feed.xml">
+            <svg xmlns="http://www.w3.org/2000/svg"
+                 version="1.1" width="1em" height="1em" viewBox="0 0 256 256">
+              <defs>
+                <linearGradient id="RSSg" x1="0.085" y1="0.085" x2="0.915" y2="0.915">
+                  <stop offset="0.0" stop-color="#e3702d"/>
+                  <stop offset="0.1071" stop-color="#ea7d31"/>
+                  <stop offset="0.3503" stop-color="#f69537"/>
+                  <stop offset="0.5" stop-color="#fb9e3a"/>
+                  <stop offset="0.7016" stop-color="#ea7c31"/>
+                  <stop offset="0.8866" stop-color="#de642b"/>
+                  <stop offset="1.0" stop-color="#d95b29"/>
+                </linearGradient>
+              </defs>
+              <rect width="256" height="256" rx="55" ry="55" x="0" y="0" fill="#cc5d15"/>
+              <rect width="246" height="246" rx="50" ry="50" x="5" y="5" fill="#f49c52"/>
+              <rect width="236" height="236" rx="47" ry="47" x="10" y="10" fill="url(#RSSg)"/>
+              <circle cx="68" cy="189" r="24" fill="#fff"/>
+              <path d="M160 213h-34a82 82 0 0 0 -82 -82v-34a116 116 0 0 1 116 116z" fill="#fff"/>
+              <path d="M184 213A140 140 0 0 0 44 73 V 38a175 175 0 0 1 175 175z" fill="#fff"/>
+            </svg>
+          </a>
+        </small>
+      </footer>
+    </div>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <script>
+      window.jQuery ||
+      document.write('<script src="/js/vendor/jquery-1.11.3.min.js"><\/script>')
+    </script>
+    <script src="/js/plugins.js"></script>
+    <script src="/js/main.js"></script>
+  </body>
+</html>

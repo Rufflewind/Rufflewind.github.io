@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html class="no-js">
+  <head>
+    <meta charset="utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>Rufflewind's Scratchpad</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Fira+Mono|Fira+Sans|Oxygen"/>
+    <link rel="stylesheet" href="/css/normalize.css"/>
+    <link rel="stylesheet" href="/css/syntax.css"/>
+    <link rel="stylesheet" href="/css/main.css"/>
+    <link rel="icon" href="/favicon.ico"/>
+    <link rel="alternate" type="application/rss+xml" href="/feed"/>
+    <script src="/js/vendor/modernizr.custom.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+      ga('create', 'UA-48515395-1', 'rufflewind.com');
+      ga('send', 'pageview');
+    </script>
+  </head>
+  <body prefix="schema: http://schema.org/" typeof="schema:Blog">
+    <div class="upper">
+      <header class="root">
+        <div class="header-title">
+          <h1><a href="/">Rufflewind's Scratchpad</a></h1>
+        </div>
+        <div class="header-banner">
+          <nav>
+            <ul>
+              <li><a class="extra" href="/">Home</a></li>
+              <li><a class="extra" href="/archive">Archive</a></li>
+              <li><a class="extra" href="/about">About</a></li>
+            </ul>
+            <form class="search" method="get" action="//google.com/search">
+              <input type="hidden" name="sitesearch" value="rufflewind.com"/>
+              <input id="search-input" type="search" name="q" placeholder="Search"/>
+              <button id="search-button">
+                <svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 100 100">
+                  <circle cx="42" cy="42" r="30" stroke="white" stroke-width="12" fill="none"/>
+                  <path d="m 60 60 35 35" stroke="white" stroke-width="12" fill="none"/>
+                </svg>
+                <span>Search</span>
+              </button>
+            </form>
+          </nav>
+        </div>
+      </header>
+      <div class="content">
+        
+
+
+
+<nav class="pagination">
+ 
+  <a class="prev" href="/page5">&lArr; Prev</a>
+ 
+
+ 
+  
+  
+  <a class="page" href="/">1</a>
+  
+ 
+  
+  
+  <a class="page" href="/page2">2</a>
+  
+ 
+  
+  
+  <a class="page" href="/page3">3</a>
+  
+ 
+  
+  
+  <a class="page" href="/page4">4</a>
+  
+ 
+  
+  
+  <a class="page" href="/page5">5</a>
+  
+ 
+  
+  
+  <strong class="page">6</strong>
+  
+ 
+  
+  
+  <a class="page" href="/page7">7</a>
+  
+ 
+  
+  
+  <a class="page" href="/page8">8</a>
+  
+ 
+  
+  
+  <a class="page" href="/page9">9</a>
+  
+ 
+
+ 
+  <a class="next" href="/page7">Next &rArr;</a>
+ 
+</nav>
+
+
+
+
+<article class="h-entry post" property="schema:blogPost" typeof="schema:BlogPosting">
+  <header>
+    <h1 property="schema:headline schema:name"><a class="p-name u-url" href="/2015-04-06/loeb-moeb-javascript">Löb and möb in JavaScript</a></h1>
+    <div class="meta">
+      <time class="dt-published date" property="schema:datePublished">2015-04-06</time>
+      <ul class="tags">
+        
+        <li property="schema:keywords"><a class="p-category tag" href="/archive/tag#tag-haskell">haskell</a></li>
+        
+        <li property="schema:keywords"><a class="p-category tag" href="/archive/tag#tag-lazy-evaluation">lazy-evaluation</a></li>
+        
+        <li property="schema:keywords"><a class="p-category tag" href="/archive/tag#tag-javascript">javascript</a></li>
+        
+        <li property="schema:keywords"><a class="p-category tag" href="/archive/tag#tag-recursion">recursion</a></li>
+        
+      </ul>
+    </div>
+  </header>
+  <div class="e-content post-content" property="schema:articleBody">
+    <p><i>Strange loops in Haskell, but now in JavaScript! :D</i></p>
+<p>The name of this function probably comes from <a href="https://en.wikipedia.org/wiki/L%C3%B6b%27s_theorem">Löb’s theorem</a>, which is the mathematical analogue of the <code>loeb</code> function.</p>
+<p>You may or may not want to read up on the <a href="https://github.com/quchen/articles/blob/master/loeb-moeb.md">original Haskell version and commentary by David Luposchainsky</a> first.</p>
+<p>For the adventurous, here’s a <a href="https://jsfiddle.net/Lttsfub9">JSFiddle of this entire article</a> (results will only appear in the developer console).</p>
+<h2 id="remark-about-lazy-evaluation">Remark about lazy evaluation</h2>
+<p>Since JavaScript uses strict/eager evaluation, lazy values must be indicated explicitly. We denote them here using the <code>Lazy</code> prefix:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode hs"><code class="sourceCode haskell"><a class="sourceLine" id="cb1-1" data-line-number="1"><span class="co">-- Haskell</span></a>
+<a class="sourceLine" id="cb1-2" data-line-number="2"><span class="kw">type</span> <span class="dt">Lazy</span> a <span class="fu">=</span> () <span class="ot">-&gt;</span> a</a></code></pre></div>
+<p>This makes the type signatures slightly more complicated than usual.</p>
+<h2 id="löb">Löb</h2>
+<p>First, let’s look at the <code>loeb</code> function, specialized for arrays. The original lazy Haskell definition looked like this when written out fully:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode hs"><code class="sourceCode haskell"><a class="sourceLine" id="cb2-1" data-line-number="1"><span class="co">-- Haskell</span></a>
+<a class="sourceLine" id="cb2-2" data-line-number="2"><span class="ot">loeb ::</span> [[a] <span class="ot">-&gt;</span> a] <span class="ot">-&gt;</span> [a]</a>
+<a class="sourceLine" id="cb2-3" data-line-number="3">loeb formulas <span class="fu">=</span> results</a>
+<a class="sourceLine" id="cb2-4" data-line-number="4">  <span class="kw">where</span> evaluate formula <span class="fu">=</span> formula results</a>
+<a class="sourceLine" id="cb2-5" data-line-number="5">        results <span class="fu">=</span> map evaluate formulas</a></code></pre></div>
+<p>In an eager language, this needs to be modified slightly:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode hs"><code class="sourceCode haskell"><a class="sourceLine" id="cb3-1" data-line-number="1"><span class="co">-- Haskell</span></a>
+<a class="sourceLine" id="cb3-2" data-line-number="2"><span class="ot">loeb ::</span> [[<span class="dt">Lazy</span> a] <span class="ot">-&gt;</span> a] <span class="ot">-&gt;</span> [<span class="dt">Lazy</span> a]</a>
+<a class="sourceLine" id="cb3-3" data-line-number="3">loeb formulas <span class="fu">=</span> results</a>
+<a class="sourceLine" id="cb3-4" data-line-number="4">  <span class="kw">where</span> evaluate formula () <span class="fu">=</span> formula results</a>
+<a class="sourceLine" id="cb3-5" data-line-number="5">        results <span class="fu">=</span> map evaluate formulas</a></code></pre></div>
+<p>This has the slight downside of having to manually force out the results afterwards.</p>
+<p>Translating into JavaScript is straightforward, but the code is uglier:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode js"><code class="sourceCode javascript"><a class="sourceLine" id="cb4-1" data-line-number="1"><span class="kw">function</span> <span class="at">loeb</span>(formulas) <span class="op">{</span></a>
+<a class="sourceLine" id="cb4-2" data-line-number="2">    <span class="kw">function</span> <span class="at">evaluate</span>(formula) <span class="op">{</span> <span class="cf">return</span> <span class="kw">function</span>() <span class="op">{</span></a>
+<a class="sourceLine" id="cb4-3" data-line-number="3">        <span class="cf">return</span> <span class="at">formula</span>(results)<span class="op">;</span></a>
+<a class="sourceLine" id="cb4-4" data-line-number="4">    <span class="op">}</span> <span class="op">}</span></a>
+<a class="sourceLine" id="cb4-5" data-line-number="5">    <span class="kw">var</span> results <span class="op">=</span> <span class="va">formulas</span>.<span class="at">map</span>(evaluate)<span class="op">;</span></a>
+<a class="sourceLine" id="cb4-6" data-line-number="6">    <span class="cf">return</span> results<span class="op">;</span></a>
+<a class="sourceLine" id="cb4-7" data-line-number="7"><span class="op">}</span></a></code></pre></div>
+<p>The typical use for this function is as a <em>spreadsheet evaluator</em>. Here’s an example of a simple 3-cell spreadsheet:</p>
+<pre><code>A1:       2
+A2:       3
+A3:  =A1+A2</code></pre>
+<div class="sourceCode" id="cb6"><pre class="sourceCode js"><code class="sourceCode javascript"><a class="sourceLine" id="cb6-1" data-line-number="1"><span class="va">console</span>.<span class="at">log</span>(<span class="st">&quot;spreadsheet result: &quot;</span><span class="op">,</span> <span class="at">loeb</span>([</a>
+<a class="sourceLine" id="cb6-2" data-line-number="2">    <span class="kw">function</span>(cells) <span class="op">{</span> <span class="cf">return</span> <span class="dv">2</span><span class="op">;</span> <span class="op">},</span></a>
+<a class="sourceLine" id="cb6-3" data-line-number="3">    <span class="kw">function</span>(cells) <span class="op">{</span> <span class="cf">return</span> <span class="dv">3</span><span class="op">;</span> <span class="op">},</span></a>
+<a class="sourceLine" id="cb6-4" data-line-number="4">    <span class="kw">function</span>(cells) <span class="op">{</span> <span class="cf">return</span> cells[<span class="dv">0</span>]() <span class="op">+</span> cells[<span class="dv">1</span>]()<span class="op">;</span> <span class="op">}</span></a>
+<a class="sourceLine" id="cb6-5" data-line-number="5">]).<span class="at">map</span>(<span class="kw">function</span>(x)<span class="op">{</span> <span class="cf">return</span> <span class="at">x</span>()<span class="op">;</span> <span class="op">}</span>))</a></code></pre></div>
+<p>The <code>.map(function(x){ return x(); })</code> forces every cell to be evaluated. You should see <code>[2, 3, 5]</code> in the console.</p>
+<h2 id="möb">Möb</h2>
+<p>The <code>loeb</code> function can be generalized by adding an explicit <code>map</code> parameter, allowing our choice of the mapping function.</p>
+<p>The Haskell type signature looks quite scary, even though the implementation is virtually identical:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode hs"><code class="sourceCode haskell"><a class="sourceLine" id="cb7-1" data-line-number="1"><span class="co">-- Haskell</span></a>
+<a class="sourceLine" id="cb7-2" data-line-number="2"><span class="ot">moeb ::</span> (((t <span class="ot">-&gt;</span> a) <span class="ot">-&gt;</span> <span class="dt">Lazy</span> a) <span class="ot">-&gt;</span> s <span class="ot">-&gt;</span> t) <span class="ot">-&gt;</span> s <span class="ot">-&gt;</span> t</a>
+<a class="sourceLine" id="cb7-3" data-line-number="3">moeb map formulas <span class="fu">=</span> results</a>
+<a class="sourceLine" id="cb7-4" data-line-number="4">  <span class="kw">where</span> evaluate formula () <span class="fu">=</span> formula results</a>
+<a class="sourceLine" id="cb7-5" data-line-number="5">        results <span class="fu">=</span> map evaluate formulas</a></code></pre></div>
+<p>But since we’re in JavaScript-land we don’t care about type signatures. We just copy-paste our implementation, but allow the <code>map</code> function to be chosen arbitrarily.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode js"><code class="sourceCode javascript"><a class="sourceLine" id="cb8-1" data-line-number="1"><span class="kw">function</span> <span class="at">moeb</span>(map) <span class="op">{</span> <span class="cf">return</span> <span class="kw">function</span> (formulas) <span class="op">{</span></a>
+<a class="sourceLine" id="cb8-2" data-line-number="2">    <span class="kw">function</span> <span class="at">evaluate</span>(formula) <span class="op">{</span> <span class="cf">return</span> <span class="kw">function</span>() <span class="op">{</span></a>
+<a class="sourceLine" id="cb8-3" data-line-number="3">        <span class="cf">return</span> <span class="at">formula</span>(results)<span class="op">;</span></a>
+<a class="sourceLine" id="cb8-4" data-line-number="4">    <span class="op">}</span> <span class="op">}</span></a>
+<a class="sourceLine" id="cb8-5" data-line-number="5">    <span class="kw">var</span> results <span class="op">=</span> <span class="at">map</span>(evaluate)(formulas)<span class="op">;</span></a>
+<a class="sourceLine" id="cb8-6" data-line-number="6">    <span class="cf">return</span> results<span class="op">;</span></a>
+<a class="sourceLine" id="cb8-7" data-line-number="7"><span class="op">}</span> <span class="op">}</span></a></code></pre></div>
+<p>It’s easy to recover <code>loeb</code> from <code>moeb</code>. We just need to define a helper function (literally just a curried version of <code>.map</code>).</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode js"><code class="sourceCode javascript"><a class="sourceLine" id="cb9-1" data-line-number="1"><span class="kw">function</span> <span class="at">map</span>(func) <span class="op">{</span> <span class="cf">return</span> <span class="kw">function</span>(array) <span class="op">{</span></a>
+<a class="sourceLine" id="cb9-2" data-line-number="2">    <span class="cf">return</span> <span class="va">array</span>.<span class="at">map</span>(func)<span class="op">;</span></a>
+<a class="sourceLine" id="cb9-3" data-line-number="3"><span class="op">}</span> <span class="op">}</span></a></code></pre></div>
+<p>Then, we have that:</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode js"><code class="sourceCode javascript"><a class="sourceLine" id="cb10-1" data-line-number="1"><span class="kw">var</span> the_same_loeb <span class="op">=</span> <span class="at">moeb</span>(map)<span class="op">;</span></a></code></pre></div>
+<p>See for yourself :p</p>
+<p>We can also define the <a href="https://en.wikipedia.org/wiki/Fixed-point_combinator">fixpoint combinator</a> (a.k.a. <i>Y combinator</i>). But first we need another helper function, the <a href="https://en.wikipedia.org/wiki/Identity_function">identity function</a>.</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode js"><code class="sourceCode javascript"><a class="sourceLine" id="cb11-1" data-line-number="1"><span class="kw">function</span> <span class="at">id</span>(x) <span class="op">{</span></a>
+<a class="sourceLine" id="cb11-2" data-line-number="2">    <span class="cf">return</span> x<span class="op">;</span></a>
+<a class="sourceLine" id="cb11-3" data-line-number="3"><span class="op">}</span></a></code></pre></div>
+<p>Then the fixpoint combinator is just:</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode js"><code class="sourceCode javascript"><a class="sourceLine" id="cb12-1" data-line-number="1"><span class="kw">var</span> fix <span class="op">=</span> <span class="at">moeb</span>(id)<span class="op">;</span></a></code></pre></div>
+<p>Here’s an example of using the fixpoint combinator to implement the <a href="https://en.wikipedia.org/wiki/Factorial">factorial</a> function. Not the sanest way of implementating factorials, I might add.</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode js"><code class="sourceCode javascript"><a class="sourceLine" id="cb13-1" data-line-number="1"><span class="kw">var</span> factorial <span class="op">=</span> <span class="at">fix</span>(<span class="kw">function</span>(fac) <span class="op">{</span> <span class="cf">return</span> <span class="kw">function</span>(x) <span class="op">{</span></a>
+<a class="sourceLine" id="cb13-2" data-line-number="2">    <span class="cf">return</span> x <span class="op">&gt;</span> <span class="dv">0</span> <span class="op">?</span> x <span class="op">*</span> <span class="at">fac</span>()(x <span class="op">-</span> <span class="dv">1</span>) : <span class="dv">1</span><span class="op">;</span></a>
+<a class="sourceLine" id="cb13-3" data-line-number="3"><span class="op">}</span> <span class="op">}</span>)()<span class="op">;</span></a>
+<a class="sourceLine" id="cb13-4" data-line-number="4"><span class="va">console</span>.<span class="at">log</span>(<span class="st">&quot;factorial of 3 is&quot;</span><span class="op">,</span> <span class="at">factorial</span>(<span class="dv">3</span>))<span class="op">;</span></a></code></pre></div>
+
+  </div>
+  <p><a class="link-button" href="/2015-04-06/loeb-moeb-javascript#comments">Comments</a></p>
+</article>
+
+<article class="h-entry post" property="schema:blogPost" typeof="schema:BlogPosting">
+  <header>
+    <h1 property="schema:headline schema:name"><a class="p-name u-url" href="/2015-02-15/autotools-intro">Introduction to the GNU Build System (Autotools)</a></h1>
+    <div class="meta">
+      <time class="dt-published date" property="schema:datePublished">2015-02-15</time>
+      <ul class="tags">
+        
+        <li property="schema:keywords"><a class="p-category tag" href="/archive/tag#tag-build">build</a></li>
+        
+        <li property="schema:keywords"><a class="p-category tag" href="/archive/tag#tag-posix">posix</a></li>
+        
+      </ul>
+    </div>
+  </header>
+  <div class="e-content post-content" property="schema:articleBody">
+    <p><em>This is intended to be a brief introduction to the GNU build system (Autotools) for beginners. The reader is assumed to have a basic understanding of the process of compilation and linking.</em></p>
+<h2 id="duxzmzso-toc">
+Outline
+</h2>
+<ul>
+<li><a href="#duxzmzso-build-system">What is a build system?</a></li>
+<li><a href="#duxzmzso-autotools">What is a Autotools?</a></li>
+<li><a href="#duxzmzso-use">How do I build programs that use Autotools?</a>
+<ul>
+<li><a href="#duxzmzso-configure-fail">What should I do if <code>./configure</code> fails?</a></li>
+<li><a href="#duxzmzso-customize-configure">How do I customize configuration process?</a></li>
+</ul></li>
+</ul>
+<h2 id="duxzmzso-build-system">
+What is a build system? <a href="#duxzmzso-toc" title="back to top">⇡</a>
+</h2>
+<p>Running the compiler and linker by hand can be a tedious chore when there are numerous files, as is typical in large projects. This is where the <strong>build system</strong> comes in – it automates the workflow to aid the developers as well as the the users in the process of <strong>building</strong> software. The process can be roughly divided into three stages:</p>
+<ol type="1">
+<li><strong>configuration</strong>: adapting the build process to the target system;</li>
+<li><strong>compilation and linking</strong>: translating source code into machine code;</li>
+<li><strong>installation</strong>: copying the final product to its final location.</li>
+</ol>
+<p>Build systems assist in some or all of these steps.</p>
+<h2 id="duxzmzso-autotools">
+What is Autotools? <a href="#duxzmzso-toc" title="back to top">⇡</a>
+</h2>
+<p>Build systems come in all shapes and varieties. For this article we focus on the <strong>GNU build system</strong>, also known as <strong>Autotools</strong>, which is one of the oldest build systems and remains quite popular on Unix-like platforms.</p>
+<p>An easy way to tell if the project uses Autotools is to look for the presence for its primary input files:</p>
+<ul>
+<li><code>configure.ac</code>, and</li>
+<li><code>Makefile.am</code>.</li>
+</ul>
+<p>Note that Autotools is not a monolithic build system. Rather, it is more like a collection of different tools that work together to help build a project. Of these tools, the two most critical ones are:</p>
+<ul>
+<li><a href="https://gnu.org/software/autoconf">Autoconf</a>, and</li>
+<li><a href="https://gnu.org/software/automake">Automake</a>.</li>
+</ul>
+<p><strong>Autoconf</strong> is a tool that generates a <code>configure</code> script for the <em>configuration</em> step. The script detects the available features of the target system and adjusts the build process where needed. The script is written in the <a href="http://pubs.opengroup.org/onlinepubs/009695399/utilities/xcu_chap02.html">shell language</a>, but in a somewhat unusual way to maximize portability across different platforms. It is automatically generated from the input file (<code>configure.ac</code>) via the <a href="https://en.wikipedia.org/wiki/M4_(computer_language)">m4 macro language</a>.</p>
+<p><strong>Automake</strong> is a tool that aids in the construction of makefiles. It consumes input files (<code>Makefile.am</code>) to generate <em>makefile precursors</em>, known as <code>Makefile.in</code>. These precursors are later consumed by the <code>configure</code> script to construct the complete makefiles, which may then be used to build and install the program.</p>
+<p>Here is a highly simplified sketch of the typical Autotools workflow:</p>
+<figure>
+<img src="/img/autotools-process.png" alt="diagram of the Autotools workflow" /><figcaption>diagram of the Autotools workflow</figcaption>
+</figure>
+<p>(A more detailed <a href="https://en.wikipedia.org/wiki/File:Autoconf-automake-process.svg">diagram</a> as well as <a href="https://en.wikipedia.org/wiki/GNU_build_system#Components">description</a> be found on Wikipedia.)</p>
+<ol type="1">
+<li><p>Initially, the developer runs <code>autoreconf</code> to generate the <code>configure</code> script from <code>configure.ac</code> and a <code>Makefile.in</code> from every <code>Makefile.am</code> (of which there may be several, hidden in the subdirectories):</p>
+<pre><code class="shell"><p>autoreconf -i</p></code></pre></li>
+<li><p>Afterwards, the user runs <code>./configure</code> to generate a <code>Makefile</code> from every <code>Makefile.in</code>.</p>
+<pre><code class="shell"><p>./configure</p></code></pre></li>
+</ol>
+<p>Generally, when the user downloads a package, step 1 has already been done, hence the user only needs to run the <code>configure</code> script. The user does not need to invoke <code>autoreconf</code> unless the <code>configure</code> script is absent.</p>
+<p>If you are interested in learning how to use Autotools in your own projects, consider reading the <a href="https://gnu.org/software/automake/manual/html_node/Hello-World.html#Hello-World">official docs</a> or one of the many <a href="https://google.com/search?q=autotools%20tutorial">Autotools tutorials</a>.</p>
+<h2 id="duxzmzso-use">
+How do I build programs that use Autotools? <a href="#duxzmzso-toc" title="back to top">⇡</a>
+</h2>
+<p>First, make sure you have changed the working directory to the project directory that contains the <code>configure</code> script.</p>
+<p>Next, skim through the <code>README</code> and/or <code>INSTALL</code> documents to make sure that any required dependencies are installed. Note that if the dependencies are installed in an unusual location you may need to adjust the <em>search paths</em> for</p>
+<ul>
+<li>executables (<a href="https://en.wikipedia.org/wiki/PATH_(variable)"><code>PATH</code></a>),</li>
+<li>headers (<a href="https://gcc.gnu.org/onlinedocs/cpp/Environment-Variables.html#index-CPATH-204"><code>C_INCLUDE_PATH</code></a> and/or <a href="https://gcc.gnu.org/onlinedocs/cpp/Environment-Variables.html#index-CPATH-204"><code>CPLUS_INCLUDE_PATH</code></a>), and/or</li>
+<li>libraries (<a href="https://gcc.gnu.org/onlinedocs/gcc/Environment-Variables.html"><code>LIBRARY_PATH</code></a>).</li>
+</ul>
+<p>This must be done <em>before</em> running <code>configure</code> (the next step), otherwise it may fail or link against the wrong library.</p>
+<p>Finally, you can then build the program by following the traditional 3-step procedure:</p>
+<pre><code class="shell"><p>./configure</p><p>make</p><p class="root">make install</p></code></pre>
+<p>However, sometimes this fails, or perhaps, the default configuration is not what you want.</p>
+<h3 id="duxzmzso-configure-fail">
+What should I do if <code>./configure</code> fails? <a href="#duxzmzso-toc" title="back to top">⇡</a>
+</h3>
+<p>The first thing to do is to look for the same error message in <code>config.log</code>. Just above the error message there will be a record of the last few actions <code>configure</code> tried to do but failed.</p>
+<p>Most of the steps in a <code>configure</code> script are <strong>feature tests</strong>: they typically run a test program to find out if some feature is available and whether it has any specific quirks. If a test fails and there is no fallback plan, then the entire <code>configure</code> script is aborted. There will usually be an error message associated with this (e.g. a compiler error) but it is buried inside <code>config.log</code>.</p>
+<p>Sometimes the reasons are not obvious, or the <code>configure</code> script may even give misleading reasons! Therefore, always dig into the log to uncover the true cause. It could be an improperly set environment variable, a missing library/tool, or a flag that needs to be overriden, etc.</p>
+<p>In the worst case, the <code>configure.ac</code> may have been faulty and as result you may have to debug the <code>configure</code> script itself.</p>
+<h3 id="duxzmzso-customize-configure">
+How do I customize configuration process? <a href="#duxzmzso-toc" title="back to top">⇡</a>
+</h3>
+<p>To see what customizations are available, run</p>
+<pre><code>./configure --help</code></pre>
+<p>The options available will vary from project to project, so read it carefully. In my experience, the two most commonly used flags are:</p>
+<ul>
+<li><p><code>–prefix=<var>/some/path</var></code>: sets the path to which the project will be installed. If not provided, the default is <code>/usr/local</code>, which means</p>
+<ul>
+<li>executables are installed to <code>/usr/local/bin</code>,</li>
+<li>libraries are installed to <code>/usr/local/lib</code>,</li>
+<li>manuals are installed to <code>/usr/local/man</code>, and</li>
+<li>additional files are installed to <code>/usr/local/share</code>.</li>
+</ul>
+<p>A commonly used alternative is the <code>$HOME</code> directory, useful if you don’t have superuser privileges.</p></li>
+<li><p><code>–with-<var>somepackage</var>=<var>someflags</var></code>: overrides the linker flag(s) used for <var>somepackage</var>. This is useful if you want to use a substitute library that the script is not aware of. Be sure to <a href="http://wiki.bash-hackers.org/syntax/quoting">quote the argument</a> if it contains special characters or consists of more than one flag.</p>
+<p>For example, if a project expects the <a href="http://netlib.org/blas">BLAS library</a> and you wish to use <a href="https://software.intel.com/en-us/intel-mkl">Intel MKL</a> instead, you can specify <code>--with-blas=-lmkl_rt</code>.</p></li>
+</ul>
+
+  </div>
+  <p><a class="link-button" href="/2015-02-15/autotools-intro#comments">Comments</a></p>
+</article>
+
+<article class="h-entry post" property="schema:blogPost" typeof="schema:BlogPosting">
+  <header>
+    <h1 property="schema:headline schema:name"><a class="p-name u-url" href="/2015-02-01/cabal-gc">Uninstalling Cabal packages</a></h1>
+    <div class="meta">
+      <time class="dt-published date" property="schema:datePublished">2015-02-01</time>
+      <ul class="tags">
+        
+        <li property="schema:keywords"><a class="p-category tag" href="/archive/tag#tag-haskell">haskell</a></li>
+        
+        <li property="schema:keywords"><a class="p-category tag" href="/archive/tag#tag-cabal">cabal</a></li>
+        
+        <li property="schema:keywords"><a class="p-category tag" href="/archive/tag#tag-package">package</a></li>
+        
+      </ul>
+    </div>
+  </header>
+  <div class="e-content post-content" property="schema:articleBody">
+    <p><i>Edit (2015-08-10): the tools have been updated to fix a few bugs as well as incompatibilities with the latest GHC; they now also work on Cabal sandboxes.</i></p>
+<h2 id="problems">Problems</h2>
+<h3 id="a.-there-is-no-way-to-uninstall-packages-in-cabal">A. There is no way to uninstall packages in Cabal</h3>
+<p>Currently, <a href="https://haskell.org/cabal">cabal-install</a> <a href="https://github.com/haskell/cabal/issues/227">doesn’t know how to</a> <a href="https://www.reddit.com/r/haskell/comments/lrc39/why_is_there_no_cabal_">uninstall packages</a>. The best you can do is to <a href="https://stackoverflow.com/a/10587933">unregister</a> the package with the GHC package-database manager, eliminating the package metadata from the database without removing the actual files.</p>
+<p>There is a package called <a href="https://hackage.haskell.org/package/cabal-uninstall">cabal-uninstall</a> (and probably a few others) that remedies this to some extent, but it doesn’t work if the package has <em>already</em> been unregistered.</p>
+<p>Additionally, while ghc-pkg does warn you of dependency breakage, it doesn’t provide an easy way to remove a package and all its dependents transitively.</p>
+<h3 id="b.-removing-broken-packages-is-a-tedious-chore">B. Removing broken packages is a tedious chore</h3>
+<p>If for some reason your packages get broken, there’s no easy way to clean up the mess.</p>
+<p>On my system, this usually happens because Arch Linux upgrades some of the globally-installed packages, breaking swaths of user-installed packages in the process (or it could be due to a GHC upgrade).</p>
+<p>To fix this you’d have to unregister all of the broken packages. And if you want to reclaim the space used by the dead packages, you’d have to dive into <code>~/.cabal</code> and remove them manually.</p>
+<h2 id="tools">Tools</h2>
+<p>To help fix the issues outlined above, here are some scripts to assist the process:</p>
+<ul>
+<li><p><a href="https://github.com/Rufflewind/config/blob/master/home/sbin/cabal-gc">cabal-gc</a>: a “garbage collector” that searches for any lingering packages whose files still remain but are no longer registered. (<em>Note: it does not remove any executables in the <code>bin</code> directory.</em>)</p></li>
+<li><p><a href="https://github.com/Rufflewind/config/blob/master/home/sbin/ghc-pkg-check">ghc-pkg-check</a>: a thin wrapper around <code>ghc-pkg check</code> that suppresses the <a href="https://ghc.haskell.org/trac/ghc/ticket/8981">haddock warnings</a> that <a href="https://stackoverflow.com/q/22554498">no-one seems to care about</a>.</p></li>
+<li><p><a href="https://github.com/Rufflewind/config/blob/master/home/sbin/ghc-pkg-unregister">ghc-pkg-unregister</a>: a thin wrapper around <code>ghc-pkg unregister</code> that allows multiple packages to be unregistered in one call.</p></li>
+</ul>
+<p>While it’s possible to fully automate this process, it’s best to do them one at a time to make sure nothing bad happens.</p>
+<h2 id="tutorial">Tutorial</h2>
+<p>First off, if you want to manage packages in a <strong>sandbox</strong>, be sure to run this command <em>prior to</em> everything else below:</p>
+<pre><code class="shell"><p>cabal <span class="metatoken">[</span>--sandbox-config-file=<var>./cabal.sandbox.config</var><span class="metatoken">]</span> exec -- "$SHELL"</p></code></pre>
+<p>(The <code>--sandbox-config-file=…</code> flag is optional.)</p>
+<p>Now,</p>
+<ul>
+<li>if your goal is to <strong>uninstall a specific package</strong> as well as its dependents, then follow all the steps below;</li>
+<li>if your goal is to only <strong>remove broken packages</strong>, then jump straight to step 2.</li>
+</ul>
+<h3 id="remove-the-target-packages">1. Remove the target packages</h3>
+<p>To remove packages, the first thing to do would be to run:</p>
+<pre><code class="shell"><p>ghc-pkg-unregister <var>my-package-0.5.0 some-package-1.0.0</var> <span class="metatoken">…</span></p></code></pre>
+<p>If there are any dependent packages, you will receive an error telling you that those will be broken:</p>
+<pre><samp>ghc-pkg: unregistering <var>some-package-1.0.0</var> would break the following packages: <var>other-package-2.0.0 another-package-3.0.0</var> (use --force to override)</samp></pre>
+<p>If you’re alright with this, add the <code>--force</code> flag to remove it for good. We’ll eliminate the broken packages shortly.</p>
+<pre><code class="shell"><p>ghc-pkg-unregister --force <var>some-package-1.0.0</var> <span class="metatoken">…</span></p></code>
+<samp>unregistering <var>some-package-1.0.0</var> would break the following packages: <var>other-package-2.0.0 another-package-3.0.0</var> (ignoring)</samp></pre>
+<p>Despite the <a href="https://en.wikipedia.org/wiki/Uses_of_English_verb_forms#Conditional">conditional mood</a> in the message, the package will indeed be unregistered.</p>
+<h3 id="remove-the-dependent-packages">2. Remove the dependent packages</h3>
+<p>Now, we need to get rid of the broken packages. Let’s see which packages are broken:</p>
+<pre><code class="shell"><p>ghc-pkg-check</p></code>
+<samp>There are problems in package <var>other-package-2.0.0</var>:
+  dependency "<var>some-package-1.0.0-…</var>" doesn't exist
+There are problems in package <var>another-package-3.0.0</var>:
+  dependency "<var>some-package-1.0.0-…</var>" doesn't exist
+
+The following packages are broken, either because they have a problem
+listed above, or because they depend on a broken package.
+<var>other-package-2.0.0</var>
+<var>another-package-3.0.0</var></samp></pre>
+<p>To remove <em>all</em> of these broken packages, run:</p>
+<pre><code class="shell"><p>ghc-pkg-check --simple-output | xargs ghc-pkg-unregister --force </p></code></pre>
+<p>To make sure all of the broken packages are taken care of, run <code>ghc-pkg-check</code> again. If there are more broken packages, you’ll need to keep repeating this step until all of them have been eliminated.</p>
+<h3 id="delete-the-associated-files">3. Delete the associated files</h3>
+<p>This step is optional, although it can be useful to reclaim some disk space.</p>
+<p>Since we will be <em>deleting files</em>, it’s best to perform a dry run first:</p>
+<pre><code class="shell"><p>cabal-gc</p></code>
+<samp>can be removed: /home/<var>user</var>/.cabal/lib/<var>x86_64-linux-ghc-7.10.1/anoth_d9K7jTHCBftCdWJFHesDel</var>
+can be removed: /home/<var>user</var>/.cabal/lib/<var>x86_64-linux-ghc-7.10.1/other_8j0AdSQVkKosS3ev8r3pBu</var>
+can be removed: /home/<var>user</var>/.cabal/lib/<var>x86_64-linux-ghc-7.10.1/mypac_XYf894wKraySpNs9RUwwMV</var>
+can be removed: /home/<var>user</var>/.cabal/lib/<var>x86_64-linux-ghc-7.10.1/somep_x3XTaLFeSmcMHNpv7Ng8xw</var>
+can be removed: /home/<var>user</var>/.cabal/share/doc/<var>x86_64-linux-ghc-7.10.1/another-package-3.0.0</var>
+can be removed: /home/<var>user</var>/.cabal/share/doc/<var>x86_64-linux-ghc-7.10.1/other-package-2.0.0</var>
+can be removed: /home/<var>user</var>/.cabal/share/doc/<var>x86_64-linux-ghc-7.10.1/my-package-0.5.0</var>
+can be removed: /home/<var>user</var>/.cabal/share/doc/<var>x86_64-linux-ghc-7.10.1/some-package-1.0.0</var></samp></pre>
+<p>If everything looks okay, go ahead and delete them for real:</p>
+<pre><code class="shell"><p>cabal-gc -r</p></code>
+<samp>removed: /home/<var>user</var>/.cabal/lib/<var>x86_64-linux-ghc-7.10.1/anoth_d9K7jTHCBftCdWJFHesDel</var>
+removed: /home/<var>user</var>/.cabal/lib/<var>x86_64-linux-ghc-7.10.1/other_8j0AdSQVkKosS3ev8r3pBu</var>
+removed: /home/<var>user</var>/.cabal/lib/<var>x86_64-linux-ghc-7.10.1/mypac_XYf894wKraySpNs9RUwwMV</var>
+removed: /home/<var>user</var>/.cabal/lib/<var>x86_64-linux-ghc-7.10.1/somep_x3XTaLFeSmcMHNpv7Ng8xw</var>
+removed: /home/<var>user</var>/.cabal/share/doc/<var>x86_64-linux-ghc-7.10.1/another-package-3.0.0</var>
+removed: /home/<var>user</var>/.cabal/share/doc/<var>x86_64-linux-ghc-7.10.1/other-package-2.0.0</var>
+removed: /home/<var>user</var>/.cabal/share/doc/<var>x86_64-linux-ghc-7.10.1/my-package-0.5.0</var>
+removed: /home/<var>user</var>/.cabal/share/doc/<var>x86_64-linux-ghc-7.10.1/some-package-1.0.0</var></samp></pre>
+
+  </div>
+  <p><a class="link-button" href="/2015-02-01/cabal-gc#comments">Comments</a></p>
+</article>
+
+
+      </div>
+    </div>
+    <div class="lower">
+      <footer class="root">
+        <small>
+          Hosted on <a href="https://pages.github.com">GitHub Pages</a>.
+          Built with <a href="http://jekyllrb.com">Jekyll</a>.
+          Some rights reserved
+          (<a rel="license" href="https://creativecommons.org/licenses/by/4.0" property="schema:license">CC BY 4.0</a>).
+          <a href="/feed.xml">
+            <svg xmlns="http://www.w3.org/2000/svg"
+                 version="1.1" width="1em" height="1em" viewBox="0 0 256 256">
+              <defs>
+                <linearGradient id="RSSg" x1="0.085" y1="0.085" x2="0.915" y2="0.915">
+                  <stop offset="0.0" stop-color="#e3702d"/>
+                  <stop offset="0.1071" stop-color="#ea7d31"/>
+                  <stop offset="0.3503" stop-color="#f69537"/>
+                  <stop offset="0.5" stop-color="#fb9e3a"/>
+                  <stop offset="0.7016" stop-color="#ea7c31"/>
+                  <stop offset="0.8866" stop-color="#de642b"/>
+                  <stop offset="1.0" stop-color="#d95b29"/>
+                </linearGradient>
+              </defs>
+              <rect width="256" height="256" rx="55" ry="55" x="0" y="0" fill="#cc5d15"/>
+              <rect width="246" height="246" rx="50" ry="50" x="5" y="5" fill="#f49c52"/>
+              <rect width="236" height="236" rx="47" ry="47" x="10" y="10" fill="url(#RSSg)"/>
+              <circle cx="68" cy="189" r="24" fill="#fff"/>
+              <path d="M160 213h-34a82 82 0 0 0 -82 -82v-34a116 116 0 0 1 116 116z" fill="#fff"/>
+              <path d="M184 213A140 140 0 0 0 44 73 V 38a175 175 0 0 1 175 175z" fill="#fff"/>
+            </svg>
+          </a>
+        </small>
+      </footer>
+    </div>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <script>
+      window.jQuery ||
+      document.write('<script src="/js/vendor/jquery-1.11.3.min.js"><\/script>')
+    </script>
+    <script src="/js/plugins.js"></script>
+    <script src="/js/main.js"></script>
+  </body>
+</html>

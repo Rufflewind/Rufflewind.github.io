@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html class="no-js">
+  <head>
+    <meta charset="utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>Using libraries - Rufflewind's Scratchpad</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Fira+Mono|Fira+Sans|Oxygen"/>
+    <link rel="stylesheet" href="/css/normalize.css"/>
+    <link rel="stylesheet" href="/css/syntax.css"/>
+    <link rel="stylesheet" href="/css/main.css"/>
+    <link rel="icon" href="/favicon.ico"/>
+    <link rel="alternate" type="application/rss+xml" href="/feed"/>
+    <script src="/js/vendor/modernizr.custom.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+      ga('create', 'UA-48515395-1', 'rufflewind.com');
+      ga('send', 'pageview');
+    </script>
+  </head>
+  <body prefix="schema: http://schema.org/" typeof="schema:Blog">
+    <div class="upper">
+      <header class="root">
+        <div class="header-title">
+          <h1><a href="/">Rufflewind's Scratchpad</a></h1>
+        </div>
+        <div class="header-banner">
+          <nav>
+            <ul>
+              <li><a class="extra" href="/">Home</a></li>
+              <li><a class="extra" href="/archive">Archive</a></li>
+              <li><a class="extra" href="/about">About</a></li>
+            </ul>
+            <form class="search" method="get" action="//google.com/search">
+              <input type="hidden" name="sitesearch" value="rufflewind.com"/>
+              <input id="search-input" type="search" name="q" placeholder="Search"/>
+              <button id="search-button">
+                <svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 100 100">
+                  <circle cx="42" cy="42" r="30" stroke="white" stroke-width="12" fill="none"/>
+                  <path d="m 60 60 35 35" stroke="white" stroke-width="12" fill="none"/>
+                </svg>
+                <span>Search</span>
+              </button>
+            </form>
+          </nav>
+        </div>
+      </header>
+      <div class="content">
+        <article class="h-entry post" property="schema:blogPost" typeof="schema:BlogPosting">
+  <header>
+    <h1><a class="p-name u-url" href="" property="schema:headline schema:name">Using libraries</a></h1>
+    <div class="meta">
+      <time class="dt-published date" property="schema:datePublished">2017-02-25</time>
+      <ul class="tags">
+        
+        <li property="schema:keywords"><a class="p-category tag" href="/archive/tag#tag-c">c</a></li>
+        
+        <li property="schema:keywords"><a class="p-category tag" href="/archive/tag#tag-c++">c++</a></li>
+        
+        <li property="schema:keywords"><a class="p-category tag" href="/archive/tag#tag-libraries">libraries</a></li>
+        
+      </ul>
+    </div>
+  </header>
+  <div class="e-content post-content" property="schema:articleBody">
+    <p>Note: This article is somewhat biased toward Linux-like environments.</p>
+<h2 id="native-vs-non-native">Native vs non-native</h2>
+<ul>
+<li><p><strong>Native libraries</strong>: these are the ones you get through native compilation. This applies to languages such as C, C++, Fortran. These libraries are interoperable.</p>
+<p>This category also applies to modern natively-compiled languages such as Haskell or Rust, but I’m not as familiar with those so I won’t discuss them here.</p></li>
+<li><p><strong>Non-native libraries</strong>: these are made of source code or bytecode that isn’t executed directly on the CPU. Examples include C#, Java, Perl, Python, Ruby, etc. Non-native libraries are usually highly language-specific and not interoperable with each other.</p></li>
+</ul>
+<p>This article is only concerned with <em>native libraries</em>, specifically of the older family (C, C++, Fortran).</p>
+<h2 id="parts-of-a-library">Parts of a library</h2>
+<p>Libraries are generally divided into two components:</p>
+<ul>
+<li><p>The <strong>library file</strong>, which contains mostly machine code. This is the essential library <em>implementation</em>.</p>
+<p>The file extensions are usually:</p>
+<ul>
+<li><code>.a</code>/<code>.so</code> (<a href="https://en.wikipedia.org/wiki/Executable_and_Linkable_Format">ELF</a> OSes like Linux),</li>
+<li><code>.a</code>/<code>.dylib</code> (OS X),</li>
+<li><code>.lib</code>/<code>.dll</code> (Windows).</li>
+</ul>
+<p>The former of each pair are file extensions for static libraries, whereas the latter of each pair are for shared libraries a.k.a. dynamically-linked libraries (DLLs). The distinction is explained in the next section.</p></li>
+<li><p>The <strong>library interface</strong>, which is a protocol that users of the library must abide by in order to use the library correctly. Failing to do so will often lead to crashes (segfaults) and brokenness.</p>
+<p>For C and C++, this is usually distributed as a <strong>header file</strong> (<code>.h</code>, <code>.hpp</code>, etc). There are ways to use a library even without a header file, but it is usually discouraged as it is error-prone. There is one exception though: non-C/C++ programs (e.g. a Rust program) that want to use a C/C++ library often don’t require header files.</p>
+<p>For Fortran, the library interface is usually just the source code itself, or interchangeably the <code>.mod</code> files.</p></li>
+</ul>
+<h2 id="static-vs-shared-libraries">Static vs shared libraries</h2>
+<ul>
+<li><p>In <strong>static libraries</strong>, the library’s own code is copied and merged with the user’s code, creating one combined file. This means after compilation, the static library file itself is no longer needed nor used. (Of course, you probably want to keep it in case you want to compile more programs with that same library.)</p>
+<p>Note that static libraries are quite dumb: you cannot link more than one copy of the same static library into the same program. You might wonder “Why would anyone do that anyway?” Well, it’s often unintentional: say you use library A and library B, both of which use library C. If this whole thing is linked statically, then both A and B will bring in their own copy of C!</p></li>
+<li><p>In <strong>shared libraries</strong>, the library’s own code remains a separate file. This means later when the program runs, it must <em>load</em> the library as a separate step. If the shared library can’t be found the program will fail to launch. If the shared library is upgraded or changed, then the behavior of any program that depends on that library may change (this can be both useful and annoying).</p>
+<p>Even though shared libraries are never incorporated into the final program, they are still needed during compilation because the compiler still needs to be aware of the library’s interface. On non-Windows systems, the compiler simply reads the shared library itself (<code>.so</code> or <code>.dylib</code>) during compilation. On Windows, compilation requires a so-called <strong>import library</strong>, which has the extension <code>.lib</code> (not to be confused with static libraries on Windows, which also have the same extension).</p></li>
+</ul>
+<h2 id="installing-a-library">Installing a library</h2>
+<p>The first step to use a library is to install it, obviously. The process varies a lot. It’s best to read the documentation for that specific library. One of the most crucial things to figure out is where the library is going to be installed.</p>
+<p>(Another crucial thing is to find out if the library has optional features, because they might be off by default, or turned off if the configuration step fails to find its dependencies!)</p>
+<h3 id="prefixes">Prefixes</h3>
+<p>On Unix-like OSes, libraries are usually installed to the <code>/usr/local</code> prefix by default. This <strong>prefix</strong> means that all of the library’s relevant files will be installed to <code>/usr/local/lib</code> (library files), <code>/usr/local/include</code> (header files), <code>/usr/local/bin</code> (executable programs), etc. To change the prefix, the process varies depending on the build system used by the library:</p>
+<ul>
+<li><p>For <a href="https://www.gnu.org/software/autoconf/autoconf.html">Autoconf</a>-like build systems, this can often be changed through the <code>./configure</code> script. The command would be something like</p>
+<pre><code>./configure --prefix=/my_custom_prefix</code></pre></li>
+<li><p>For the <a href="https://cmake.org">CMake</a> build system, this can be changed using</p>
+<pre><code>cmake -DCMAKE_INSTALL_PREFIX=/my_custom_prefix .</code></pre></li>
+</ul>
+<p>It is considered bad practice to install libraries to the <code>/usr</code> prefix as that lies within the territory of the system package manager.</p>
+<h2 id="including-a-library">Including a library</h2>
+<p>To use the library in your C or C++ code, you’d likely have added</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode c"><code class="sourceCode c"><a class="sourceLine" id="cb3-1" data-line-number="1"><span class="pp">#include </span><span class="im">&lt;some_library_header.h&gt;</span></a></code></pre></div>
+<p>to various places in your source code to inform the compiler about the library <em>interface</em> (by forward declaring various types, functions, and variables). These header files are found under the <code>include</code> directory of wherever the library was installed, usually.</p>
+<p>If the library header files exist in a standardized location such as <code>/usr/include</code>, then the compiler will find them just fine. But if you installed them in an unusual location like <code>/my_custom_prefix/include</code>, then you’ll have to give a hint to your compiler so it knows where to look. This can be accomplished via the <code>-I</code> flag:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode sh"><code class="sourceCode bash"><a class="sourceLine" id="cb4-1" data-line-number="1"><span class="fu">cc</span> -c -I/my_custom_prefix/include my_program.c</a></code></pre></div>
+<p>(Replace <code>cc</code> with whatever compiler you use.) An <em>alternative</em> approach is to use the <code>C_INCLUDE_PATH</code> (C) and/or <code>CPLUS_INCLUDE_PATH</code> (C++) environment variables:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode sh"><code class="sourceCode bash"><a class="sourceLine" id="cb5-1" data-line-number="1"><span class="bu">export</span> <span class="va">C_INCLUDE_PATH=</span>/my_custom_prefix/include</a>
+<a class="sourceLine" id="cb5-2" data-line-number="2"><span class="fu">cc</span> -c my_program.c</a></code></pre></div>
+<p>You can have multiple paths in the variable using colon (<code>:</code>), analogous to <code>PATH</code>. These environment variables may not be recognized by all compilers, however. I know it works for <code>clang</code> and <code>gcc</code> at least.</p>
+<h2 id="linking-with-a-library">Linking with a library</h2>
+<p>When all the source files have been compiled with <code>-c</code>, you now need to link everything together, including any libraries you use. This is done using the <code>-l</code> flag:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode sh"><code class="sourceCode bash"><a class="sourceLine" id="cb6-1" data-line-number="1"><span class="fu">cc</span> my_program.o my_blah.o my_foo.o -lalpha -lbeta</a></code></pre></div>
+<p>The word that follows <code>-l</code> is the <strong>name</strong> of the library. If the library file is <code>libalpha.so</code>, then its name is just <code>alpha</code>.</p>
+<p>If <code>alpha</code> and/or <code>beta</code> are at an unconventional location <code>/my_custom_prefix/lib</code>, then you have to pass in a flag <code>-L</code> to tell the compiler where they could be found:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode sh"><code class="sourceCode bash"><a class="sourceLine" id="cb7-1" data-line-number="1"><span class="fu">cc</span> -L/my_custom_prefix/lib my_program.o my_blah.o my_foo.o -lalpha -lbeta</a></code></pre></div>
+<p>You can also do this using another colon-separated environment variable <code>LIBRARY_PATH</code>:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode sh"><code class="sourceCode bash"><a class="sourceLine" id="cb8-1" data-line-number="1"><span class="bu">export</span> <span class="va">LIBRARY_PATH=</span>/my_custom_prefix/lib</a>
+<a class="sourceLine" id="cb8-2" data-line-number="2"><span class="fu">cc</span> my_program.o my_blah.o my_foo.o -lalpha -lbeta</a></code></pre></div>
+<p>Again, I think only <em>some</em> compilers recognize this variable.</p>
+<h2 id="loading-a-shared-library">Loading a shared library</h2>
+<p>The last step is to make sure the program can actually load the shared library. Usually this is automatic, but if the library is in an unconventional place like <code>/my_custom_prefix/lib</code>, then you gotta give it another hint using yet-another colon-separated environment variable <code>LD_LIBRARY_PATH</code> (or <code>DYLIB_LIBRARY_PATH</code> if you’re using OS X):</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode sh"><code class="sourceCode bash"><a class="sourceLine" id="cb9-1" data-line-number="1"><span class="bu">export</span> <span class="va">LD_LIBRARY_PATH=</span>/my_custom_prefix/lib</a>
+<a class="sourceLine" id="cb9-2" data-line-number="2"><span class="ex">./a.out</span></a></code></pre></div>
+<p>Alternatively, you can bake the library path directly into the program so you don’t need an environment variable to run the program. This is the <a href="https://en.wikipedia.org/wiki/Rpath"><code>-rpath</code></a> flag:</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode sh"><code class="sourceCode bash"><a class="sourceLine" id="cb10-1" data-line-number="1"><span class="fu">cc</span> -Wl,-rpath=/my_custom_prefix/lib my_program.o my_blah.o my_foo.o -lalpha -lbeta</a></code></pre></div>
+<p>You can specify a path relative to the location of the program itself using the <code>${ORIGIN}</code> placeholder. Note that this is <em>not</em> a shell variable, so be sure to <em>single-quote</em> it in the shell:</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode sh"><code class="sourceCode bash"><a class="sourceLine" id="cb11-1" data-line-number="1"><span class="fu">cc</span> -Wl,-rpath=<span class="st">&#39;${ORIGIN}/lib&#39;</span> …</a></code></pre></div>
+
+  </div>
+  <div id="comments" property="schema:comment">
+    <p><a class="link-button" id="show-disqus-button" href="#comments">Show Disqus comments</a></p>
+    <div id="disqus_thread"></div>
+    <a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+    <script type="text/javascript">
+      var button = document.getElementById('show-disqus-button');
+      var brlink = document.getElementsByClassName('dsq-brlink')[0];
+      brlink.style.display = 'none';
+      button.onclick = function() {
+        button.style.display = 'none';
+        brlink.style.display = 'block';
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//rufflewind.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+      };
+    </script>
+  </div>
+</article>
+
+      </div>
+    </div>
+    <div class="lower">
+      <footer class="root">
+        <small>
+          Hosted on <a href="https://pages.github.com">GitHub Pages</a>.
+          Built with <a href="http://jekyllrb.com">Jekyll</a>.
+          Some rights reserved
+          (<a rel="license" href="https://creativecommons.org/licenses/by/4.0" property="schema:license">CC BY 4.0</a>).
+          <a href="/feed.xml">
+            <svg xmlns="http://www.w3.org/2000/svg"
+                 version="1.1" width="1em" height="1em" viewBox="0 0 256 256">
+              <defs>
+                <linearGradient id="RSSg" x1="0.085" y1="0.085" x2="0.915" y2="0.915">
+                  <stop offset="0.0" stop-color="#e3702d"/>
+                  <stop offset="0.1071" stop-color="#ea7d31"/>
+                  <stop offset="0.3503" stop-color="#f69537"/>
+                  <stop offset="0.5" stop-color="#fb9e3a"/>
+                  <stop offset="0.7016" stop-color="#ea7c31"/>
+                  <stop offset="0.8866" stop-color="#de642b"/>
+                  <stop offset="1.0" stop-color="#d95b29"/>
+                </linearGradient>
+              </defs>
+              <rect width="256" height="256" rx="55" ry="55" x="0" y="0" fill="#cc5d15"/>
+              <rect width="246" height="246" rx="50" ry="50" x="5" y="5" fill="#f49c52"/>
+              <rect width="236" height="236" rx="47" ry="47" x="10" y="10" fill="url(#RSSg)"/>
+              <circle cx="68" cy="189" r="24" fill="#fff"/>
+              <path d="M160 213h-34a82 82 0 0 0 -82 -82v-34a116 116 0 0 1 116 116z" fill="#fff"/>
+              <path d="M184 213A140 140 0 0 0 44 73 V 38a175 175 0 0 1 175 175z" fill="#fff"/>
+            </svg>
+          </a>
+        </small>
+      </footer>
+    </div>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <script>
+      window.jQuery ||
+      document.write('<script src="/js/vendor/jquery-1.11.3.min.js"><\/script>')
+    </script>
+    <script src="/js/plugins.js"></script>
+    <script src="/js/main.js"></script>
+  </body>
+</html>

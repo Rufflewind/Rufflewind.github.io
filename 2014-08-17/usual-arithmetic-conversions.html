@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html class="no-js">
+  <head>
+    <meta charset="utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>The usual arithmetic conversions - Rufflewind's Scratchpad</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Fira+Mono|Fira+Sans|Oxygen"/>
+    <link rel="stylesheet" href="/css/normalize.css"/>
+    <link rel="stylesheet" href="/css/syntax.css"/>
+    <link rel="stylesheet" href="/css/main.css"/>
+    <link rel="icon" href="/favicon.ico"/>
+    <link rel="alternate" type="application/rss+xml" href="/feed"/>
+    <script src="/js/vendor/modernizr.custom.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+      ga('create', 'UA-48515395-1', 'rufflewind.com');
+      ga('send', 'pageview');
+    </script>
+  </head>
+  <body prefix="schema: http://schema.org/" typeof="schema:Blog">
+    <div class="upper">
+      <header class="root">
+        <div class="header-title">
+          <h1><a href="/">Rufflewind's Scratchpad</a></h1>
+        </div>
+        <div class="header-banner">
+          <nav>
+            <ul>
+              <li><a class="extra" href="/">Home</a></li>
+              <li><a class="extra" href="/archive">Archive</a></li>
+              <li><a class="extra" href="/about">About</a></li>
+            </ul>
+            <form class="search" method="get" action="//google.com/search">
+              <input type="hidden" name="sitesearch" value="rufflewind.com"/>
+              <input id="search-input" type="search" name="q" placeholder="Search"/>
+              <button id="search-button">
+                <svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 100 100">
+                  <circle cx="42" cy="42" r="30" stroke="white" stroke-width="12" fill="none"/>
+                  <path d="m 60 60 35 35" stroke="white" stroke-width="12" fill="none"/>
+                </svg>
+                <span>Search</span>
+              </button>
+            </form>
+          </nav>
+        </div>
+      </header>
+      <div class="content">
+        <article class="h-entry post" property="schema:blogPost" typeof="schema:BlogPosting">
+  <header>
+    <h1><a class="p-name u-url" href="" property="schema:headline schema:name">The usual arithmetic conversions</a></h1>
+    <div class="meta">
+      <time class="dt-published date" property="schema:datePublished">2014-08-17</time>
+      <ul class="tags">
+        
+        <li property="schema:keywords"><a class="p-category tag" href="/archive/tag#tag-c">c</a></li>
+        
+        <li property="schema:keywords"><a class="p-category tag" href="/archive/tag#tag-c++">c++</a></li>
+        
+      </ul>
+    </div>
+  </header>
+  <div class="e-content post-content" property="schema:articleBody">
+    <p>In C and C++, the <strong>usual arithmetic conversions</strong> are a set of implicit conversions performed to match the operand types in built-in binary operations such as addition, subtraction, less-than, etc (note that bit-shifts are <em>not</em> included). These conversions can occasionally result in subtle bugs, such as:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode c"><code class="sourceCode c"><a class="sourceLine" id="cb1-1" data-line-number="1"><span class="co">/* this&#39;ll never terminate :C */</span></a>
+<a class="sourceLine" id="cb1-2" data-line-number="2"><span class="dt">int</span> i;</a>
+<a class="sourceLine" id="cb1-3" data-line-number="3"><span class="dt">unsigned</span> n = <span class="dv">10</span>;</a>
+<a class="sourceLine" id="cb1-4" data-line-number="4"><span class="cf">for</span> (i = <span class="dv">0</span>; n - i &gt;= <span class="dv">0</span>; ++i) { <span class="co">/* ... */</span> }</a></code></pre></div>
+<p>A somewhat contrived example, but the point is that mixing signed and unsigned integers can often result in unexpected conversions. In the expression <code>n - i</code> of this example, because <code>n</code> is unsigned and has the same <em>conversion rank</em> as <code>i</code>, <code>i</code> is implicitly converted into <code>unsigned</code>. The result is therefore also <code>unsigned</code>, causing the loop condition to be trivially satisfied. Therefore, it’s always a good idea to enable compiler warnings for sign-to-unsigned conversions (<code>-Wsign-conversion</code> in GCC and Clang).</p>
+<p>The <a href="http://en.cppreference.com/w/cpp/language/operator_arithmetic#Conversions">exact rules are rather long and arcane</a> so I won’t duplicate them here, but the key is recognize that there is actually a <em>rationale</em> behind it, which can be summarized as the following rules:</p>
+<ul>
+<li><em>Rule A.</em> The final conversion rank is always the larger of the two, no more, no less. The rank is related to the size of integer types, so you’ll never get a type whose size is larger than expected.</li>
+<li><em>Rule B.</em> The conversion will never cause a signed integer overflow, so undefined behavior won’t occur due to the conversion itself (it can still occur due to the operation, however).</li>
+</ul>
+<p><small>Note: Although Rule A holds for the usual arithmetic conversions, <a href="http://en.cppreference.com/w/cpp/language/implicit_cast#Integral_conversions"><strong>integer promotion</strong> <em>does</em> violate Rule A</a>. In addition, the rationale presented here is a “best guess” and doesn’t necessarily correlate with the rationale of the standards committee.</small></p>
+<p>The unfortunate corollary of the two rules is that frequently you will end up with signed-to-unsigned conversions because the compiler is <em>actively avoiding</em> a potential signed overflow while preserving Rule A. When can this happen? When <em>both</em> of the following hold:</p>
+<ul>
+<li>Naturally, one operand needs to be <em>unsigned</em> and the other operand needs to be <em>signed</em>.</li>
+<li>The type of the signed operand <em>can’t represent every possible value</em> in the type of the unsigned operand. That is, when an overflow of the signed operand would otherwise occur.</li>
+</ul>
+<p>In fact, this is really the only scenario that you have to worry about as far as the usual arithmetic conversions are concerned (for integers). In all other cases, the value is preserved by this conversion and hence you won’t see any surprises.</p>
+<p><small>Note: I haven’t actually said anything about floating-point numbers. They are like a trump card: any time a floating-point number is present, the conversion will favor the most precise floating-point number. This is not quite as bad as the signed-to-unsigned conversions, but <a href="http://stackoverflow.com/a/1848762">it can still be lossy if you have very large integers</a>.</small></p>
+<p>Official reference: <a href="http://open-std.org/jtc1/sc22/wg14/www/docs/n1570.pdf">N1570 Section 6.3.1.8</a>.</p>
+
+  </div>
+  <div id="comments" property="schema:comment">
+    <p><a class="link-button" id="show-disqus-button" href="#comments">Show Disqus comments</a></p>
+    <div id="disqus_thread"></div>
+    <a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+    <script type="text/javascript">
+      var button = document.getElementById('show-disqus-button');
+      var brlink = document.getElementsByClassName('dsq-brlink')[0];
+      brlink.style.display = 'none';
+      button.onclick = function() {
+        button.style.display = 'none';
+        brlink.style.display = 'block';
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//rufflewind.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+      };
+    </script>
+  </div>
+</article>
+
+      </div>
+    </div>
+    <div class="lower">
+      <footer class="root">
+        <small>
+          Hosted on <a href="https://pages.github.com">GitHub Pages</a>.
+          Built with <a href="http://jekyllrb.com">Jekyll</a>.
+          Some rights reserved
+          (<a rel="license" href="https://creativecommons.org/licenses/by/4.0" property="schema:license">CC BY 4.0</a>).
+          <a href="/feed.xml">
+            <svg xmlns="http://www.w3.org/2000/svg"
+                 version="1.1" width="1em" height="1em" viewBox="0 0 256 256">
+              <defs>
+                <linearGradient id="RSSg" x1="0.085" y1="0.085" x2="0.915" y2="0.915">
+                  <stop offset="0.0" stop-color="#e3702d"/>
+                  <stop offset="0.1071" stop-color="#ea7d31"/>
+                  <stop offset="0.3503" stop-color="#f69537"/>
+                  <stop offset="0.5" stop-color="#fb9e3a"/>
+                  <stop offset="0.7016" stop-color="#ea7c31"/>
+                  <stop offset="0.8866" stop-color="#de642b"/>
+                  <stop offset="1.0" stop-color="#d95b29"/>
+                </linearGradient>
+              </defs>
+              <rect width="256" height="256" rx="55" ry="55" x="0" y="0" fill="#cc5d15"/>
+              <rect width="246" height="246" rx="50" ry="50" x="5" y="5" fill="#f49c52"/>
+              <rect width="236" height="236" rx="47" ry="47" x="10" y="10" fill="url(#RSSg)"/>
+              <circle cx="68" cy="189" r="24" fill="#fff"/>
+              <path d="M160 213h-34a82 82 0 0 0 -82 -82v-34a116 116 0 0 1 116 116z" fill="#fff"/>
+              <path d="M184 213A140 140 0 0 0 44 73 V 38a175 175 0 0 1 175 175z" fill="#fff"/>
+            </svg>
+          </a>
+        </small>
+      </footer>
+    </div>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <script>
+      window.jQuery ||
+      document.write('<script src="/js/vendor/jquery-1.11.3.min.js"><\/script>')
+    </script>
+    <script src="/js/plugins.js"></script>
+    <script src="/js/main.js"></script>
+  </body>
+</html>

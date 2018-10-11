@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html class="no-js">
+  <head>
+    <meta charset="utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>Rufflewind's Scratchpad</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Fira+Mono|Fira+Sans|Oxygen"/>
+    <link rel="stylesheet" href="/css/normalize.css"/>
+    <link rel="stylesheet" href="/css/syntax.css"/>
+    <link rel="stylesheet" href="/css/main.css"/>
+    <link rel="icon" href="/favicon.ico"/>
+    <link rel="alternate" type="application/rss+xml" href="/feed"/>
+    <script src="/js/vendor/modernizr.custom.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+      ga('create', 'UA-48515395-1', 'rufflewind.com');
+      ga('send', 'pageview');
+    </script>
+  </head>
+  <body prefix="schema: http://schema.org/" typeof="schema:Blog">
+    <div class="upper">
+      <header class="root">
+        <div class="header-title">
+          <h1><a href="/">Rufflewind's Scratchpad</a></h1>
+        </div>
+        <div class="header-banner">
+          <nav>
+            <ul>
+              <li><a class="extra" href="/">Home</a></li>
+              <li><a class="extra" href="/archive">Archive</a></li>
+              <li><a class="extra" href="/about">About</a></li>
+            </ul>
+            <form class="search" method="get" action="//google.com/search">
+              <input type="hidden" name="sitesearch" value="rufflewind.com"/>
+              <input id="search-input" type="search" name="q" placeholder="Search"/>
+              <button id="search-button">
+                <svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 100 100">
+                  <circle cx="42" cy="42" r="30" stroke="white" stroke-width="12" fill="none"/>
+                  <path d="m 60 60 35 35" stroke="white" stroke-width="12" fill="none"/>
+                </svg>
+                <span>Search</span>
+              </button>
+            </form>
+          </nav>
+        </div>
+      </header>
+      <div class="content">
+        
+
+
+
+<nav class="pagination">
+ 
+  <a class="prev" href="/page8">&lArr; Prev</a>
+ 
+
+ 
+  
+  
+  <a class="page" href="/">1</a>
+  
+ 
+  
+  
+  <a class="page" href="/page2">2</a>
+  
+ 
+  
+  
+  <a class="page" href="/page3">3</a>
+  
+ 
+  
+  
+  <a class="page" href="/page4">4</a>
+  
+ 
+  
+  
+  <a class="page" href="/page5">5</a>
+  
+ 
+  
+  
+  <a class="page" href="/page6">6</a>
+  
+ 
+  
+  
+  <a class="page" href="/page7">7</a>
+  
+ 
+  
+  
+  <a class="page" href="/page8">8</a>
+  
+ 
+  
+  
+  <strong class="page">9</strong>
+  
+ 
+
+ 
+  <span class="next">Next &rArr;</span>
+ 
+</nav>
+
+
+
+
+<article class="h-entry post" property="schema:blogPost" typeof="schema:BlogPosting">
+  <header>
+    <h1 property="schema:headline schema:name"><a class="p-name u-url" href="/2014-06-24/auto-disable-touchpad-linux">Automatically disable touchpad when mouse is plugged in</a></h1>
+    <div class="meta">
+      <time class="dt-published date" property="schema:datePublished">2014-06-24</time>
+      <ul class="tags">
+        
+        <li property="schema:keywords"><a class="p-category tag" href="/archive/tag#tag-system">system</a></li>
+        
+      </ul>
+    </div>
+  </header>
+  <div class="e-content post-content" property="schema:articleBody">
+    <p>This is one of those really simple things that are surprisingly tricky to do right. My goal: <strong>automatically disable the touchpad when an external mouse is plugged in</strong>. Why go through all the trouble? Because—in addition to being plain annoying—a moving cursor can alter the window focus in my current tiling window manager.</p>
+<p>On Windows, you can either do it easily (if the driver supports it) or it’s nearly impossible. For better or worse, on Linux, you can almost always do it after expending some (possibly non-trivial) effort.</p>
+<h2 id="solution">Solution</h2>
+<p>In the end, I boiled it down to:</p>
+<ul>
+<li><a href="https://github.com/Rufflewind/arch-boot/blob/master/root/bin/touchpad-ctl">/bin/touchpad-ctl</a>: executable script; don’t forget to set <code>TOUCHPAD</code></li>
+<li><a href="https://github.com/Rufflewind/arch-boot/blob/master/root/etc/udev/rules.d/01-touchpad.rules">/etc/udev/rules.d/01-touchpad.rules</a>: two <a href="https://wiki.archlinux.org/index.php/udev">udev</a> rules</li>
+<li>a minor modification to <code>.xinitrc</code> to call <code>touchpad-ctl</code> at startup</li>
+</ul>
+<p>These are intended for Arch Linux. I haven’t tried on any other systems yet, but it shouldn’t be too hard to adapt them for other distributions. It might even work out of the box!</p>
+<h2 id="details">Details</h2>
+<p>I started out by following the <a href="https://wiki.archlinux.org/index.php/Touchpad_Synaptics#System_with_multiple_X_sessions">Arch Linux wiki</a>, but I’ve simplified the script and made some of my own discoveries along the way.</p>
+<p>Firstly, the udev rules: these consist of two simple rules that will call <code>/bin/touchpad-ctl</code> whenever a mouse is added or removed. Nothing too fancy here.</p>
+<pre><code># /etc/udev/rules.d/01-touchpad.rules
+SUBSYSTEM==&quot;input&quot;, KERNEL==&quot;mouse[0-9]*&quot;, ACTION==&quot;add&quot;,    RUN+=&quot;/bin/touchpad-ctl&quot;
+SUBSYSTEM==&quot;input&quot;, KERNEL==&quot;mouse[0-9]*&quot;, ACTION==&quot;remove&quot;, RUN+=&quot;/bin/touchpad-ctl&quot;</code></pre>
+<p>The udev rules would miss the opportunity to fire if the mouse is already plugged in at boot, so it’s necessary to call <code>touchpad-ctrl</code> in <code>.xinitrc</code> to make sure that the touchpad is disabled in this scenario.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode sh"><code class="sourceCode bash"><a class="sourceLine" id="cb2-1" data-line-number="1"><span class="co"># ~/.xinitrc (insert this somewhere before starting your window manager)</span></a>
+<a class="sourceLine" id="cb2-2" data-line-number="2"><span class="ex">touchpad-ctl</span></a></code></pre></div>
+<p>The <code>touchpad-ctl</code> script is where the magic occurs. Since I’ve not come across an easy to way to figure out which device is the actual touchpad, you’ll have to set this variable manually in the script. To list all the mouse-like devices, run this command:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode sh"><code class="sourceCode bash"><a class="sourceLine" id="cb3-1" data-line-number="1"><span class="fu">find</span> /sys/class/input/ -name mouse<span class="dt">\*</span>                    \</a>
+<a class="sourceLine" id="cb3-2" data-line-number="2">     -exec udevadm info --attribute-walk --path=<span class="dt">{}</span> <span class="dt">\;</span>   \</a>
+<a class="sourceLine" id="cb3-3" data-line-number="3">    <span class="kw">|</span> <span class="fu">grep</span> ATTRS<span class="dt">{name}</span></a></code></pre></div>
+<p>(If it says it can’t find udevadm, then try running it as root.)</p>
+<p>The script does two things:</p>
+<ul>
+<li><p>Check if any external mouse is plugged in. This is the easy part: simply loop through all the mice and check if it’s an external mouse (i.e. not the touchpad).</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode sh"><code class="sourceCode bash"><a class="sourceLine" id="cb4-1" data-line-number="1"><span class="va">FOUND=</span>0</a>
+<a class="sourceLine" id="cb4-2" data-line-number="2"><span class="kw">for</span> <span class="ex">MOUSE</span> in <span class="kw">`</span><span class="fu">find</span> /sys/class/input -name mouse<span class="dt">\*</span><span class="kw">`</span></a>
+<a class="sourceLine" id="cb4-3" data-line-number="3"><span class="kw">do</span></a>
+<a class="sourceLine" id="cb4-4" data-line-number="4">    <span class="kw">if</span><span class="bu"> [</span> <span class="st">&quot;</span><span class="kw">`</span><span class="fu">cat</span> <span class="va">$MOUSE</span>/device/name<span class="kw">`</span><span class="st">&quot;</span> <span class="ot">!=</span> <span class="st">&quot;</span><span class="va">$TOUCHPAD</span><span class="st">&quot;</span><span class="bu"> ]</span></a>
+<a class="sourceLine" id="cb4-5" data-line-number="5">    <span class="kw">then</span></a>
+<a class="sourceLine" id="cb4-6" data-line-number="6">        <span class="va">FOUND=</span>1</a>
+<a class="sourceLine" id="cb4-7" data-line-number="7">        <span class="bu">break</span></a>
+<a class="sourceLine" id="cb4-8" data-line-number="8">    <span class="kw">fi</span></a>
+<a class="sourceLine" id="cb4-9" data-line-number="9"><span class="kw">done</span></a></code></pre></div></li>
+<li><p>Enable or disable the touchpad with <code>synclient</code>. This is a bit more difficult because it needs to know the <code>DISPLAY</code> and <code>XAUTHORITY</code>. The <code>DISPLAY</code> variable is hardcoded, while the <code>XAUTHORITY</code> is obtained from the home directories of the users. This is repeated for every user.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode sh"><code class="sourceCode bash"><a class="sourceLine" id="cb5-1" data-line-number="1"><span class="va">DISPLAY=</span>:0</a>
+<a class="sourceLine" id="cb5-2" data-line-number="2"><span class="bu">export</span> <span class="va">DISPLAY</span></a>
+<a class="sourceLine" id="cb5-3" data-line-number="3"><span class="kw">for</span> <span class="ex">USER</span> in <span class="kw">`</span><span class="fu">w</span> -h <span class="kw">|</span> <span class="fu">cut</span> -d<span class="dt">\ </span> -f1 <span class="kw">|</span> <span class="fu">sort</span> <span class="kw">|</span> <span class="fu">uniq</span><span class="kw">`</span></a>
+<a class="sourceLine" id="cb5-4" data-line-number="4"><span class="kw">do</span></a>
+<a class="sourceLine" id="cb5-5" data-line-number="5">    <span class="va">XAUTHORITY=</span><span class="kw">`</span><span class="fu">sudo</span> -Hiu <span class="va">$USER</span> env <span class="kw">|</span> <span class="fu">grep</span> ^HOME= <span class="kw">|</span> <span class="fu">cut</span> -d= -f2<span class="kw">`</span>/.Xauthority</a>
+<a class="sourceLine" id="cb5-6" data-line-number="6">    <span class="bu">export</span> <span class="va">XAUTHORITY</span></a>
+<a class="sourceLine" id="cb5-7" data-line-number="7">    <span class="ex">synclient</span> TouchpadOff=<span class="va">$FOUND</span></a>
+<a class="sourceLine" id="cb5-8" data-line-number="8"><span class="kw">done</span></a></code></pre></div></li>
+</ul>
+
+  </div>
+  <p><a class="link-button" href="/2014-06-24/auto-disable-touchpad-linux#comments">Comments</a></p>
+</article>
+
+<article class="h-entry post" property="schema:blogPost" typeof="schema:BlogPosting">
+  <header>
+    <h1 property="schema:headline schema:name"><a class="p-name u-url" href="/2014-03-02/ssh-port-forwarding">Port forwarding with SSH</a></h1>
+    <div class="meta">
+      <time class="dt-published date" property="schema:datePublished">2014-03-02</time>
+      <ul class="tags">
+        
+        <li property="schema:keywords"><a class="p-category tag" href="/archive/tag#tag-networks">networks</a></li>
+        
+      </ul>
+    </div>
+  </header>
+  <div class="e-content post-content" property="schema:articleBody">
+    <p>SSH port forwarding can be a very useful tool for working with remote systems. There are two common reasons for doing this:</p>
+<ul>
+<li><p>to add security to an unencrypted connection, or</p></li>
+<li><p>to access services behind firewalls.</p></li>
+</ul>
+<h2 id="background">Background</h2>
+<p>In networking lingo, a host generally refers to a single computer. Each host can have multiple network interfaces, each of which is assigned an (IP) address.</p>
+<p>The address suffices to identify the network interface and hence the host, but a single host can provide a variety of services (e.g. web server, mail server, SSH server, etc). Hence, there needs to be a way to distinguish between them. This is where the notion of a <strong>port</strong> comes in. Each service is allowed to pick its own port, denoted by a 16-bit unsigned integer (0‒65535).</p>
+<p>Services can <strong>listen</strong> to a particular port, waiting for clients to initiate connections to the port. The port numbers for many services are specified by conventions. Clients can then connect to the <strong>target</strong> port that corresponds to the one chosen by the service.</p>
+<p><em>Example.</em> An HTTP web server such as <code>httpd</code> would typically listen to port 80 (one can also say the service <code>httpd</code> “runs on” port 80).</p>
+<figure>
+<img src="/img/ssh-port-forwarding/httpd-port.png" title="the `httpd` server listens on port 80" alt="the httpd server listens on port 80" /><figcaption>the <code>httpd</code> server listens on port 80</figcaption>
+</figure>
+<p>Hence, HTTP clients such as web browsers or downloaders would typically have a target port of 80.</p>
+<figure>
+<img src="/img/ssh-port-forwarding/wget-port.png" title="the `wget` client targets port 80" alt="the wget client targets port 80" /><figcaption>the <code>wget</code> client targets port 80</figcaption>
+</figure>
+<p>Note: In the process of establishing a connection to a server, the clients themselves also obtain a port on their end. This port, however, is ephemeral and generally irrelevant here. They are not shown in any of these diagrams.</p>
+<p>Normally, given the correct port, the client can simply connect directly to the server…</p>
+<figure>
+<img src="/img/ssh-port-forwarding/wget-httpd-connection.png" title="`wget` connects to `httpd` directly" alt="wget connects to httpd directly" /><figcaption><code>wget</code> connects to <code>httpd</code> directly</figcaption>
+</figure>
+<p>… unless of course, there is a firewall that blocks port 80. However, if the firewall permits SSH connections, port forwarding can be used to bypass the barrier. In this case, the client would connect to, say, port 8000, which is then forwarded to port 80 on the server.</p>
+<figure>
+<img src="/img/ssh-port-forwarding/wget-httpd-forwarded-connection.png" title="`wget` connects to `httpd` via a forwarded port" alt="wget connects to httpd via a forwarded port" /><figcaption><code>wget</code> connects to <code>httpd</code> via a forwarded port</figcaption>
+</figure>
+<p>Forwarded ports are generally temporary, so conventionally one would use a large port number to avoid conflicts with the more frequently used ports. (Some systems, usually the Unix-like ones, would also reserve port numbers below 1024 so that one would require superuser privileges to forward them.)</p>
+<h2 id="port-forwarding">Port forwarding</h2>
+<p>SSH supports two kinds of port forwarding: <strong>local</strong> and <strong>remote</strong> port forwarding. (There is also the so-called <em>dynamic</em> port forwarding, which won’t be discussed here.) The first and most important question here is: what is the difference between local and remote forwarding?</p>
+<p>In <em>local</em> port forwarding, the port that is being forwarded resides on the <em>local</em> end, i.e. the host of the <em>SSH client</em>, whereas …</p>
+<figure>
+<img src="/img/ssh-port-forwarding/local-port-forwarding.png" title="local port forwarding" alt="local port forwarding" /><figcaption>local port forwarding</figcaption>
+</figure>
+<p>… in <em>remote</em> port forwarding, the port that is being forwarded resides on the <em>remote</em> end, i.e. the host of the <em>SSH server</em>.</p>
+<figure>
+<img src="/img/ssh-port-forwarding/remote-port-forwarding.png" title="remote port forwarding" alt="remote port forwarding" /><figcaption>remote port forwarding</figcaption>
+</figure>
+<p>In other words, the type of port forwarding depends on the <em>location of the service of interest</em> (in the example earlier, the <code>httpd</code> server) <em>with respect to the SSH server</em>.</p>
+<p>From the <a href="http://openbsd.org/cgi-bin/man.cgi?query=ssh">manual pages of SSH</a>, the argument syntax for port forwarding is:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode sh"><code class="sourceCode bash"><a class="sourceLine" id="cb1-1" data-line-number="1"><span class="co"># local port forwarding</span></a>
+<a class="sourceLine" id="cb1-2" data-line-number="2"><span class="fu">ssh</span> -L [BIND_ADDRESS:]PORT:HOST:HOSTPORT HOSTNAME</a>
+<a class="sourceLine" id="cb1-3" data-line-number="3"></a>
+<a class="sourceLine" id="cb1-4" data-line-number="4"><span class="co"># remote port forwarding</span></a>
+<a class="sourceLine" id="cb1-5" data-line-number="5"><span class="fu">ssh</span> -R [BIND_ADDRESS:]PORT:HOST:HOSTPORT HOSTNAME</a></code></pre></div>
+<p>The parameters are:</p>
+<ul>
+<li><p><code>PORT</code>: the port that is being forwarded. SSH will listen to this port and forward connections made to this port to the other side (i.e. <code>HOST</code>).</p>
+<ul>
+<li><p>In the case of <em>local</em> port forwarding, <code>PORT</code> is bound to the host of the <em>SSH client</em>.</p></li>
+<li><p>In the case of <em>remote</em> port forwarding, <code>PORT</code> is bound to the host of the <em>SSH server</em>.</p></li>
+</ul></li>
+<li><p><code>HOST</code>: the host that provides the service of interest.</p>
+<ul>
+<li><p>In the case of <em>local</em> port forwarding, <code>HOST</code> is on the side of the <em>SSH server</em>.</p></li>
+<li><p>In the case of <em>remote</em> port forwarding, <code>HOST</code> is on the side of the <em>SSH client</em>.</p></li>
+</ul></li>
+<li><p><code>HOSTPORT</code>: the port on <code>HOST</code> listened by the service of interest.</p></li>
+<li><p><code>HOSTNAME</code>: the SSH server (unrelated to <code>HOST</code> or <code>HOSTPORT</code>).</p></li>
+<li><p><code>BIND_ADDRESS</code>: this is an optional argument that specifies the address that <code>PORT</code> should be associated with. By default, this only binds to the loopback interface.</p></li>
+</ul>
+<p>The naming of the arguments here is rather unfortunate as the word “host” is overloaded to mean several things. For this reason, the name <code>sshd-host</code> will be used to refer to the host of the SSH server (i.e. <code>HOSTNAME</code>), while the name <code>appd-host</code> will be used to refer to the host that provides the service of interest. Correspondingly, <code>ssh-host</code> will refer to the host of the SSH client.</p>
+<p><em>Example.</em> Consider the previous example involving the HTTP server and client. If the HTTP server resides on host of the SSH server and the HTTP client resides on host of the SSH client, then one can use <em>local</em> port forwarding to access the remote HTTP server from the local side.</p>
+<figure>
+<img src="/img/ssh-port-forwarding/local-port-forwarding-example.png" title="example of local port forwarding: ssh -L 8000:localhost:80 sshd-host" alt="example of local port forwarding: ssh -L 8000:localhost:80 sshd-host" /><figcaption>example of local port forwarding: ssh -L 8000:localhost:80 sshd-host</figcaption>
+</figure>
+<p>On the other hand, if the HTTP server resides on the host of the SSH client and the HTTP client resides on the host of the SSH server, then one can use <em>remote</em> port forwarding to access the local HTTP server from the remote side.</p>
+<figure>
+<img src="/img/ssh-port-forwarding/remote-port-forwarding-example.png" title="example of remote port forwarding: ssh -R 8000:localhost:80 sshd-host" alt="example of remote port forwarding: ssh -R 8000:localhost:80 sshd-host" /><figcaption>example of remote port forwarding: ssh -R 8000:localhost:80 sshd-host</figcaption>
+</figure>
+<p>Notice that for both cases, the arguments differ only by the flag (<code>-L</code>/<code>-R</code>). However, the similarity is somewhat deceptive: the address <code>localhost</code> is interpreted differently in each case. In the case of remote port forwarding, <code>localhost</code> refers to the host of the SSH client (<code>ssh-host</code>) as one would normally expect, whereas in the case of local port forwarding, <code>localhost</code> actually refers to the host of the SSH server (<code>sshd-host</code>)! In fact, the <code>HOST</code> parameter in the case of <em>local</em> port forwarding is always <em>relative to the SSH server</em>.</p>
+<p>The above two scenarios are actually special cases of a more general scenario: <code>appd-host</code> could be a separate host, different from either <code>ssh-host</code> or <code>sshd-host</code>. In the more general case, local port forwarding would involve forwarding a port from <code>ssh-host</code> to <code>sshd-host</code> and then to <code>appd-host</code>, while remote port forwarding would involve forwarding a port from <code>sshd-host</code> to <code>ssh-host</code> and then to <code>appd-host</code>.</p>
+<p><em>Example.</em> If the HTTP server is accessible on the remote side and the HTTP client resides on host of the SSH client, then one can use <em>local</em> port forwarding to access the HTTP server from the local side.</p>
+<figure>
+<img src="/img/ssh-port-forwarding/general-local-port-forwarding-example.png" title="example of more general local port forwarding: ssh -L 8000:appd-host:80 sshd-host" alt="example of more general local port forwarding: ssh -L 8000:appd-host:80 sshd-host" /><figcaption>example of more general local port forwarding: ssh -L 8000:appd-host:80 sshd-host</figcaption>
+</figure>
+<p>On the other hand, if the HTTP server is accessible on the local side and the HTTP client resides on host of the SSH server, then one can use <em>remote</em> port forwarding to access the HTTP server from the remote side.</p>
+<figure>
+<img src="/img/ssh-port-forwarding/general-remote-port-forwarding-example.png" title="example of more general remote port forwarding: ssh -R 8000:appd-host:80 sshd-host" alt="example of more general remote port forwarding: ssh -R 8000:appd-host:80 sshd-host" /><figcaption>example of more general remote port forwarding: ssh -R 8000:appd-host:80 sshd-host</figcaption>
+</figure>
+<p>Note that in both cases, the second part of the traffic is <em>not encrypted</em> by SSH since the SSH tunnel only connects between <code>ssh-host</code> and <code>sshd-host</code>.</p>
+<p>While the target host (<code>appd-host</code>) can be almost anywhere, the forwarded port must always reside on either <code>ssh-host</code> or <code>sshd-host</code>: this is necessary since SSH has to actually <em>listen</em> to the forwarded port, whereas the target port simply needs to be reachable (not blocked by a firewall).</p>
+<p>Lastly, what about <code>BIND_ADDRESS</code>? By default, SSH will only listen to a forwarded port on the <em>loopback interface</em>, which is a virtual network interface that only responds to internal requests (from the same host). This is for security reasons, since if SSH listened on all interfaces, it could be potentially forwarding traffic from just about anybody on the Internet. Using <code>BIND_ADDRESS</code> one can override the default behavior so that SSH will listen on other interfaces as well. Use this cautiously! (Note: it may necessary to enable the <code>GatewayPorts</code> flag for this to work on anything but the loopback interface.)</p>
+<p><a href="http://csce.uark.edu/~kal/info/private/ssh/ch09_02.htm">Chapter 9.2 in the book <em>SSH, The Secure Shell: The Definitive Guide</em></a> goes into greater detail about port forwarding with SSH.</p>
+
+  </div>
+  <p><a class="link-button" href="/2014-03-02/ssh-port-forwarding#comments">Comments</a></p>
+</article>
+
+<article class="h-entry post" property="schema:blogPost" typeof="schema:BlogPosting">
+  <header>
+    <h1 property="schema:headline schema:name"><a class="p-name u-url" href="/2014-03-01/introduction">And so it begins</a></h1>
+    <div class="meta">
+      <time class="dt-published date" property="schema:datePublished">2014-03-01</time>
+      <ul class="tags">
+        
+        <li property="schema:keywords"><a class="p-category tag" href="/archive/tag#tag-meta">meta</a></li>
+        
+      </ul>
+    </div>
+  </header>
+  <div class="e-content post-content" property="schema:articleBody">
+    <p>It’s been a while. The last time I had a blog was in college a few years back and it’s been offline for quite some time. I didn’t really have anything useful to write on at the time, but between now and then, I think (or would like to think) I’ve acquired at least <em>some</em> new knowledge and experience, so perhaps this time it’ll be a bit different. Hopefully I won’t run dry within a few weeks. We’ll see!</p>
+<p>I’d like to start afresh: I won’t repost any of the old stuff, which were mostly garbage anyway. Maybe if I dig up a gem I might repost it after some editing, but I don’t expect that to happen any time soon.</p>
+<p>I once thought I would eventually get to do everything that I wanted to do, learn everything I wanted to learn, but that was a young, naive thought. I’ve since learned that I have pick and choose because I have only so much time. In this case, things I write would have to be of relevance to both myself and others.</p>
+<p>This blog shall be primarily devoted to <a href="http://angelfire.com/hi/littleprince/framechapter13.html"><strong>matters of technical consequence</strong></a>: information, guides, expositions, etc. in programming, physics, and math. The idea is that what I write should be <em>relatively timeless</em>: it should be useful now and a few years into the future perhaps. Its usefulness may diminish if the technology becomes outdated for some reason (as is often the case in the fast-moving digital world), but even then it’s better than, say, a post about why I enjoy peanut butter and jelly sandwiches!</p>
+<p>I’m aware that this a fairly broad spectrum of subjects here: not everyone who reads about programming is going to care about physics since there aren’t a lot people who care about both simultaneously! That’s fine though. There is a reason why I didn’t even bother adding feeds to this blog (do people still use them?): the posts are going to be relatively self-contained snippets, other than the occasional series. There’ll be little if any meaning to the chronological ordering of the posts. The hope is that whatever I write <em>might</em> potentially help someone who is (un)fortunate enough to encounter the topic of interest.</p>
+<blockquote>
+<p>Many times I have tread through the barren wastes of the Internet, scrounging for answers to questions that no-one asked, and only to find none. May this site be of use to my fellow travelers in search of such answers.</p>
+</blockquote>
+
+  </div>
+  <p><a class="link-button" href="/2014-03-01/introduction#comments">Comments</a></p>
+</article>
+
+
+      </div>
+    </div>
+    <div class="lower">
+      <footer class="root">
+        <small>
+          Hosted on <a href="https://pages.github.com">GitHub Pages</a>.
+          Built with <a href="http://jekyllrb.com">Jekyll</a>.
+          Some rights reserved
+          (<a rel="license" href="https://creativecommons.org/licenses/by/4.0" property="schema:license">CC BY 4.0</a>).
+          <a href="/feed.xml">
+            <svg xmlns="http://www.w3.org/2000/svg"
+                 version="1.1" width="1em" height="1em" viewBox="0 0 256 256">
+              <defs>
+                <linearGradient id="RSSg" x1="0.085" y1="0.085" x2="0.915" y2="0.915">
+                  <stop offset="0.0" stop-color="#e3702d"/>
+                  <stop offset="0.1071" stop-color="#ea7d31"/>
+                  <stop offset="0.3503" stop-color="#f69537"/>
+                  <stop offset="0.5" stop-color="#fb9e3a"/>
+                  <stop offset="0.7016" stop-color="#ea7c31"/>
+                  <stop offset="0.8866" stop-color="#de642b"/>
+                  <stop offset="1.0" stop-color="#d95b29"/>
+                </linearGradient>
+              </defs>
+              <rect width="256" height="256" rx="55" ry="55" x="0" y="0" fill="#cc5d15"/>
+              <rect width="246" height="246" rx="50" ry="50" x="5" y="5" fill="#f49c52"/>
+              <rect width="236" height="236" rx="47" ry="47" x="10" y="10" fill="url(#RSSg)"/>
+              <circle cx="68" cy="189" r="24" fill="#fff"/>
+              <path d="M160 213h-34a82 82 0 0 0 -82 -82v-34a116 116 0 0 1 116 116z" fill="#fff"/>
+              <path d="M184 213A140 140 0 0 0 44 73 V 38a175 175 0 0 1 175 175z" fill="#fff"/>
+            </svg>
+          </a>
+        </small>
+      </footer>
+    </div>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <script>
+      window.jQuery ||
+      document.write('<script src="/js/vendor/jquery-1.11.3.min.js"><\/script>')
+    </script>
+    <script src="/js/plugins.js"></script>
+    <script src="/js/main.js"></script>
+  </body>
+</html>
